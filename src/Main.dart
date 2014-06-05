@@ -5,7 +5,7 @@ void main() {
 
     IRCClient.debug(client);
 
-    client.on(Events.Ready).listen((event) {
+    client.on(Events.Ready).listen((ReadyEvent event) {
         client.join("#DirectCode");
     });
 
