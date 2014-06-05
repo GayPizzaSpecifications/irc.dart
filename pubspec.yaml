@@ -1,0 +1,4 @@
+name: DartBot
+dependencies:
+  event_bus: any
+  irc_message: any
