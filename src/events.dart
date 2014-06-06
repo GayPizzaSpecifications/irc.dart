@@ -1,5 +1,17 @@
 part of irc;
 
+class EventEmitting {
+    EventBus _eventBus = new EventBus();
+
+    void fire(EventType type, data) {
+        _eventBus.fire(type, data);
+    }
+
+    Stream on(EventType type) {
+        return _eventBus.on(type);
+    }
+}
+
 class Events {
     static final EventType<ConnectEvent> Connect = new EventType<ConnectEvent>();
     static final EventType<ReadyEvent> Ready = new EventType<ReadyEvent>();

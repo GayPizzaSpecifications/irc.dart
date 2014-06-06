@@ -1,17 +1,5 @@
 part of irc;
 
-class EventEmitting {
-    EventBus _eventBus = new EventBus();
-
-    void fire(EventType type, data) {
-        _eventBus.fire(type, data);
-    }
-
-    Stream on(EventType type) {
-        return _eventBus.on(type);
-    }
-}
-
 class IRCClient extends EventEmitting {
     Socket _socket;
     bool _ready = false;
