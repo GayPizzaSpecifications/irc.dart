@@ -1,4 +1,3 @@
 # Dart IRC
 
-The Beautiful IRC Libary for Dart that WORKS!
-
+The Beautiful IRC Library for Dart that WORKS!

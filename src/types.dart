@@ -25,4 +25,6 @@ class Channel {
     void notice(String message) {
         _client.notice(name, message);
     }
+
+    bool operator ==(Channel channel) => this.name == channel.name;
 }
