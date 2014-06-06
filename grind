@@ -1,0 +1,12 @@
+#!/usr/bin/env dart
+import 'package:grinder/grinder.dart';
+
+void main([List<String> args]) {
+    defineTask('check', taskFunction: check);
+
+    startGrinder(args);
+}
+
+void check(GrinderContext context) {
+    print("Checking Code...");
+}
