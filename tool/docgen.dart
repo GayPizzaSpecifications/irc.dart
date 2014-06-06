@@ -38,7 +38,6 @@ Task createDocGenTask(String path, {compile: true, Iterable<String> excludes: nu
         return Process.start("docgen", args).then((process) {
             return inheritIO(process);
         }).then((code) {
-            print("Exit Code");
             if (code != 0) {
                 context.fail("docgen exited with the status code ${code}");
             }
