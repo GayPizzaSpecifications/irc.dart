@@ -1,2 +1,7 @@
 #!/usr/bin/env bash
+
+if [ ! -d "packages"/ ]; then
+  pub install
+fi 
+
 dart tool/hop_runner.dart ${@}
