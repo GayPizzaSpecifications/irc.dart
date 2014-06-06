@@ -1,12 +1,17 @@
-import 'irc.dart';
-
-import "dart:io";
+import '../src/irc.dart';
 
 void main() {
-    CommandBot bot = new CommandBot(new BotConfig(), prefix: "\$");
+    BotConfig config = new BotConfig(
+        host: "irc.freenode.net",
+        port: 6667,
+        nickname: "DartBot",
+        username: "DartBot"
+    );
+
+    CommandBot bot = new CommandBot(config, prefix: ".");
 
     bot.ready((ReadyEvent event) {
-        event.join("#DirectCode");
+        event.join("#Dart");
     });
 
     bot.command("help").listen((MessageEvent event) {
