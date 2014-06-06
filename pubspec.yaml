@@ -1,4 +1,5 @@
 name: DartBot
 dependencies:
   event_bus: any
-  irc_message: any
+  irc_message:
+    git: git://github.com/kaendfinger/dart-irc_message.git

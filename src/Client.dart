@@ -6,6 +6,7 @@ class IRCClient {
     bool _receivedAny;
     EventBus _eventBus = new EventBus();
     BotConfig config;
+    List<Channel> channels = [];
 
     IRCClient(this.config) {
         _registerHandlers();
@@ -27,6 +28,31 @@ class IRCClient {
                     _ready = true;
                     fire(Events.Ready, new ReadyEvent(this));
                 }
+            }
+
+            switch (event.command) {
+                case "PING":
+                    send("PONG ${event.params[0]}");
+
+                    if (!_ready) {
+                        _ready = true;
+                        fire(Events.Ready, new ReadyEvent(this));
+                    }
+                    break;
+                case "JOIN":
+                    String who = event.message.getHostmask()["nick"];
+                    if (who == config.nickname) {
+                        // We Joined a New Channel
+                        channels.add(new Channel(this, event.params[0]));
+                    }
+                    fire(Events.Join, new JoinEvent(this, who, channel(event.params[0])));
+                    break;
+                case "PRIVMSG":
+                    String from = event.message.getHostmask()["nick"];
+                    String target = event.params[0];
+                    String message = event.params.last;
+                    fire(Events.Message, new MessageEvent(this, from, target, message));
+                    break;
             }
         });
     }
@@ -51,6 +77,14 @@ class IRCClient {
         });
     }
 
+    void message(String target, String message) {
+        send("PRIVMSG ${target} :${message}");
+    }
+
+    void notice(String target, String message) {
+        send("PRIVMSG ${target} :${message}");
+    }
+
     void send(String line) {
         fire(Events.Send, new SendEvent(this, line));
         _socket.writeln(line);
@@ -66,6 +100,12 @@ class IRCClient {
 
     Stream on(EventType type) {
         return _eventBus.on(type);
+    }
+
+    Channel channel(String name) {
+        return channels.firstWhere((channel) {
+            return channel.name == name;
+        });
     }
 
     static void debug(IRCClient client) {

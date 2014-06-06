@@ -9,5 +9,13 @@ void main() {
         client.join("#DirectCode");
     });
 
+    client.on(Events.Join).listen((JoinEvent event) {
+        event.reply("Hello! I'm DartBot, the best IRC Bot written in Dart!");
+    });
+
+    client.on(Events.Message).listen((MessageEvent event) {
+        event.reply("Such Message, Much Wow");
+    });
+
     client.connect();
 }
