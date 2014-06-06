@@ -15,11 +15,3 @@ part 'colors.dart';
 
 part 'bots/CommandBot.dart';
 part 'bots/DumbBot.dart';
-
-/**
- * Temporary Fix for Hostmask Parsing
- */
-
-Map<String, String> _parse_hostmask(IRCParser.Message message) {
-    return message.getHostmask() as Map<String, String>;
-}

@@ -41,7 +41,7 @@ class Client extends EventEmitting {
                     _fire_ready();
                     break;
                 case "JOIN":
-                    String who = _parse_hostmask(event.message)["nick"];
+                    String who = event.message.getHostmask()["nick"];
                     if (who == config.nickname) {
                         // We Joined a New Channel
                         channels.add(new Channel(this, event.params[0]));
@@ -49,7 +49,7 @@ class Client extends EventEmitting {
                     fire(Events.Join, new JoinEvent(this, who, channel(event.params[0])));
                     break;
                 case "PRIVMSG":
-                    String from = _parse_hostmask(event.message)["nick"];
+                    String from = event.message.getHostmask()["nick"];
                     String target = event.params[0];
                     String message = event.params.last;
                     fire(Events.Message, new MessageEvent(this, from, target, message));
