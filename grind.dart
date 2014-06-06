@@ -22,7 +22,7 @@ void analyze(GrinderContext context) {
 
 void format(GrinderContext context) {
   print("Formatting Library");
-  runSdkBinary(context, 'dartfmt', arguments: ['-w', 'lib/']);
+  runSdkBinary(context, 'dartfmt', arguments: ['-w', '-t', 'lib/']);
   print("Formatting Grind Script");
-  runSdkBinary(context, 'dartfmt', arguments: ['-w', 'grind.dart']);
+  runSdkBinary(context, 'dartfmt', arguments: ['-w', '-t', 'grind.dart']);
 }
