@@ -4,5 +4,8 @@ version: 1.1.0
 author: Kenneth Endfinger <kaendfinger@gmail.com>
 homepage: https://github.com/kaendfinger/irc.dart/
 dependencies:
-  event_bus: ">=0.2.4 <0.3.0"
-  irc_message: ">=1.0.0 <2.0.0"
+  event_bus: 0.2.4
+  irc_message: 1.0.0
+  quiver: 0.18.2
+dev_dependencies:
+  grinder: 0.5.4
