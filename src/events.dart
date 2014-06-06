@@ -1,4 +1,4 @@
-part of DartBot;
+part of irc;
 
 class Events {
     static final EventType<ConnectEvent> Connect = new EventType<ConnectEvent>();
@@ -23,13 +23,17 @@ class ReadyEvent extends Event {
     ReadyEvent(IRCClient client) {
         this.client = client;
     }
+
+    void join(String channel) {
+        client.join(channel);
+    }
 }
 
 class LineEvent extends Event {
     String command;
     String prefix;
     List<String> params;
-    IRCParser.Message message;
+    _irc_message.Message message;
 
     LineEvent(IRCClient client, this.command, this.prefix, this.params, this.message) {
         this.client = client;

@@ -1,6 +1,18 @@
-part of DartBot;
+part of irc;
 
-class IRCClient {
+class EventEmitting {
+    EventBus _eventBus = new EventBus();
+
+    void fire(EventType type, data) {
+        _eventBus.fire(type, data);
+    }
+
+    Stream on(EventType type) {
+        return _eventBus.on(type);
+    }
+}
+
+class IRCClient extends EventEmitting {
     Socket _socket;
     bool _ready = false;
     bool _receivedAny;
@@ -68,7 +80,7 @@ class IRCClient {
                 sock.close();
             });
 
-            sock.transform(UTF8.decoder).transform(new LineSplitter()).transform(new IRCParser.MessageParser()).listen((message) {
+            sock.transform(UTF8.decoder).transform(new LineSplitter()).transform(new _irc_message.MessageParser()).listen((message) {
                 String command = message.command;
                 String prefix = message.prefix;
                 List<String> params = message.params;
@@ -90,22 +102,20 @@ class IRCClient {
         _socket.writeln(line);
     }
 
-    void fire(EventType type, data) {
-        _eventBus.fire(type, data);
-    }
-
     void join(String channel) {
         send("JOIN ${channel}");
-    }
-
-    Stream on(EventType type) {
-        return _eventBus.on(type);
     }
 
     Channel channel(String name) {
         return channels.firstWhere((channel) {
             return channel.name == name;
         });
+    }
+
+    void disconnect({String reason: "Disconnecting"}) {
+        send("QUIT :${reason}");
+        sleep(new Duration(milliseconds: 5));
+        _socket.close();
     }
 
     static void debug(IRCClient client) {
