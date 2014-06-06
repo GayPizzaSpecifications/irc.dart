@@ -13,5 +13,5 @@ part 'events.dart';
 part 'types.dart';
 part 'colors.dart';
 
-part 'bots/CommandBot.dart';
-part 'bots/DumbBot.dart';
+part 'bots/commandbot.dart';
+part 'bots/dumbbot.dart';
