@@ -20,9 +20,7 @@ class CommandBot {
     void disconnect() => _client.disconnect();
 
     Stream<MessageEvent> command(String name) {
-        return commands.putIfAbsent(name, () {
-            return new StreamController.broadcast();
-        }).stream;
+        return commands.putIfAbsent(name, () => new StreamController.broadcast()).stream;
     }
 
     void _registerHandlers() {
