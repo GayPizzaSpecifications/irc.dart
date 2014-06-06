@@ -11,7 +11,7 @@ void main() {
     CommandBot bot = new CommandBot(config, prefix: ".");
 
     bot.whenReady((ReadyEvent event) {
-        event.join("#Dart");
+        event.join("#irc.dart");
     });
 
     bot.command("help").listen((MessageEvent event) {

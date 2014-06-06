@@ -31,13 +31,14 @@ class Client extends EventEmitting {
             }
 
             switch (event.command) {
+                case "376":
+                    _fire_ready();
+
+                    break;
                 case "PING":
                     send("PONG ${event.params[0]}");
 
-                    if (!_ready) {
-                        _ready = true;
-                        fire(Events.Ready, new ReadyEvent(this));
-                    }
+                    _fire_ready();
                     break;
                 case "JOIN":
                     String who = _parse_hostmask(event.message)["nick"];
@@ -57,6 +58,13 @@ class Client extends EventEmitting {
         });
     }
 
+    void _fire_ready() {
+        if (!_ready) {
+            _ready = true;
+            fire(Events.Ready, new ReadyEvent(this));
+        }
+    }
+
     void connect() {
         Socket.connect(config.host, config.port).then((Socket sock) {
             _socket = sock;
@@ -68,7 +76,7 @@ class Client extends EventEmitting {
                 sock.close();
             });
 
-            sock.transform(UTF8.decoder).transform(new LineSplitter()).transform(new IRCParser.MessageParser()).listen((message) {
+            sock.transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).transform(new IRCParser.MessageParser()).listen((message) {
                 String command = message.command;
                 String prefix = message.prefix;
                 List<String> params = message.params;
