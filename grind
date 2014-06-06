@@ -2,11 +2,17 @@
 import 'package:grinder/grinder.dart';
 
 void main([List<String> args]) {
-    defineTask('check', taskFunction: check);
+    defineTask('init', taskFunction: init);
+    defineTask('analyze', taskFunction: analyze);
 
     startGrinder(args);
 }
 
-void check(GrinderContext context) {
-    print("Checking Code...");
+void init(GrinderContext context) {
+    PubTools pub = new PubTools();
+    pub.get(context);
+}
+
+void analyze(GrinderContext context) {
+    runSdkBinary(context, 'dartanalyzer', arguments: ['lib/irc.dart']);
 }

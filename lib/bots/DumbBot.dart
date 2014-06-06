@@ -2,9 +2,9 @@ part of irc;
 
 class DumbBot extends Bot {
     Client _client;
-    List<String> channels;
+    List<String> channels = [];
 
-    DumbBot(BotConfig config, {this.channels: []}) {
+    DumbBot(BotConfig config) {
         _client = new Client(config);
         _registerHandlers();
     }
