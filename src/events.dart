@@ -33,7 +33,7 @@ class LineEvent extends Event {
     String command;
     String prefix;
     List<String> params;
-    _irc_message.Message message;
+    IRCParser.Message message;
 
     LineEvent(IRCClient client, this.command, this.prefix, this.params, this.message) {
         this.client = client;

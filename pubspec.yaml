@@ -1,6 +1,8 @@
-name: DartBot
+name: irc
+description: A feature-full Dart IRC library
 version: 1.0.0
+author: Kenneth Endfinger <kaendfinger@gmail.com>
+homepage: https://github.com/kaendfinger/irc.dart/
 dependencies:
-  event_bus: any
-  irc_message:
-    git: git://github.com/kaendfinger/dart-irc_message.git
+  event_bus: ">=0.2.4 <0.3.0"
+  irc_message: ">=1.0.0 <2.0.0"
