@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+dart tool/hop_runner.dart ${@}
