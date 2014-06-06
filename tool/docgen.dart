@@ -1,6 +1,6 @@
 part of hop_runner;
 
-Task createDocGenTask(String path, {compile: true, Iterable<String> excludes: null, include_sdk: false, include_deps: false}) {
+Task createDocGenTask(String path, {compile: true, Iterable<String> excludes: null, include_sdk: false, include_deps: false, out_dir: "docs"}) {
     return new Task((TaskContext context) {
         var args = [];
 
@@ -26,6 +26,8 @@ Task createDocGenTask(String path, {compile: true, Iterable<String> excludes: nu
         } else {
             args.add("--no-include-dependent-packages");
         }
+
+        args.add("--out=${out_dir}");
 
         args.addAll(context.arguments.rest);
 
