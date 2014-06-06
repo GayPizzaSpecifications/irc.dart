@@ -7,9 +7,10 @@ import 'package:irc_message/irc_message.dart' as IRCParser;
 import 'package:event_bus/event_bus.dart';
 
 part 'client.dart';
+part 'bot.dart';
 part 'events.dart';
 part 'types.dart';
-part 'commands.dart';
+part 'bots/CommandBot.dart';
 part 'colors.dart';
 
 /**

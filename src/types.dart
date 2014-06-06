@@ -11,10 +11,10 @@ class BotConfig {
 }
 
 class Channel {
-    IRCClient _client;
+    Client _client;
     String name;
 
-    Channel(IRCClient client, this.name) {
+    Channel(Client client, this.name) {
         _client = client;
     }
 

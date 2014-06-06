@@ -10,7 +10,7 @@ void main() {
 
     CommandBot bot = new CommandBot(config, prefix: ".");
 
-    bot.ready((ReadyEvent event) {
+    bot.whenReady((ReadyEvent event) {
         event.join("#Dart");
     });
 
@@ -18,7 +18,7 @@ void main() {
         event.reply("> ${Color.BLUE}Commands${Color.RESET}: ${bot.commands.keys.join(', ')}");
     });
 
-    IRCClient.debug(bot.client());
+    Client.debug(bot.client());
 
     bot.connect();
 }

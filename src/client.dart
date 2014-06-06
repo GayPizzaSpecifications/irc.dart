@@ -1,6 +1,6 @@
 part of irc;
 
-class IRCClient extends EventEmitting {
+class Client extends EventEmitting {
     Socket _socket;
     bool _ready = false;
     bool _receivedAny;
@@ -8,7 +8,7 @@ class IRCClient extends EventEmitting {
     BotConfig config;
     List<Channel> channels = [];
 
-    IRCClient(this.config) {
+    Client(this.config) {
         _registerHandlers();
     }
 
@@ -106,7 +106,7 @@ class IRCClient extends EventEmitting {
         _socket.close();
     }
 
-    static void debug(IRCClient client) {
+    static void debug(Client client) {
         client.on(Events.Connect).listen((ConnectEvent event) {
             print("[DEBUG] Connected");
         });

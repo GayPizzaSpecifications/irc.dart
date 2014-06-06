@@ -1,6 +1,6 @@
 part of irc;
 
-class CommandBot {
+class CommandBot extends Bot {
     Client _client;
 
     Map<String, StreamController<MessageEvent>> commands = {
@@ -14,10 +14,6 @@ class CommandBot {
     }
 
     Client client() => _client;
-
-    void connect() => _client.connect();
-
-    void disconnect() => _client.disconnect();
 
     Stream<MessageEvent> command(String name) {
         return commands.putIfAbsent(name, () {
@@ -39,10 +35,4 @@ class CommandBot {
             }
         });
     }
-
-    StreamSubscription<ReadyEvent> ready(Function handler) {
-        return on(Events.Ready).listen(handler);
-    }
-
-    Stream<Event> on(EventType<Event> type) => client().on(type);
 }

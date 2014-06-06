@@ -1,8 +1,5 @@
 part of irc;
 
-class IRCText {
-}
-
 abstract class Color {
     static final String BLUE = "\u000312";
     static final String RESET = "\u000f";

@@ -22,17 +22,17 @@ class Events {
 }
 
 abstract class Event {
-    IRCClient client;
+    Client client;
 }
 
 class ConnectEvent extends Event {
-    ConnectEvent(IRCClient client) {
+    ConnectEvent(Client client) {
         this.client = client;
     }
 }
 
 class ReadyEvent extends Event {
-    ReadyEvent(IRCClient client) {
+    ReadyEvent(Client client) {
         this.client = client;
     }
 
@@ -47,7 +47,7 @@ class LineEvent extends Event {
     List<String> params;
     IRCParser.Message message;
 
-    LineEvent(IRCClient client, this.command, this.prefix, this.params, this.message) {
+    LineEvent(Client client, this.command, this.prefix, this.params, this.message) {
         this.client = client;
     }
 }
@@ -57,7 +57,7 @@ class MessageEvent extends Event {
     String target;
     String message;
 
-    MessageEvent(IRCClient client, this.from, this.target, this.message) {
+    MessageEvent(Client client, this.from, this.target, this.message) {
         this.client = client;
     }
 
@@ -74,7 +74,7 @@ class JoinEvent extends Event {
     Channel channel;
     String user;
 
-    JoinEvent(IRCClient client, this.user, this.channel) {
+    JoinEvent(Client client, this.user, this.channel) {
         this.client = client;
     }
 
@@ -90,7 +90,7 @@ class JoinEvent extends Event {
 class SendEvent extends Event {
     String line;
 
-    SendEvent(IRCClient client, this.line) {
+    SendEvent(Client client, this.line) {
         this.client = client;
     }
 }
