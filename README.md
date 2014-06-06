@@ -6,7 +6,7 @@ The Beautiful IRC Library for Dart that WORKS!
 
 Command Bot:
 ```dart
-import '../src/irc.dart';
+import 'package:irc/irc.dart';
 
 void main() {
     BotConfig config = new BotConfig(
