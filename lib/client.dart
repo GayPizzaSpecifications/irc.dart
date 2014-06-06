@@ -124,7 +124,7 @@ class Client extends EventEmitting {
         });
 
         client.on(Events.Line).listen((LineEvent event) {
-            print("[DEBUG] Recieved Line: ${event.message}");
+            print("[DEBUG] Received Line: ${event.message}");
         });
 
         client.on(Events.Send).listen((SendEvent event) {
