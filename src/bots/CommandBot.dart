@@ -13,6 +13,7 @@ class CommandBot extends Bot {
         _registerHandlers();
     }
 
+    @override
     Client client() => _client;
 
     Stream<MessageEvent> command(String name) {

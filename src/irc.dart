@@ -11,8 +11,10 @@ part 'client.dart';
 part 'bot.dart';
 part 'events.dart';
 part 'types.dart';
-part 'bots/CommandBot.dart';
 part 'colors.dart';
+
+part 'bots/CommandBot.dart';
+part 'bots/DumbBot.dart';
 
 /**
  * Temporary Fix for Hostmask Parsing
