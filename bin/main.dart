@@ -1,4 +1,4 @@
-import '../src/irc.dart';
+import '../lib/irc.dart';
 
 void main() {
     BotConfig config = new BotConfig(
