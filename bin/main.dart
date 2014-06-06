@@ -1,8 +1,7 @@
 import '../lib/irc.dart';
 
 void main() {
-    BotConfig config = new BotConfig(
-        host: "irc.freenode.net",
+    BotConfig config = new BotConfig(host: "irc.esper.net",
         port: 6667,
         nickname: "DartBot",
         username: "DartBot"
@@ -11,7 +10,7 @@ void main() {
     CommandBot bot = new CommandBot(config, prefix: ".");
 
     bot.whenReady((ReadyEvent event) {
-        event.join("#irc.dart");
+        event.join("#directcode");
     });
 
     bot.command("help").listen((MessageEvent event) {
