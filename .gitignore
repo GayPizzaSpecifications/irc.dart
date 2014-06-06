@@ -3,3 +3,4 @@ bin/packages
 pubspec.lock
 .idea/
 docs/
+dartdoc-viewer/

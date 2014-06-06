@@ -9,3 +9,4 @@ dependencies:
   quiver: ">=0.18.2 <0.19.0"
 dev_dependencies:
   hop: 0.31.0
+  yaml: any
