@@ -1,27 +1,2 @@
-#!/usr/bin/env dart
-import 'package:grinder/grinder.dart';
-
-bool formatEnabled = false;
-
-void main([List<String> args]) {
-    defineTask('init', taskFunction: init);
-    defineTask('analyze', taskFunction: analyze, depends: ['init']);
-
-    if (formatEnabled)
-        defineTask('format', taskFunction: format, depends: ['init']);
-
-    startGrinder(args);
-}
-
-void init(GrinderContext context) {
-    PubTools pub = new PubTools();
-    pub.get(context);
-}
-
-void analyze(GrinderContext context) {
-    runSdkBinary(context, 'dartanalyzer', arguments: ['lib/irc.dart']);
-}
-
-void format(GrinderContext context) {
-    runSdkBinary(context, 'dartfmt', arguments: ['-w', 'lib/']);
-}
+#!/usr/bin/env bash
+dart grind.dart ${@}

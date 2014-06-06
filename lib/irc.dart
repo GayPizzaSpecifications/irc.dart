@@ -3,7 +3,8 @@ library irc;
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
-import 'package:irc_message/irc_message.dart' as IRCParser show Message, MessageParser;
+import 'package:irc_message/irc_message.dart' as IRCParser show Message,
+    MessageParser;
 
 import 'package:event_bus/event_bus.dart' show EventType, EventBus;
 

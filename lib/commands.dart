@@ -1,48 +1,47 @@
 part of irc;
 
 class CommandBot {
-    Client _client;
+  Client _client;
 
-    Map<String, StreamController<MessageEvent>> commands = {
-    };
+  Map<String, StreamController<MessageEvent>> commands = {};
 
-    String prefix;
+  String prefix;
 
-    CommandBot(BotConfig config, {this.prefix: "!"}) {
-        _client = new Client(config);
-        _registerHandlers();
-    }
+  CommandBot(BotConfig config, {this.prefix: "!"}) {
+    _client = new Client(config);
+    _registerHandlers();
+  }
 
-    Client client() => _client;
+  Client client() => _client;
 
-    void connect() => _client.connect();
+  void connect() => _client.connect();
 
-    void disconnect() => _client.disconnect();
+  void disconnect() => _client.disconnect();
 
-    Stream<MessageEvent> command(String name) {
-        return commands.putIfAbsent(name, () {
-            return new StreamController.broadcast();
-        }).stream;
-    }
+  Stream<MessageEvent> command(String name) {
+    return commands.putIfAbsent(name, () {
+      return new StreamController.broadcast();
+    }).stream;
+  }
 
-    void _registerHandlers() {
-        client().on(Events.Message).listen((MessageEvent event) {
-            String message = event.message;
+  void _registerHandlers() {
+    client().on(Events.Message).listen((MessageEvent event) {
+      String message = event.message;
 
-            if (message.startsWith(prefix)) {
-                List<String> split = message.split(" ");
-                String command = split[0].substring(1);
+      if (message.startsWith(prefix)) {
+        List<String> split = message.split(" ");
+        String command = split[0].substring(1);
 
-                if (commands.containsKey(command)) {
-                    commands[command].add(event);
-                }
-            }
-        });
-    }
+        if (commands.containsKey(command)) {
+          commands[command].add(event);
+        }
+      }
+    });
+  }
 
-    StreamSubscription<ReadyEvent> ready(Function handler) {
-        return on(Events.Ready).listen(handler);
-    }
+  StreamSubscription<ReadyEvent> ready(Function handler) {
+    return on(Events.Ready).listen(handler);
+  }
 
-    Stream<Event> on(EventType<Event> type) => client().on(type);
+  Stream<Event> on(EventType<Event> type) => client().on(type);
 }
