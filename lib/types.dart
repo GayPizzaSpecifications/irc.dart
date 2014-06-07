@@ -6,8 +6,9 @@ class BotConfig {
     String nickname;
     String realname;
     String username;
+    bool synchronous;
 
-    BotConfig({this.host: "irc.esper.net", this.port: 6667, this.nickname:"DartBot", this.username: "DartBot", this.realname: "Dart IRC Bot"});
+    BotConfig({this.host: "irc.esper.net", this.port: 6667, this.nickname:"DartBot", this.username: "DartBot", this.realname: "Dart IRC Bot", this.synchronous: false});
 }
 
 class Channel {
