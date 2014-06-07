@@ -21,15 +21,6 @@ class Client extends EventEmitting {
                 send("USER ${config.username} 8 * :${config.realname}");
             }
 
-            if (event.command == "PING") {
-                send("PONG ${event.params[0]}");
-
-                if (!_ready) {
-                    _ready = true;
-                    fire(Events.Ready, new ReadyEvent(this));
-                }
-            }
-
             switch (event.command) {
                 case "376":
                     _fire_ready();
