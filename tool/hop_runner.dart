@@ -14,5 +14,6 @@ part 'utils.dart';
 
 void main(List<String> args) {
     addTask("docs", createDocGenTask("."));
+    addTask("analyze", createAnalyzerTask("lib/"));
     runHop(args);
 }

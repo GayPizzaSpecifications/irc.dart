@@ -1,4 +1,5 @@
 import '../lib/irc.dart';
+import 'dart:io';
 
 void main() {
     BotConfig config = new BotConfig(host: "irc.esper.net",
@@ -15,6 +16,14 @@ void main() {
 
     bot.command("help").listen((MessageEvent event) {
         event.reply("> ${Color.BLUE}Commands${Color.RESET}: ${bot.commands.keys.join(', ')}");
+    });
+
+    bot.command("dart").listen((MessageEvent event) {
+        event.reply("> Dart VM: ${Platform.version}");
+    });
+
+    bot.onMessage((MessageEvent event) {
+
     });
 
     Client.debug(bot.client());

@@ -5,6 +5,7 @@ part of irc;
  * Base Class for Bots
  */
 abstract class Bot {
+
     void connect() => client().connect();
 
     void disconnect() => client().disconnect();
