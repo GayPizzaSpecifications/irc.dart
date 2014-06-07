@@ -2,6 +2,17 @@
 
 The Beautiful IRC Library for Dart that WORKS!
 
+## Design
+
+irc.dart is designed to work out of the box in a very configurable way.
+
+- Optional Synchronous System
+- Builtin Bot System
+- Ability to create your own bots
+- Easy to Understand API
+- Use of a lot of Language Features
+- Optionally use only what you need
+
 ## Bots
 
 ### Command Bot
