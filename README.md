@@ -99,7 +99,20 @@ void main() {
 The following events are currently available:
 
 - ReadyEvent: When the client is ready to join channels.
-- JoinEvent: When a user (maybe the client) joins a channel.
+- JoinEvent: When a user joins a channel.
 - MessageEvent: When the client receives a message.
 - LineEvent: When the client receives a line from the IRC Server.
 - SendEvent: When the client sends a line to the IRC Server.
+- PartEvent When a user leaves a channel.
+- ConnectEvent: When the client connects to the server.
+- BotJoinEvent: When the client joins a channel.
+- BotPartEvent: When the client leaves a channel.
+- DisconnectEvent: When the client disconnects from the server.
+
+To register an event handler on a Client or Bot, where client is a Client or Bot, `EventName` is the name of the event above without the 'Event' ending, and `SomeEvent` is the full name above:
+
+```dart
+client.on(Events.EventName).listen((SomeEvent event) {
+    useTheEvent(event);
+});
+```
