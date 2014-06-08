@@ -1,4 +1,4 @@
-# Dart IRC
+# Dart IRC [![Build Status](https://drone.io/github.com/kaendfinger/irc.dart/status.png)](https://drone.io/github.com/kaendfinger/irc.dart/latest)
 
 The Beautiful IRC Library for Dart that WORKS!
 
