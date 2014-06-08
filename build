@@ -4,4 +4,4 @@ if [ ! -d "packages"/ ]; then
   pub install
 fi 
 
-dart tool/hop_runner.dart ${@}
+dart --checked tool/hop_runner.dart ${@}
