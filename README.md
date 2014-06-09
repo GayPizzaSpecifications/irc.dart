@@ -115,4 +115,3 @@ client.on(Events.EventName).listen((SomeEvent event) {
     useTheEvent(event);
 });
 ```
-z
