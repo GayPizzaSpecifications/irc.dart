@@ -1,6 +1,6 @@
 name: irc
 description: A feature-full Dart IRC library
-version: 1.1.5
+version: 1.1.6
 author: Kenneth Endfinger <kaendfinger@gmail.com>
 homepage: https://github.com/kaendfinger/irc.dart/
 documentation: http://kaendfinger.github.io/docs/irc.dart/
