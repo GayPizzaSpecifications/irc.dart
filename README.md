@@ -16,7 +16,6 @@ irc.dart is designed to work out of the box in a very configurable way.
 ## Bots
 
 ### Command Bot
-
 The command bot is just a normal bot implementation of commands.
 
 ```dart
@@ -44,7 +43,7 @@ void main() {
 }
 ```
 
-# Dumb Bot
+### Dumb Bot
 
 This bot just prints messages to the console.
 
@@ -116,3 +115,4 @@ client.on(Events.EventName).listen((SomeEvent event) {
     useTheEvent(event);
 });
 ```
+z
