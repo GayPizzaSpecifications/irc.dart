@@ -73,6 +73,7 @@ class Client extends EventEmitting {
                     } else {
                         fire(Events.Quit, new QuitEvent(this, who, channel(event.params[0])));
                     }
+                    _socket.destroy();
                     break;
             }
         });
@@ -95,7 +96,7 @@ class Client extends EventEmitting {
 
             sock.handleError((err) {
                 print(err);
-                sock.close();
+                _socket.destroy();
             });
 
             sock.transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).transform(new IRCParser.MessageParser()).listen((message) {
@@ -137,7 +138,7 @@ class Client extends EventEmitting {
     void disconnect({String reason: "Disconnecting"}) {
         send("QUIT :${reason}");
         sleep(new Duration(milliseconds: 5));
-        _socket.close();
+        _socket.destroy();
     }
 
     static void debug(Client client) {

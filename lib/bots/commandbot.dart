@@ -30,11 +30,12 @@ class CommandBot extends Bot {
                 List<String> split = message.split(" ");
 
                 String command = split[0].substring(1);
+
                 List<String> args = new List.from(split);
                 args.removeAt(0);
 
                 if (commands.containsKey(command)) {
-                    commands[command].add(new CommandEvent(event, command, split));
+                    commands[command].add(new CommandEvent(event, command, args));
                 }
             }
         });
