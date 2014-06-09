@@ -1,4 +1,4 @@
-part of irc;
+part of irc.bot;
 
 class DumbBot extends Bot {
     Client _client;

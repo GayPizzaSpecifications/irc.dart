@@ -1,5 +1,11 @@
 /* Bot Abstraction */
-part of irc;
+library irc.bot;
+
+import "package:irc/irc.dart";
+import "dart:async";
+
+part "dumbbot.dart";
+part "commandbot.dart";
 
 /**
  * Base Class for Bots

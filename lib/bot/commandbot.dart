@@ -1,4 +1,4 @@
-part of irc;
+part of irc.bot;
 
 class CommandBot extends Bot {
     Client _client;
