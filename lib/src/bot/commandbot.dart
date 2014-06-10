@@ -53,4 +53,12 @@ class CommandEvent extends MessageEvent {
   List<String> args;
 
   CommandEvent(MessageEvent event, this.command, this.args) : super(event.client, event.from, event.target, event.message);
+
+  bool checkArguments(int size, String help) {
+    if (args.length != size) {
+      reply(help);
+      return false;
+    }
+    return true;
+  }
 }
