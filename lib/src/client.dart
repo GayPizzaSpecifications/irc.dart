@@ -144,7 +144,7 @@ class Client extends EventEmitting {
     message(nickserv, "identify ${username} ${password}");
   }
 
-  void disconnect({String reason: "Disconnecting"}) {
+  void disconnect({String reason: "Client Disconnecting"}) {
     send("QUIT :${reason}");
     sleep(new Duration(milliseconds: 5));
     _socket.destroy();
