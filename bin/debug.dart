@@ -31,6 +31,14 @@ void main() {
     event.reply("> Dart VM: ${Platform.version}");
   });
 
+  bot.command("ping").listen((CommandEvent event) {
+    event.reply("> Pong!");
+  });
+
+  bot.command("nick").listen((CommandEvent event) {
+    bot.client().send("NICK ${event.args[0]}");
+  });
+
   bot.command("join").listen((CommandEvent event) {
     if (event.checkArguments(1, "> Usage: join <channel>")) {
       bot.join(event.args[0]);
