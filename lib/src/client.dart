@@ -140,6 +140,10 @@ class Client extends EventEmitting {
     send("NICK ${nickname}");
   }
 
+  void identify({String username: config.username, String password: "password", String nickserv: "NickServ"}) {
+    message(nickserv, "identify ${username} ${password}");
+  }
+
   void disconnect({String reason: "Disconnecting"}) {
     send("QUIT :${reason}");
     sleep(new Duration(milliseconds: 5));
