@@ -18,7 +18,7 @@ class Client extends EventEmitting {
 
   void _registerHandlers() {
 
-    on(Events.Send).listen((SendEvent event) {
+    on(Events.Send).listen((LineSentEvent event) {
       switch (event.message.command) {
         case "QUIT":
           fire(Events.Disconnect, new DisconnectEvent(this));
@@ -26,7 +26,7 @@ class Client extends EventEmitting {
       }
     });
 
-    on(Events.Line).listen((LineEvent event) {
+    on(Events.Line).listen((LineReceiveEvent event) {
       if (!_receivedAny) {
         _receivedAny = true;
         sleep(new Duration(milliseconds: 200));
@@ -103,7 +103,7 @@ class Client extends EventEmitting {
         String command = message.command;
         String prefix = message.prefix;
         List<String> params = message.params;
-        fire(Events.Line, new LineEvent(this, command, prefix, params, message));
+        fire(Events.Line, new LineReceiveEvent(this, command, prefix, params, message));
       });
     });
   }
@@ -117,7 +117,7 @@ class Client extends EventEmitting {
   }
 
   void send(String line) {
-    fire(Events.Send, new SendEvent(this, PARSER.convert(line)));
+    fire(Events.Send, new LineSentEvent(this, PARSER.convert(line)));
     _socket.writeln(line);
   }
 
@@ -162,11 +162,11 @@ class Client extends EventEmitting {
       print("[DEBUG] Ready");
     });
 
-    client.on(Events.Line).listen((LineEvent event) {
+    client.on(Events.Line).listen((LineReceiveEvent event) {
       print("[DEBUG] Received Line: ${event.message}");
     });
 
-    client.on(Events.Send).listen((SendEvent event) {
+    client.on(Events.Send).listen((LineSentEvent event) {
       print("[DEBUG] Sent Line: ${event.message}");
     });
   }

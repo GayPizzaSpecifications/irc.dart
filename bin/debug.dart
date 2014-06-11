@@ -9,11 +9,11 @@ void main() {
 
   CommandBot bot = new CommandBot(config, prefix: ".");
 
-  bot.on(Events.Line).listen((LineEvent event) {
+  bot.on(Events.Line).listen((LineReceiveEvent event) {
     print(">> ${event.message}");
   });
 
-  bot.on(Events.Send).listen((SendEvent event) {
+  bot.on(Events.Send).listen((LineSentEvent event) {
     print("<< ${event.message}");
   });
 
@@ -81,22 +81,26 @@ void main() {
   });
 
   bot.onJoin((JoinEvent event) {
-    if (event.isBot()) {
-      print("Joined ${event.channel.name}");
-    } else {
-      print("<${event.channel.name}> ${event.user} has joined");
-    }
+    print("<${event.channel.name}> ${event.user} has joined");
+  });
+
+  bot.onBotJoin((BotJoinEvent event) {
+    print("Joined ${event.channel.name}");
+  });
+
+  bot.onBotPart((BotPartEvent event) {
+    print("Left ${event.channel.name}");
   });
 
   bot.on(Events.Part).listen((PartEvent event) {
     print("<${event.channel.name}> ${event.user} has left");
   });
 
-  bot.client().on(Events.Line).listen((LineEvent event) {
+  bot.onLineReceived((LineReceiveEvent event) {
     print(">> ${event.message}");
   });
 
-  bot.client().on(Events.Send).listen((SendEvent event) {
+  bot.onLineSent((LineSentEvent event) {
     print("<< ${event.message}");
   });
 

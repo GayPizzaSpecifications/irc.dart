@@ -19,12 +19,13 @@ class EventEmitting {
 class Events {
   static final EventType<ConnectEvent> Connect = new EventType<ConnectEvent>();
   static final EventType<ReadyEvent> Ready = new EventType<ReadyEvent>();
-  static final EventType<LineEvent> Line = new EventType<LineEvent>();
-  static final EventType<SendEvent> Send = new EventType<SendEvent>();
+  static final EventType<LineReceiveEvent> Line = new EventType<LineReceiveEvent>();
+  static final EventType<LineSentEvent> Send = new EventType<LineSentEvent>();
   static final EventType<JoinEvent> Join = new EventType<JoinEvent>();
   static final EventType<MessageEvent> Message = new EventType<MessageEvent>();
   static final EventType<PartEvent> Part = new EventType<PartEvent>();
   static final EventType<QuitEvent> Quit = new EventType<QuitEvent>();
+  static final EventType<BotJoinEvent> BotJoin = new EventType<BotJoinEvent>();
   static final EventType<BotPartEvent> BotPart = new EventType<BotPartEvent>();
   static final EventType<DisconnectEvent> Disconnect = new EventType<DisconnectEvent>();
 }
@@ -49,13 +50,13 @@ class ReadyEvent extends Event {
   }
 }
 
-class LineEvent extends Event {
+class LineReceiveEvent extends Event {
   String command;
   String prefix;
   List<String> params;
   IRCParser.Message message;
 
-  LineEvent(Client client, this.command, this.prefix, this.params, this.message) : super(client);
+  LineReceiveEvent(Client client, this.command, this.prefix, this.params, this.message) : super(client);
 }
 
 class MessageEvent extends Event {
@@ -81,10 +82,12 @@ class JoinEvent extends Event {
   void reply(String message) {
     channel.message(message);
   }
+}
 
-  bool isBot() {
-    return user == client.config.nickname;
-  }
+class BotJoinEvent extends Event {
+  Channel channel;
+
+  BotJoinEvent(Client client, this.channel) : super(client);
 }
 
 class PartEvent extends Event {
@@ -95,10 +98,6 @@ class PartEvent extends Event {
 
   void reply(String message) {
     channel.message(message);
-  }
-
-  bool isBot() {
-    return user == client.config.nickname;
   }
 }
 
@@ -123,8 +122,8 @@ class DisconnectEvent extends Event {
   DisconnectEvent(Client client) : super(client);
 }
 
-class SendEvent extends Event {
+class LineSentEvent extends Event {
   IRCParser.Message message;
 
-  SendEvent(Client client, this.message) : super(client);
+  LineSentEvent(Client client, this.message) : super(client);
 }
