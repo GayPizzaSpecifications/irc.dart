@@ -35,6 +35,10 @@ void main() {
     event.reply("> Pong!");
   });
 
+  bot.command("opall").listen((CommandEvent event) {
+    event.args.forEach((it) => bot.client().send("MODE ${event.channel.name} +o ${it}"));
+  });
+
   bot.command("nick").listen((CommandEvent event) {
     bot.client().nickname(event.args[0]);
   });

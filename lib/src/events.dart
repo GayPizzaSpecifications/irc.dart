@@ -65,9 +65,7 @@ class MessageEvent extends Event {
 
   MessageEvent(Client client, this.from, this.target, this.message) : super(client);
 
-  Channel channel() {
-    return client.channel(target);
-  }
+  Channel get channel => client.channel(target);
 
   void reply(String message) {
     client.message(target, message);
