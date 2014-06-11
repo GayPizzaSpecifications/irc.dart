@@ -44,7 +44,7 @@ class Client extends EventEmitting {
           break;
         case "JOIN":
           String who = event.message.getHostmask()["nick"];
-          if (who == config.nickname) {
+          if (who == _nickname) {
             // We Joined a New Channel
             channels.add(new Channel(this, event.params[0]));
           }
@@ -133,6 +133,11 @@ class Client extends EventEmitting {
     return channels.firstWhere((channel) {
       return channel.name == name;
     });
+  }
+
+  void nickname(String nickname) {
+    _nickname = nickname;
+    send("NICK ${nickname}");
   }
 
   void disconnect({String reason: "Disconnecting"}) {

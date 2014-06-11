@@ -36,7 +36,7 @@ void main() {
   });
 
   bot.command("nick").listen((CommandEvent event) {
-    bot.client().send("NICK ${event.args[0]}");
+    bot.client().nickname(event.args[0]);
   });
 
   bot.command("join").listen((CommandEvent event) {
