@@ -28,6 +28,7 @@ class Events {
   static final EventType<BotJoinEvent> BotJoin = new EventType<BotJoinEvent>();
   static final EventType<BotPartEvent> BotPart = new EventType<BotPartEvent>();
   static final EventType<DisconnectEvent> Disconnect = new EventType<DisconnectEvent>();
+  static final EventType<TopicEvent> Topic = new EventType<TopicEvent>();
 }
 
 abstract class Event {
@@ -126,4 +127,11 @@ class LineSentEvent extends Event {
   IRCParser.Message message;
 
   LineSentEvent(Client client, this.message) : super(client);
+}
+
+class TopicEvent extends Event {
+  Channel channel;
+  String topic;
+
+  TopicEvent(Client client, this.channel, this.topic) : super(client);
 }

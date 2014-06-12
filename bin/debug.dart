@@ -49,6 +49,10 @@ void main() {
     }
   });
 
+  bot.command("topic").listen((CommandEvent event) {
+    event.reply("> ${event.channel.topic}");
+  });
+
   bot.command("list-libs").listen((CommandEvent event) {
     Set<String> libraries = [].toSet();
     currentMirrorSystem().libraries.forEach((key, value) {
@@ -96,12 +100,12 @@ void main() {
     print("<${event.channel.name}> ${event.user} has left");
   });
 
-  bot.onLineReceived((LineReceiveEvent event) {
-    print(">> ${event.message}");
-  });
-
   bot.onLineSent((LineSentEvent event) {
     print("<< ${event.message}");
+  });
+
+  bot.onLineReceived((LineReceiveEvent event) {
+    print(">> ${event.message}");
   });
 
   bot.connect();

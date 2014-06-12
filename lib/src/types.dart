@@ -14,6 +14,11 @@ class BotConfig {
 class Channel {
   Client client;
   String name;
+  String _topic;
+
+  String get topic => _topic;
+
+  void set topic(String topic) => client.send("TOPIC ${name} :${topic}");
 
   Channel(this.client, this.name);
 

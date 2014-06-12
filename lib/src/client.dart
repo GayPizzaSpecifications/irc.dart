@@ -32,7 +32,6 @@ class Client extends EventEmitting {
           break;
         case "PING":
           send("PONG ${event.params[0]}");
-          _fire_ready();
           break;
         case "JOIN":
           String who = event.message.getHostmask()["nick"];
@@ -69,6 +68,12 @@ class Client extends EventEmitting {
             fire(Events.Quit, new QuitEvent(this, who, channel(event.params[0])));
           }
           _socket.destroy();
+          break;
+        case "332":
+          String topic = event.params.last;
+          var chan = channel(event.params[1]);
+          chan._topic = topic;
+          fire(Events.Topic, new TopicEvent(this, chan, topic));
           break;
       }
     });
@@ -125,9 +130,12 @@ class Client extends EventEmitting {
   }
 
   Channel channel(String name) {
-    return channels.firstWhere((channel) {
-      return channel.name == name;
-    });
+    for (Channel channel in channels) {
+      if (channel.name == name) {
+        return channel;
+      }
+    }
+    return null;
   }
 
   void nickname(String nickname) {
