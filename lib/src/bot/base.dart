@@ -7,6 +7,7 @@ abstract class Bot {
   Client client();
 
   void connect() => client().connect();
+
   void disconnect() => client().disconnect();
 
   Channel channel(String name) => client().channel(name);

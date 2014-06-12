@@ -140,8 +140,8 @@ class Client extends EventEmitting {
     send("NICK ${nickname}");
   }
 
-  void identify({String username: "RAND_VALUE_FAKE", String password: "password", String nickserv: "NickServ"}) {
-    if (username == "RAND_VALUE_FAKE") {
+  void identify({String username: "PLEASE_INJECT_DEFAULT", String password: "password", String nickserv: "NickServ"}) {
+    if (username == "PLEASE_INJECT_DEFAULT") {
       username = config.username;
     }
     message(nickserv, "identify ${username} ${password}");
