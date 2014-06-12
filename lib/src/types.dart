@@ -35,6 +35,11 @@ class Channel {
 
   void kick(String user) => client.send("KICK ${name} ${user}");
 
+  void kickban(String user) {
+    ban(user);
+    kick(user);
+  }
+
   void mode(String mode, [String user = null]) {
     if (user != null) {
       client.send("MODE ${name} ${mode} ${user}");
