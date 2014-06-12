@@ -19,8 +19,8 @@ class EventEmitting {
 class Events {
   static final EventType<ConnectEvent> Connect = new EventType<ConnectEvent>();
   static final EventType<ReadyEvent> Ready = new EventType<ReadyEvent>();
-  static final EventType<LineReceiveEvent> Line = new EventType<LineReceiveEvent>();
-  static final EventType<LineSentEvent> Send = new EventType<LineSentEvent>();
+  static final EventType<LineReceiveEvent> LineReceive = new EventType<LineReceiveEvent>();
+  static final EventType<LineSentEvent> LineSent = new EventType<LineSentEvent>();
   static final EventType<JoinEvent> Join = new EventType<JoinEvent>();
   static final EventType<MessageEvent> Message = new EventType<MessageEvent>();
   static final EventType<PartEvent> Part = new EventType<PartEvent>();

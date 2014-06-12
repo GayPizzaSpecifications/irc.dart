@@ -9,11 +9,11 @@ void main() {
 
   CommandBot bot = new CommandBot(config, prefix: ".");
 
-  bot.on(Events.Line).listen((LineReceiveEvent event) {
+  bot.on(Events.LineReceive).listen((LineReceiveEvent event) {
     print(">> ${event.message}");
   });
 
-  bot.on(Events.Send).listen((LineSentEvent event) {
+  bot.on(Events.LineSent).listen((LineSentEvent event) {
     print("<< ${event.message}");
   });
 

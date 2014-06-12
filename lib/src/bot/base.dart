@@ -23,9 +23,9 @@ abstract class Bot {
 
   StreamSubscription<BotPartEvent> onBotPart(Function handler) => on(Events.BotPart).listen(handler);
 
-  StreamSubscription<LineSentEvent> onLineSent(Function handler) => on(Events.Send).listen(handler);
+  StreamSubscription<LineSentEvent> onLineSent(Function handler) => on(Events.LineSent).listen(handler);
 
-  StreamSubscription<LineReceiveEvent> onLineReceived(Function handler) => on(Events.Line).listen(handler);
+  StreamSubscription<LineReceiveEvent> onLineReceived(Function handler) => on(Events.LineReceive).listen(handler);
 
   StreamSubscription<MessageEvent> onMessage(Function handler) => on(Events.Message).listen(handler);
 
