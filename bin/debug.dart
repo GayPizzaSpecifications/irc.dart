@@ -36,7 +36,7 @@ void main() {
   });
 
   bot.command("opall").listen((CommandEvent event) {
-    event.args.forEach((it) => bot.client().send("MODE ${event.channel.name} +o ${it}"));
+    event.args.forEach((it) => event.channel.op(it));
   });
 
   bot.command("nick").listen((CommandEvent event) {

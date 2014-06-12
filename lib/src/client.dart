@@ -152,22 +152,4 @@ class Client extends EventEmitting {
     sleep(new Duration(milliseconds: 5));
     _socket.destroy();
   }
-
-  static void debug(Client client) {
-    client.on(Events.Connect).listen((ConnectEvent event) {
-      print("[DEBUG] Connected");
-    });
-
-    client.on(Events.Ready).listen((ReadyEvent event) {
-      print("[DEBUG] Ready");
-    });
-
-    client.on(Events.LineReceive).listen((LineReceiveEvent event) {
-      print("[DEBUG] Received Line: ${event.message}");
-    });
-
-    client.on(Events.LineSent).listen((LineSentEvent event) {
-      print("[DEBUG] Sent Line: ${event.message}");
-    });
-  }
 }
