@@ -40,6 +40,10 @@ class Channel {
     kick(user);
   }
 
+  void action(String msg) {
+    message("\u0001ACTION ${msg}\u0001");
+  }
+
   void mode(String mode, [String user = null]) {
     if (user != null) {
       client.send("MODE ${name} ${mode} ${user}");
