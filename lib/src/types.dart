@@ -29,6 +29,12 @@ class Channel {
 
   void devoice(String user) => mode("-v", user);
 
+  void ban(String user) => mode("+b", user);
+
+  void unban(String user) => mode("-b", user);
+
+  void kick(String user) => client.send("KICK ${name} ${user}");
+
   void mode(String mode, [String user = null]) {
     if (user != null) {
       client.send("MODE ${name} ${mode} ${user}");
