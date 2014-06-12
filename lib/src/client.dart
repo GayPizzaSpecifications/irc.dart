@@ -18,14 +18,6 @@ class Client extends EventEmitting {
 
   void _registerHandlers() {
 
-    on(Events.LineSent).listen((LineSentEvent event) {
-      switch (event.message.command) {
-        case "QUIT":
-          fire(Events.Disconnect, new DisconnectEvent(this));
-          break;
-      }
-    });
-
     on(Events.LineReceive).listen((LineReceiveEvent event) {
       if (!_receivedAny) {
         _receivedAny = true;
@@ -46,6 +38,9 @@ class Client extends EventEmitting {
           String who = event.message.getHostmask()["nick"];
           if (who == _nickname) {
             // We Joined a New Channel
+            if (channel(event.params[0]) != null) {
+              break;
+            }
             channels.add(new Channel(this, event.params[0]));
           }
           fire(Events.Join, new JoinEvent(this, who, channel(event.params[0])));
