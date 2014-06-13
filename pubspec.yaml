@@ -4,6 +4,8 @@ version: 1.1.8-dev.1
 author: Kenneth Endfinger <kaendfinger@gmail.com>
 homepage: https://github.com/kaendfinger/irc.dart/
 documentation: http://www.dartdocs.org/documentation/irc/1.1.8/
+environment:
+  sdk: ">=1.2.0"
 dependencies:
   event_bus: ">=0.2.4 <0.3.0"
   irc_message: ">=1.0.0 <2.0.0"
