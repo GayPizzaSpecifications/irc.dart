@@ -1,6 +1,6 @@
 name: irc
 description: A feature-full Dart IRC library
-version: 1.1.8-dev.1
+version: 1.1.8-dev.2
 author: Kenneth Endfinger <kaendfinger@gmail.com>
 homepage: https://github.com/kaendfinger/irc.dart/
 documentation: http://www.dartdocs.org/documentation/irc/1.1.8/
@@ -11,4 +11,10 @@ dependencies:
   irc_message: ">=1.0.0 <2.0.0"
   quiver: ">=0.18.2 <0.19.0"
 dev_dependencies:
-  hop: 0.31.0
+  hop: "0.31.0"
+  unittest: "0.11.0+2"
+  matcher: "0.10.1+1"
+  yaml: "1.0.0+2"
+  hop_unittest: "0.1.0+1"
+dependency_overrides:
+  unittest: "0.11.0+2"
