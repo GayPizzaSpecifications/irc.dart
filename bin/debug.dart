@@ -2,12 +2,21 @@ import '../lib/irc.dart';
 import 'dart:io';
 import 'dart:mirrors';
 import 'dart:collection';
+import 'dart:convert';
 
 void main() {
 
   BotConfig config = new BotConfig(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot", synchronous: true);
 
   CommandBot bot = new CommandBot(config, prefix: ".");
+
+  File configFile = new File("${Platform.environment["HOME"]}/.irc_debug.cfg");
+
+  Map<String, String> conf = {};
+
+  if (configFile.existsSync()) {
+    conf = JSON.decode(configFile.readAsStringSync());
+  }
 
   bot
   ..on(Events.LineReceive).listen((LineReceiveEvent event) {
@@ -21,7 +30,12 @@ void main() {
   ..onMessage((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"))
 
   ..whenReady((ReadyEvent event) {
+    if (conf.containsKey("identityPassword")) {
+      bot.client().identify(username: conf["identityUsername"], password: conf["identityPassword"]);
+    }
     event.join("#directcode");
+    sleep(new Duration(milliseconds: 50));
+    event.join("#minecraftforge");
   })
 
   ..command("help").listen((CommandEvent event) {
@@ -57,7 +71,7 @@ void main() {
   ..command("list-libs").listen((CommandEvent event) {
     Set<String> libraries = [].toSet();
     currentMirrorSystem().libraries.forEach((key, value) {
-      libraries.add(MirrorSystem.getName(value.simpleName));
+      libraries.add(MirrorSystem.getName(value.qualifiedName));
     });
     event.reply("> Libraries: ${libraries.join(', ')}");
   })

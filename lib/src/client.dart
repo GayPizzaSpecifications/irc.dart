@@ -67,7 +67,6 @@ class Client extends EventEmitting {
           } else {
             fire(Events.Quit, new QuitEvent(this, who, channel(event.params[0])));
           }
-          _socket.destroy();
           break;
         case "332":
           String topic = event.params.last;
@@ -95,15 +94,18 @@ class Client extends EventEmitting {
       fire(Events.Connect, new ConnectEvent(this));
 
       sock.handleError((err) {
-        print(err);
-        _socket.destroy();
+        // Silently Fail
       });
 
-      sock.transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).transform(new IRCParser.MessageParser()).listen((message) {
-        String command = message.command;
-        String prefix = message.prefix;
-        List<String> params = message.params;
-        fire(Events.LineReceive, new LineReceiveEvent(this, command, prefix, params, message));
+      runZoned(() {
+        sock.transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).transform(new IRCParser.MessageParser()).listen((message) {
+          String command = message.command;
+          String prefix = message.prefix;
+          List<String> params = message.params;
+          fire(Events.LineReceive, new LineReceiveEvent(this, command, prefix, params, message));
+        });
+      }, onError: (err) {
+        // Silently Fail
       });
     });
   }
@@ -153,6 +155,6 @@ class Client extends EventEmitting {
   void disconnect({String reason: "Client Disconnecting"}) {
     send("QUIT :${reason}");
     sleep(new Duration(milliseconds: 5));
-    _socket.destroy();
+    _socket.close();
   }
 }
