@@ -9,59 +9,60 @@ void main() {
 
   CommandBot bot = new CommandBot(config, prefix: ".");
 
-  bot.on(Events.LineReceive).listen((LineReceiveEvent event) {
+  bot
+    ..on(Events.LineReceive).listen((LineReceiveEvent event) {
     print(">> ${event.message}");
-  });
+  })
 
-  bot.on(Events.LineSent).listen((LineSentEvent event) {
+    ..on(Events.LineSent).listen((LineSentEvent event) {
     print("<< ${event.message}");
-  });
+  })
 
-  bot.onMessage((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"));
+    ..onMessage((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"))
 
-  bot.whenReady((ReadyEvent event) {
+    ..whenReady((ReadyEvent event) {
     event.join("#directcode");
-  });
+  })
 
-  bot.command("help").listen((CommandEvent event) {
+    ..command("help").listen((CommandEvent event) {
     event.reply("> ${Color.BLUE}Commands${Color.RESET}: ${bot.commandNames().join(', ')}");
-  });
+  })
 
-  bot.command("dart").listen((CommandEvent event) {
+    ..command("dart").listen((CommandEvent event) {
     event.reply("> Dart VM: ${Platform.version}");
-  });
+  })
 
-  bot.command("ping").listen((CommandEvent event) {
+    ..command("ping").listen((CommandEvent event) {
     event.reply("> Pong!");
-  });
+  })
 
-  bot.command("opall").listen((CommandEvent event) {
+    ..command("opall").listen((CommandEvent event) {
     event.args.forEach((it) => event.channel.op(it));
-  });
+  })
 
-  bot.command("nick").listen((CommandEvent event) {
+    ..command("nick").listen((CommandEvent event) {
     bot.client().nickname(event.args[0]);
-  });
+  })
 
-  bot.command("join").listen((CommandEvent event) {
+    ..command("join").listen((CommandEvent event) {
     if (event.checkArguments(1, "> Usage: join <channel>")) {
       bot.join(event.args[0]);
     }
-  });
+  })
 
-  bot.command("topic").listen((CommandEvent event) {
+    ..command("topic").listen((CommandEvent event) {
     event.reply("> ${event.channel.topic}");
-  });
+  })
 
-  bot.command("list-libs").listen((CommandEvent event) {
+    ..command("list-libs").listen((CommandEvent event) {
     Set<String> libraries = [].toSet();
     currentMirrorSystem().libraries.forEach((key, value) {
       libraries.add(MirrorSystem.getName(value.simpleName));
     });
     event.reply("> Libraries: ${libraries.join(', ')}");
-  });
+  })
 
-  bot.command("library").listen((CommandEvent event) {
+    ..command("library").listen((CommandEvent event) {
     if (event.checkArguments(1, "> Usage: library <name>")) {
       String libName = event.args[0];
       try {
@@ -72,41 +73,41 @@ void main() {
         event.reply("> No Such Library: ${libName}");
       }
     }
-  });
+  })
 
-  bot.command("part").listen((CommandEvent event) {
+    ..command("part").listen((CommandEvent event) {
     if (event.checkArguments(1, "> Usage: part <channel>")) {
       bot.client().part(event.args[0]);
     }
-  });
+  })
 
-  bot.command("quit").listen((CommandEvent event) {
+    ..command("quit").listen((CommandEvent event) {
     bot.disconnect();
-  });
+  })
 
-  bot.onJoin((JoinEvent event) {
+    ..onJoin((JoinEvent event) {
     print("<${event.channel.name}> ${event.user} has joined");
-  });
+  })
 
-  bot.onBotJoin((BotJoinEvent event) {
+    ..onBotJoin((BotJoinEvent event) {
     print("Joined ${event.channel.name}");
-  });
+  })
 
-  bot.onBotPart((BotPartEvent event) {
+    ..onBotPart((BotPartEvent event) {
     print("Left ${event.channel.name}");
-  });
+  })
 
-  bot.on(Events.Part).listen((PartEvent event) {
+    ..on(Events.Part).listen((PartEvent event) {
     print("<${event.channel.name}> ${event.user} has left");
-  });
+  })
 
-  bot.onLineSent((LineSentEvent event) {
+    ..onLineSent((LineSentEvent event) {
     print("<< ${event.message}");
-  });
+  })
 
-  bot.onLineReceived((LineReceiveEvent event) {
+    ..onLineReceived((LineReceiveEvent event) {
     print(">> ${event.message}");
-  });
+  })
 
-  bot.connect();
+    ..connect();
 }
