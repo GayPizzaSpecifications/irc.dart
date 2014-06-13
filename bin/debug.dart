@@ -74,6 +74,13 @@ void main() {
     event.reply("> Libraries: ${libraries.join(', ')}");
   })
 
+  ..command("list-users").listen((CommandEvent event) {
+    var reply = (msg) => bot.client().notice(event.from, msg);
+    reply("> Members: ${event.channel.members.join(", ")}");
+    reply("> Ops: ${event.channel.ops.join(", ")}");
+    reply("> Voices: ${event.channel.voices.join(", ")}");
+  })
+
   ..command("library").listen((CommandEvent event) {
     if (event.checkArguments(1, "> Usage: library <name>")) {
       String libName = event.args[0];

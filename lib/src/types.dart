@@ -12,13 +12,25 @@ class BotConfig {
 }
 
 class Channel {
-  Client client;
-  String name;
+  final Client client;
+  final String name;
+  final Set<String> ops = new Set<String>();
+  final Set<String> voices = new Set<String>();
+  final Set<String> members = new Set<String>();
+
   String _topic;
 
   String get topic => _topic;
 
   void set topic(String topic) => client.send("TOPIC ${name} :${topic}");
+
+  Set<String> get allUsers {
+    Set<String> all = new Set<String>();
+    all.addAll(ops);
+    all.addAll(voices);
+    all.addAll(members);
+    return all;
+  }
 
   Channel(this.client, this.name);
 

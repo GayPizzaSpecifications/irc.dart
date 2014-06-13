@@ -78,7 +78,78 @@ class Client extends EventEmitting {
           String message = event.params.last;
           fire(Events.Error, new ErrorEvent(this, message: message, type: "server"));
           break;
+
+        case "353":
+          List<String> users = event.params.last.split(" ");
+          print(event.params);
+          Channel channel = this.channel(event.params[2]);
+          users.forEach((user) {
+            switch(user[0]) {
+              case "@":
+                channel.ops.add(user.substring(1));
+                break;
+              case "+":
+                channel.voices.add(user.substring(1));
+                break;
+              default:
+                channel.members.add(user);
+                break;
+            }
+          });
+          break;
+        case "MODE":
+          Channel channel = this.channel(event.params[0]);
+          if (event.message.params.length < 3) {
+            break;
+          }
+          String mode = event.params[1];
+          String who = event.params[2];
+
+          fire(Events.Mode, new ModeEvent(this, mode, who, channel));
+          break;
       }
+
+      on(Events.Quit).listen((QuitEvent event) {
+          Channel channel = event.channel;
+          channel.members.remove(event.user);
+          channel.voices.remove(event.user);
+          channel.ops.remove(event.user);
+      });
+
+      on(Events.Join).listen((JoinEvent event) {
+          event.channel.members.add(event.user);
+      });
+
+      on(Events.Part).listen((PartEvent event) {
+        Channel channel = event.channel;
+        channel.members.remove(event.user);
+        channel.voices.remove(event.user);
+        channel.ops.remove(event.user);
+      });
+
+      on(Events.Mode).listen((ModeEvent event) {
+        if (event.channel != null) {
+          var channel = event.channel;
+          switch (event.mode) {
+            case "+o":
+              channel.ops.add(event.user);
+              channel.members.remove(event.user);
+              break;
+            case "+v":
+              channel.voices.add(event.user);
+              channel.members.remove(event.user);
+              break;
+            case "-v":
+              channel.voices.remove(event.user);
+              channel.members.add(event.user);
+              break;
+            case "-o":
+              channel.ops.remove(event.user);
+              channel.members.add(event.user);
+              break;
+          }
+        }
+      });
     });
 
     on(Events.BotPart).listen((BotPartEvent event) => channels.remove(event.channel));
@@ -119,7 +190,7 @@ class Client extends EventEmitting {
   }
 
   void notice(String target, String message) {
-    send("PRIVMSG ${target} :${message}");
+    send("NOTICE ${target} :${message}");
   }
 
   void send(String line) {

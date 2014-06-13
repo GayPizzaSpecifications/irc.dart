@@ -30,6 +30,7 @@ class Events {
   static final EventType<DisconnectEvent> Disconnect = new EventType<DisconnectEvent>();
   static final EventType<TopicEvent> Topic = new EventType<TopicEvent>();
   static final EventType<ErrorEvent> Error = new EventType<ErrorEvent>();
+  static final EventType<ModeEvent> Mode = new EventType<ModeEvent>();
 }
 
 abstract class Event {
@@ -129,7 +130,15 @@ class ErrorEvent extends Event {
   dynamic err;
   String type;
 
-  ErrorEvent(Client client, {message: this.message, err: this.err, type: "unspecified"}) : super(client);
+  ErrorEvent(Client client, {this.message: null, this.err: null, type: "unspecified"}) : super(client);
+}
+
+class ModeEvent extends Event {
+  Channel channel;
+  String mode;
+  String user;
+
+  ModeEvent(Client client, this.mode, this.user, [this.channel = null]) : super(client);
 }
 
 class LineSentEvent extends Event {
