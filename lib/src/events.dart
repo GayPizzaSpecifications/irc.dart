@@ -126,8 +126,10 @@ class DisconnectEvent extends Event {
 
 class ErrorEvent extends Event {
   String message;
+  dynamic err;
+  String type;
 
-  ErrorEvent(Client client, this.message) : super(client);
+  ErrorEvent(Client client, {message: this.message, err: this.err, type: "unspecified"}) : super(client);
 }
 
 class LineSentEvent extends Event {

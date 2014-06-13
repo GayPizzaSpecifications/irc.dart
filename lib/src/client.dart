@@ -76,7 +76,7 @@ class Client extends EventEmitting {
           break;
         case "ERROR":
           String message = event.params.last;
-          fire(Events.Error, new ErrorEvent(this, message));
+          fire(Events.Error, new ErrorEvent(this, message: message, type: "server"));
           break;
       }
     });
@@ -98,7 +98,7 @@ class Client extends EventEmitting {
       fire(Events.Connect, new ConnectEvent(this));
 
       sock.handleError((err) {
-        // Silently Fail
+        fire(Events.Error, new ErrorEvent(this, err: err, type: "socket"));
       });
 
       runZoned(() {
@@ -109,7 +109,7 @@ class Client extends EventEmitting {
           fire(Events.LineReceive, new LineReceiveEvent(this, command, prefix, params, message));
         });
       }, onError: (err) {
-        // Silently Fail
+        fire(Events.Error, new ErrorEvent(this, err: err, type: "transform"));
       });
     });
   }
