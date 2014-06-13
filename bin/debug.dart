@@ -2,6 +2,7 @@ import '../lib/irc.dart';
 import 'dart:io';
 import 'dart:mirrors';
 import 'dart:collection';
+import 'dart:async';
 import 'dart:convert';
 
 void main() {
@@ -30,12 +31,9 @@ void main() {
   ..onMessage((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"))
 
   ..whenReady((ReadyEvent event) {
-    if (conf.containsKey("identityPassword")) {
+    if (conf.containsKey("identityPassword"))
       bot.client().identify(username: conf["identityUsername"], password: conf["identityPassword"]);
-    }
     event.join("#directcode");
-    sleep(new Duration(milliseconds: 50));
-    event.join("#minecraftforge");
   })
 
   ..command("help").listen((CommandEvent event) {

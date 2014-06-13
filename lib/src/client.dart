@@ -27,13 +27,13 @@ class Client extends EventEmitting {
       }
 
       switch (event.command) {
-        case "376":
+        case "376": /* End of MOTD */
           _fire_ready();
           break;
-        case "PING":
+        case "PING": /* Server Ping */
           send("PONG ${event.params[0]}");
           break;
-        case "JOIN":
+        case "JOIN": /* Join Event */
           String who = event.message.getHostmask()["nick"];
           if (who == _nickname) {
             // We Joined a New Channel
@@ -73,6 +73,10 @@ class Client extends EventEmitting {
           var chan = channel(event.params[1]);
           chan._topic = topic;
           fire(Events.Topic, new TopicEvent(this, chan, topic));
+          break;
+        case "ERROR":
+          String message = event.params.last;
+          fire(Events.Error, new ErrorEvent(this, message));
           break;
       }
     });

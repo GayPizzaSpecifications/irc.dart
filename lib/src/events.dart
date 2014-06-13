@@ -29,6 +29,7 @@ class Events {
   static final EventType<BotPartEvent> BotPart = new EventType<BotPartEvent>();
   static final EventType<DisconnectEvent> Disconnect = new EventType<DisconnectEvent>();
   static final EventType<TopicEvent> Topic = new EventType<TopicEvent>();
+  static final EventType<ErrorEvent> Error = new EventType<ErrorEvent>();
 }
 
 abstract class Event {
@@ -121,6 +122,12 @@ class QuitEvent extends Event {
 
 class DisconnectEvent extends Event {
   DisconnectEvent(Client client) : super(client);
+}
+
+class ErrorEvent extends Event {
+  String message;
+
+  ErrorEvent(Client client, this.message) : super(client);
 }
 
 class LineSentEvent extends Event {
