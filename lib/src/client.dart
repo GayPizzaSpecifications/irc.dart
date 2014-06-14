@@ -44,13 +44,14 @@ class Client extends EventEmitting {
         case "JOIN": /* Join Event */
           String who = _parse_nick(match[1])[0];
           if (who == _nickname) {
-            // We Joined a New Channel
-            if (channel(match[3]) != null) {
-              break;
+             // We Joined a New Channel
+            if (channel(match[3]) == null) {
+              channels.add(new Channel(this, match[3]));
             }
-            channels.add(new Channel(this, match[3]));
+            fire(Events.BotJoin, new BotJoinEvent(this, channel(match[3])));
+          } else {
+            fire(Events.Join, new JoinEvent(this, who, channel(match[3])));
           }
-          fire(Events.Join, new JoinEvent(this, who, channel(match[3])));
           break;
         case "PRIVMSG":
           String from = _parse_nick(match[1])[0];
