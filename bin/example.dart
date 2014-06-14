@@ -1,4 +1,4 @@
-import '../lib/irc.dart';
+import 'package:irc/irc.dart';
 import 'dart:io';
 
 void main() {

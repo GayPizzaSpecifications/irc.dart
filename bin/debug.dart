@@ -1,4 +1,4 @@
-import '../lib/irc.dart';
+import 'package:irc/irc.dart';
 import 'dart:io';
 import 'dart:mirrors';
 import 'dart:collection';
