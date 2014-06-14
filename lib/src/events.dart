@@ -36,9 +36,7 @@ class Events {
 abstract class Event {
   Client client;
 
-  Event(Client client) {
-    this.client = client;
-  }
+  Event(this.client);
 }
 
 class ConnectEvent extends Event {

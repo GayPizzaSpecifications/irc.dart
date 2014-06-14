@@ -115,6 +115,8 @@ class Client extends EventEmitting {
 
           fire(Events.Mode, new ModeEvent(this, mode, who, channel));
           break;
+        default: /* Command not Handled */
+          break;
       }
 
       on(Events.Quit).listen((QuitEvent event) {
