@@ -1,13 +1,15 @@
 part of irc;
 
 class Client extends EventEmitting {
-  static IRCParser.MessageParser PARSER = new IRCParser.MessageParser();
+
+  static RegExp REGEX = new RegExp(r"^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$");
+
+  BotConfig config;
+  List<Channel> channels = [];
 
   Socket _socket;
   bool _ready = false;
   bool _receivedAny;
-  BotConfig config;
-  List<Channel> channels = [];
   String _nickname;
 
   Client(BotConfig config) : super(sync: config.synchronous) {
@@ -17,7 +19,6 @@ class Client extends EventEmitting {
   }
 
   void _registerHandlers() {
-
     on(Events.LineReceive).listen((LineReceiveEvent event) {
       if (!_receivedAny) {
         _receivedAny = true;
@@ -26,63 +27,68 @@ class Client extends EventEmitting {
         send("USER ${config.username} 8 * :${config.realname}");
       }
 
-      switch (event.command) {
+      List<String> match = [];
+      {
+        Match parsed = REGEX.firstMatch(event.line);
+        for (int i = 0; i <= parsed.groupCount; i++)
+          match.add(parsed.group(i));
+      }
+
+      switch (match[2]) { // Command
         case "376": /* End of MOTD */
           _fire_ready();
           break;
         case "PING": /* Server Ping */
-          send("PONG ${event.params[0]}");
+          send("PONG ${match[4]}");
           break;
         case "JOIN": /* Join Event */
-          String who = event.message.getHostmask()["nick"];
+          String who = _parse_nick(match[1])[0];
           if (who == _nickname) {
             // We Joined a New Channel
-            if (channel(event.params[0]) != null) {
+            if (channel(match[3]) != null) {
               break;
             }
-            channels.add(new Channel(this, event.params[0]));
+            channels.add(new Channel(this, match[3]));
           }
-          fire(Events.Join, new JoinEvent(this, who, channel(event.params[0])));
+          fire(Events.Join, new JoinEvent(this, who, channel(match[3])));
           break;
         case "PRIVMSG":
-          String from = event.message.getHostmask()["nick"];
-          String target = event.params[0];
-          String message = event.params.last;
+          String from = _parse_nick(match[1])[0];
+          String target = _parse_nick(match[3])[0];
+          String message = match[4];
           fire(Events.Message, new MessageEvent(this, from, target, message));
           break;
         case "PART":
-          String who = event.message.getHostmask()["nick"];
+          String who = _parse_nick(match[1])[0];
 
           if (who == _nickname) {
-            fire(Events.BotPart, new BotPartEvent(this, channel(event.params[0])));
+            fire(Events.BotPart, new BotPartEvent(this, channel(match[3])));
           } else {
-            fire(Events.Part, new PartEvent(this, who, channel(event.params[0])));
+            fire(Events.Part, new PartEvent(this, who, channel(match[3])));
           }
           break;
         case "QUIT":
-          String who = event.message.getHostmask()["nick"];
+          String who = _parse_nick(match[1])[0];
 
           if (who == _nickname) {
             fire(Events.Disconnect, new DisconnectEvent(this));
           } else {
-            fire(Events.Quit, new QuitEvent(this, who, channel(event.params[0])));
+            fire(Events.Quit, new QuitEvent(this, who, channel(match[3])));
           }
           break;
         case "332":
-          String topic = event.params.last;
-          var chan = channel(event.params[1]);
+          String topic = match[4];
+          var chan = channel(match[3].split(" ")[1]);
           chan._topic = topic;
           fire(Events.Topic, new TopicEvent(this, chan, topic));
           break;
         case "ERROR":
-          String message = event.params.last;
+          String message = match[4];
           fire(Events.Error, new ErrorEvent(this, message: message, type: "server"));
           break;
-
         case "353":
-          List<String> users = event.params.last.split(" ");
-          print(event.params);
-          Channel channel = this.channel(event.params[2]);
+          List<String> users = match[4].split(" ");
+          Channel channel = this.channel(match[3].split(" ")[2]);
           users.forEach((user) {
             switch(user[0]) {
               case "@":
@@ -97,13 +103,15 @@ class Client extends EventEmitting {
             }
           });
           break;
-        case "MODE":
-          Channel channel = this.channel(event.params[0]);
-          if (event.message.params.length < 3) {
+        case "MODE":          
+          List<String> split = match[3].split(" ");
+          if (split.length < 3) {
             break;
           }
-          String mode = event.params[1];
-          String who = event.params[2];
+          
+          Channel channel = this.channel(split[0]);
+          String mode = split[1];
+          String who = split[2];
 
           fire(Events.Mode, new ModeEvent(this, mode, who, channel));
           break;
@@ -155,6 +163,15 @@ class Client extends EventEmitting {
     on(Events.BotPart).listen((BotPartEvent event) => channels.remove(event.channel));
   }
 
+  /*
+   * [0] = user
+   * [1] = realname
+   * [2] = hostmask
+   */
+  List<String> _parse_nick(String nick) {
+    return nick.split(new RegExp(r"!~|!|@"));
+  }
+
   void _fire_ready() {
     if (!_ready) {
       _ready = true;
@@ -173,11 +190,8 @@ class Client extends EventEmitting {
       });
 
       runZoned(() {
-        sock.transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).transform(new IRCParser.MessageParser()).listen((message) {
-          String command = message.command;
-          String prefix = message.prefix;
-          List<String> params = message.params;
-          fire(Events.LineReceive, new LineReceiveEvent(this, command, prefix, params, message));
+        sock.transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).listen((message) {
+          fire(Events.LineReceive, new LineReceiveEvent(this, message));
         });
       }, onError: (err) {
         fire(Events.Error, new ErrorEvent(this, err: err, type: "transform"));
@@ -194,7 +208,7 @@ class Client extends EventEmitting {
   }
 
   void send(String line) {
-    fire(Events.LineSent, new LineSentEvent(this, PARSER.convert(line)));
+    fire(Events.LineSent, new LineSentEvent(this, line));
     _socket.writeln(line);
   }
 

@@ -54,12 +54,9 @@ class ReadyEvent extends Event {
 }
 
 class LineReceiveEvent extends Event {
-  String command;
-  String prefix;
-  List<String> params;
-  IRCParser.Message message;
+  String line;
 
-  LineReceiveEvent(Client client, this.command, this.prefix, this.params, this.message) : super(client);
+  LineReceiveEvent(Client client, this.line) : super(client);
 }
 
 class MessageEvent extends Event {
@@ -142,9 +139,9 @@ class ModeEvent extends Event {
 }
 
 class LineSentEvent extends Event {
-  IRCParser.Message message;
+  String line;
 
-  LineSentEvent(Client client, this.message) : super(client);
+  LineSentEvent(Client client, this.line) : super(client);
 }
 
 class TopicEvent extends Event {
