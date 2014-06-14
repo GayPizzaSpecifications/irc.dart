@@ -121,10 +121,11 @@ class Client extends EventEmitting {
       }
 
       on(Events.Quit).listen((QuitEvent event) {
-          Channel channel = event.channel;
-          channel.members.remove(event.user);
-          channel.voices.remove(event.user);
-          channel.ops.remove(event.user);
+          for (chan in channels) {
+            chan.members.remove(event.user);
+            chan.voices.remove(event.user);
+            chan.ops.remove(event.user);
+          }
       });
 
       on(Events.Join).listen((JoinEvent event) {
