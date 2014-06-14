@@ -21,11 +21,11 @@ void main() {
 
   bot
   ..on(Events.LineReceive).listen((LineReceiveEvent event) {
-    print(">> ${event.message}");
+    print(">> ${event.line}");
   })
 
   ..on(Events.LineSent).listen((LineSentEvent event) {
-    print("<< ${event.message}");
+    print("<< ${event.line}");
   })
 
   ..onMessage((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"))
@@ -118,14 +118,6 @@ void main() {
 
   ..on(Events.Part).listen((PartEvent event) {
     print("<${event.channel.name}> ${event.user} has left");
-  })
-
-  ..onLineSent((LineSentEvent event) {
-    print("<< ${event.message}");
-  })
-
-  ..onLineReceived((LineReceiveEvent event) {
-    print(">> ${event.message}");
   })
 
   ..connect();
