@@ -17,6 +17,7 @@ void main(List<String> args) {
     addTask("docs", createDocGenTask("."));
     addTask("analyze", createAnalyzerTask(["lib/irc.dart"]));
     addTask("version", createVersionTask());
+    addTask("publish", createProcessTask("pub", args: ["publish", "-f"], description: "Publishes a New Version"));
     addChainedTask("check", ["analyze"]);
     runHop(args);
 }

@@ -20,7 +20,7 @@ Task createVersionTask() {
             file.writeAsStringSync(content);
             ctx.info("Updated Version: v${old} => v${next}");
         });
-    });
+    }, description: "Updates the Version");
 }
 
 String guessNextVersion(String old) {

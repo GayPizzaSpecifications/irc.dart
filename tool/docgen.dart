@@ -46,5 +46,5 @@ Task createDocGenTask(String path, {compile: false, Iterable<String> excludes: n
                 context.fail("docgen exited with the status code ${code}");
             }
         });
-    });
+    }, description: "Generates Documentation");
 }
