@@ -121,7 +121,7 @@ class Client extends EventEmitting {
       }
 
       on(Events.Quit).listen((QuitEvent event) {
-          for (chan in channels) {
+          for (var chan in channels) {
             chan.members.remove(event.user);
             chan.voices.remove(event.user);
             chan.ops.remove(event.user);
@@ -225,7 +225,7 @@ class Client extends EventEmitting {
   }
 
   Channel channel(String name) {
-    for (Channel channel in channels) {
+    for (var channel in channels) {
       if (channel.name == name) {
         return channel;
       }

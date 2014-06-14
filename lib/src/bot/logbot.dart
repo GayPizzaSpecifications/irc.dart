@@ -9,7 +9,7 @@ class LogBot extends Bot {
 
   LogBot(BotConfig config, String location) {
     _client = new Client(config);
-    _logLocation = location;
+    _logLocation = new Directory(location);
     _channelLogs = new Directory("${location}/channels");
     if (!_channelLogs.existsSync()) {
       _channelLogs.createSync(recursive: true);
