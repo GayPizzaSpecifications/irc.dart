@@ -1,5 +1,4 @@
-packages/
-bin/packages
+packages
 pubspec.lock
 .idea/
 *.iml
