@@ -2,6 +2,13 @@
 
 The Beautiful IRC Library for Dart that WORKS!
 
+Report any issues [here](https://github.com/kaendfinger/irc.dart/issues/new)!
+
+## Links
+
+- [Wiki](https://github.com/kaendfinger/irc.dart/wiki)
+- [Issues](https://github.com/kaendfinger/irc.dart/issues)
+
 ## Design
 
 irc.dart is designed to work out of the box in a very configurable way.
