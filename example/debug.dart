@@ -20,17 +20,17 @@ void main() {
   }
 
   bot
-  ..on(Events.LineReceive).listen((LineReceiveEvent event) {
+  ..register((LineReceiveEvent event) {
     print(">> ${event.line}");
   })
 
-  ..on(Events.LineSent).listen((LineSentEvent event) {
+  ..register((LineSentEvent event) {
     print("<< ${event.line}");
   })
 
-  ..onMessage((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"))
+  ..register((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"))
 
-  ..whenReady((ReadyEvent event) {
+  ..register((ReadyEvent event) {
     if (conf.containsKey("identityPassword"))
       bot.client().identify(username: conf["identityUsername"], password: conf["identityPassword"]);
     event.join("#directcode");
@@ -104,19 +104,19 @@ void main() {
     bot.disconnect();
   })
 
-  ..onJoin((JoinEvent event) {
+  ..register((JoinEvent event) {
     print("<${event.channel.name}> ${event.user} has joined");
   })
 
-  ..onBotJoin((BotJoinEvent event) {
+  ..register((BotJoinEvent event) {
     print("Joined ${event.channel.name}");
   })
 
-  ..onBotPart((BotPartEvent event) {
+  ..register((BotPartEvent event) {
     print("Left ${event.channel.name}");
   })
 
-  ..on(Events.Part).listen((PartEvent event) {
+  ..register((PartEvent event) {
     print("<${event.channel.name}> ${event.user} has left");
   })
 

@@ -19,25 +19,25 @@ class LogBot extends Bot {
   }
 
   void _registerHandlers() {
-    whenReady((ReadyEvent event) => channels.forEach((chan) => event.join(chan)));
+    register((ReadyEvent event) => channels.forEach((chan) => event.join(chan)));
 
-    onBotJoin((BotJoinEvent event) {
+    register((BotJoinEvent event) {
       writeToLog("Joined ${event.channel.name}");
     });
 
-    onBotPart((BotPartEvent event) {
+    register((BotPartEvent event) {
       writeToLog("Left ${event.channel.name}");
     });
 
-    onJoin((JoinEvent event) {
+    register((JoinEvent event) {
       writeToLog("${event.user} joined the channel", channel: event.channel);
     });
 
-    onPart((PartEvent event) {
+    register((PartEvent event) {
       writeToLog("${event.user} left the channel", channel: event.channel);
     });
 
-    onMessage((MessageEvent event) {
+    register((MessageEvent event) {
       String line = "<${event.from}> ${event.message}";
       print("<${event.target}>${line}");
       writeToLog(line, channel: event.channel);

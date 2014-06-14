@@ -31,11 +31,11 @@ void main() {
 
     CommandBot bot = new CommandBot(config, prefix: ".");
 
-    bot.whenReady((ReadyEvent event) {
+    bot.register((ReadyEvent event) {
         event.join("#irc.dart");
     });
 
-    bot.command("help").listen((MessageEvent event) {
+    bot.command("help").listen((CommandEvent event) {
         event.reply("> ${Color.BLUE}Commands${Color.RESET}: ${bot.commands.keys.join(', ')}");
     });
 
@@ -60,7 +60,7 @@ void main() {
 
     CommandBot bot = new DumbBot(config);
 
-    bot.whenReady((ReadyEvent event) {
+    bot.register((ReadyEvent event) {
         event.join("#irc.dart");
     });
 
@@ -85,7 +85,7 @@ void main() {
 
     Client client = new Client(config);
 
-    client.on(Events.Ready).listen((ReadyEvent event) {
+    client.register((ReadyEvent event) {
         event.join("#DirectCode");
     });
 

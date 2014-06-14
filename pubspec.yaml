@@ -9,7 +9,7 @@ documentation: http://www.dartdocs.org/documentation/irc/1.1.9/
 environment:
   sdk: ">=1.2.0"
 dependencies:
-  event_bus: ">=0.2.4 <0.3.0"
+  event_dispatcher: ">=0.0.1 <0.1.0"
 dev_dependencies:
   hop: "0.31.0"
   yaml: "0.10.0"

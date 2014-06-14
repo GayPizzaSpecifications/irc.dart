@@ -1,38 +1,5 @@
 part of irc;
 
-class EventEmitting {
-  EventBus eventBus;
-
-  EventEmitting({sync: false}) {
-    eventBus = new EventBus(sync: sync);
-  }
-
-  void fire(EventType type, data) {
-    eventBus.fire(type, data);
-  }
-
-  Stream on(EventType type) {
-    return eventBus.on(type);
-  }
-}
-
-class Events {
-  static final EventType<ConnectEvent> Connect = new EventType<ConnectEvent>();
-  static final EventType<ReadyEvent> Ready = new EventType<ReadyEvent>();
-  static final EventType<LineReceiveEvent> LineReceive = new EventType<LineReceiveEvent>();
-  static final EventType<LineSentEvent> LineSent = new EventType<LineSentEvent>();
-  static final EventType<JoinEvent> Join = new EventType<JoinEvent>();
-  static final EventType<MessageEvent> Message = new EventType<MessageEvent>();
-  static final EventType<PartEvent> Part = new EventType<PartEvent>();
-  static final EventType<QuitEvent> Quit = new EventType<QuitEvent>();
-  static final EventType<BotJoinEvent> BotJoin = new EventType<BotJoinEvent>();
-  static final EventType<BotPartEvent> BotPart = new EventType<BotPartEvent>();
-  static final EventType<DisconnectEvent> Disconnect = new EventType<DisconnectEvent>();
-  static final EventType<TopicEvent> Topic = new EventType<TopicEvent>();
-  static final EventType<ErrorEvent> Error = new EventType<ErrorEvent>();
-  static final EventType<ModeEvent> Mode = new EventType<ModeEvent>();
-}
-
 abstract class Event {
   Client client;
 

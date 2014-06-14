@@ -6,7 +6,7 @@ void main() {
 
   CommandBot bot = new CommandBot(config, prefix: ".");
 
-  bot.whenReady((ReadyEvent event) {
+  bot.register((ReadyEvent event) {
     event.join("#directcode");
   });
 
@@ -18,15 +18,15 @@ void main() {
     event.reply("> Dart VM: ${Platform.version}");
   });
 
-  bot.onBotJoin((BotJoinEvent event) {
+  bot.register((BotJoinEvent event) {
     print("Joined ${event.channel.name}");
   });
 
-  bot.onBotPart((BotPartEvent event) {
+  bot.register((BotPartEvent event) {
     print("Left ${event.channel.name}");
   });
 
-  bot.onMessage((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"));
+  bot.register((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"));
 
   bot.connect();
 }

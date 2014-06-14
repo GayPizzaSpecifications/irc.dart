@@ -23,7 +23,7 @@ class CommandBot extends Bot {
   }
 
   void _registerHandlers() {
-    client().on(Events.Message).listen((MessageEvent event) {
+    register((MessageEvent event) {
       String message = event.message;
 
       if (message.startsWith(prefix)) {
@@ -47,8 +47,6 @@ class CommandBot extends Bot {
 }
 
 class CommandEvent extends MessageEvent {
-  static final EventType<CommandEvent> TYPE = new EventType<CommandEvent>();
-
   String command;
   List<String> args;
 
