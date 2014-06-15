@@ -4,8 +4,8 @@ version: 1.2.1-dev.1
 authors:
 - Kenneth Endfinger <kaendfinger@gmail.com>
 - samrg472 <samrg472@gmail.com>
-homepage: https://github.com/kaendfinger/irc.dart/
-documentation: http://www.dartdocs.org/documentation/irc/1.2.0/
+homepage: https://github.com/DirectMyFile/irc.dart/
+documentation: http://www.dartdocs.org/documentation/irc/1.2.1/
 environment:
   sdk: ">=1.2.0"
 dependencies:
