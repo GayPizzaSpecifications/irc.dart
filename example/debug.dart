@@ -7,7 +7,7 @@ import 'dart:convert';
 
 void main() {
 
-  BotConfig config = new BotConfig(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot", synchronous: true);
+  BotConfig config = new BotConfig(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot");
 
   CommandBot bot = new CommandBot(config, prefix: ".");
 
