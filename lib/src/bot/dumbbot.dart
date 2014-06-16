@@ -10,9 +10,9 @@ class DumbBot extends Bot {
   }
 
   void _registerHandlers() {
-    whenReady((ReadyEvent event) => channels.forEach((chan) => event.join(chan)));
+    register((ReadyEvent event) => channels.forEach((chan) => event.join(chan)));
 
-    onMessage((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"));
+    register((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"));
   }
 
   @override
