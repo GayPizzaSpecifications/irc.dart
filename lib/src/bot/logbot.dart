@@ -6,7 +6,6 @@ class LogBot extends Bot {
   Directory _logLocation;
   Directory _channelLogs;
 
-
   LogBot(BotConfig config, String location) {
     _client = new Client(config);
     _logLocation = new Directory(location);
