@@ -34,7 +34,8 @@ class Client extends EventDispatcher<Event> {
           match.add(parsed.group(i));
       }
 
-      switch (match[2]) { // Command
+      switch (match[2]) {
+      // Command
         case "376": /* End of MOTD */
           _fire_ready();
           break;
@@ -91,7 +92,7 @@ class Client extends EventDispatcher<Event> {
           List<String> users = match[4].split(" ");
           Channel channel = this.channel(match[3].split(" ")[2]);
           users.forEach((user) {
-            switch(user[0]) {
+            switch (user[0]) {
               case "@":
                 channel.ops.add(user.substring(1));
                 break;
@@ -108,12 +109,12 @@ class Client extends EventDispatcher<Event> {
           var original = match[3];
           post(new NickInUseEvent(this, original));
           break;
-        case "MODE":          
+        case "MODE":
           List<String> split = match[3].split(" ");
           if (split.length < 3) {
             break;
           }
-          
+
           Channel channel = this.channel(split[0]);
           String mode = split[1];
           String who = split[2];
@@ -125,15 +126,15 @@ class Client extends EventDispatcher<Event> {
       }
 
       register((QuitEvent event) {
-          for (var chan in channels) {
-            chan.members.remove(event.user);
-            chan.voices.remove(event.user);
-            chan.ops.remove(event.user);
-          }
+        for (var chan in channels) {
+          chan.members.remove(event.user);
+          chan.voices.remove(event.user);
+          chan.ops.remove(event.user);
+        }
       });
 
       register((JoinEvent event) {
-          event.channel.members.add(event.user);
+        event.channel.members.add(event.user);
       });
 
       register((PartEvent event) {
@@ -176,6 +177,7 @@ class Client extends EventDispatcher<Event> {
    * [1] = realname
    * [2] = hostmask
    */
+
   List<String> _parse_nick(String nick) {
     return nick.split(new RegExp(r"!~|!|@"));
   }
