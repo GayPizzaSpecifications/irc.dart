@@ -49,6 +49,12 @@ class JoinEvent extends Event {
   }
 }
 
+class NickInUseEvent extends Event {
+  String original;
+
+  NickInUseEvent(Client client, this.original) : super(client);
+}
+
 class BotJoinEvent extends Event {
   Channel channel;
 

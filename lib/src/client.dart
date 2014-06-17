@@ -104,6 +104,10 @@ class Client extends EventDispatcher<Event> {
             }
           });
           break;
+        case "433":
+          var original = match[3];
+          post(new NickInUseEvent(this, original));
+          break;
         case "MODE":          
           List<String> split = match[3].split(" ");
           if (split.length < 3) {
