@@ -200,7 +200,10 @@ class Client extends EventDispatcher<Event> {
       });
 
       runZoned(() {
-        sock.transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).listen((message) {
+        sock.timeout(new Duration(seconds: 50), onTimeout: (EventSink sink) {
+          sink.close();
+          throw new TimeoutException("IRC Client timed out");
+        }).transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).listen((message) {
           post(new LineReceiveEvent(this, message));
         });
       }, onError: (err) {
