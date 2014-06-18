@@ -6,6 +6,8 @@ class CommandBot extends Bot {
   Map<String, StreamController<CommandEvent>> commands = {
   };
 
+  Function commandNotFound = (CommandEvent event) => null;
+
   String prefix;
 
   CommandBot(BotConfig config, {this.prefix: "!"}) {
@@ -36,6 +38,8 @@ class CommandBot extends Bot {
 
         if (commands.containsKey(command)) {
           commands[command].add(new CommandEvent(event, command, args));
+        } else {
+          commandNotFound(new CommandEvent(event, command, args));
         }
       }
     });
@@ -59,4 +63,10 @@ class CommandEvent extends MessageEvent {
     }
     return true;
   }
+
+  void notice(String message, {bool user: true}) => client.notice(user ? from : target, message);
+
+  void act(String message) => channel.action(message);
+
+  String argument(int index) => args[index];
 }
