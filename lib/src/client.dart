@@ -1,6 +1,6 @@
 part of irc;
 
-class Client extends EventDispatcher<Event> {
+class Client extends EventDispatcher {
 
   static RegExp REGEX = new RegExp(r"^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$");
 

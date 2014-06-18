@@ -1,14 +1,14 @@
 name: irc
-description: A feature-full Dart IRC library
 version: 1.2.1-dev.7
 authors:
 - Kenneth Endfinger <kaendfinger@gmail.com>
 - samrg472 <samrg472@gmail.com>
+description: A feature-full Dart IRC library
 homepage: https://github.com/DirectMyFile/irc.dart/
 environment:
-  sdk: ">=1.2.0"
+  sdk: '>=1.2.0'
 dependencies:
-  event_dispatcher: ">=0.0.1 <0.1.0"
+  event_dispatcher: '>=0.0.5 <0.1.0'
 dev_dependencies:
-  hop: "0.31.0"
-  yaml: "0.10.0"
+  hop: 0.31.0
+  yaml: 0.10.0
