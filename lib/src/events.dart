@@ -128,3 +128,10 @@ class TopicEvent extends Event {
 
   TopicEvent(Client client, this.channel, this.topic) : super(client);
 }
+
+class NickChangeEvent extends Event {
+  String original;
+  String now;
+
+  NickChangeEvent(Client client, this.original, this.now) : super(client);
+}

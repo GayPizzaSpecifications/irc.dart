@@ -114,6 +114,10 @@ void main() {
     print("Left ${event.channel.name}");
   })
 
+  ..register((NickChangeEvent event) {
+    print("${event.original} changed their nick to ${event.now}");
+  })
+
   ..register((PartEvent event) {
     print("<${event.channel.name}> ${event.user} has left");
   })

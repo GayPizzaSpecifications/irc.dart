@@ -35,8 +35,8 @@ class Client extends EventDispatcher {
           match.add(parsed.group(i));
       }
 
+      // Switches on Command
       switch (match[2]) {
-      // Command
         case "376": /* End of MOTD */
           _fire_ready();
           break;
@@ -118,8 +118,16 @@ class Client extends EventDispatcher {
           var original = match[3];
           post(new NickInUseEvent(this, original));
           break;
+
+        case "NICK":
+          var original = _parse_nick(match[1])[0];
+          var now = match[4];
+
+          post(new NickChangeEvent(this, original, now));
+          break;
         case "MODE":
           List<String> split = match[3].split(" ");
+
           if (split.length < 3) {
             break;
           }
@@ -151,6 +159,31 @@ class Client extends EventDispatcher {
         channel.members.remove(event.user);
         channel.voices.remove(event.user);
         channel.ops.remove(event.user);
+      });
+
+      register((NickChangeEvent event) {
+        if (event.original == _nickname) {
+          _nickname = event.now;
+        } else {
+          for (Channel channel in channels) {
+            if (channel.allUsers.contains(event.original)) {
+              var old = event.original;
+              var now = event.now;
+              if (channel.members.contains(old)) {
+                channel.members.remove(old);
+                channel.members.add(now);
+              }
+              if (channel.voices.contains(old)) {
+                channel.voices.remove(old);
+                channel.voices.add(now);
+              }
+              if (channel.ops.contains(old)) {
+                channel.ops.remove(old);
+                channel.ops.add(now);
+              }
+            }
+          }
+        }
       });
 
       register((ModeEvent event) {
