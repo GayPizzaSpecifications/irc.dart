@@ -12,7 +12,7 @@ abstract class Bot {
 
   Channel channel(String name) => client().channel(name);
 
-  void register(handler) => client().register(handler);
+  bool register(handler) => client().register(handler);
 
   void join(String channel) => client().join(channel);
 
