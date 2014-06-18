@@ -25,24 +25,26 @@ class CommandBot extends Bot {
   }
 
   void _registerHandlers() {
-    register((MessageEvent event) {
-      String message = event.message;
+    register(handleAsCommand);
+  }
 
-      if (message.startsWith(prefix)) {
-        List<String> split = message.split(" ");
+  void handleAsCommand(MessageEvent event) {
+    String message = event.message;
 
-        String command = split[0].substring(1);
+    if (message.startsWith(prefix)) {
+      List<String> split = message.split(" ");
 
-        List<String> args = new List.from(split);
-        args.removeAt(0);
+      String command = split[0].substring(1);
 
-        if (commands.containsKey(command)) {
-          commands[command].add(new CommandEvent(event, command, args));
-        } else {
-          commandNotFound(new CommandEvent(event, command, args));
-        }
+      List<String> args = new List.from(split);
+      args.removeAt(0);
+
+      if (commands.containsKey(command)) {
+        commands[command].add(new CommandEvent(event, command, args));
+      } else {
+        commandNotFound(new CommandEvent(event, command, args));
       }
-    });
+    }
   }
 
   Set<String> commandNames() => commands.keys;
