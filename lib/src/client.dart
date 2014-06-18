@@ -202,21 +202,16 @@ class Client extends EventDispatcher<Event> {
     Socket.connect(config.host, config.port).then((Socket sock) {
       _socket = sock;
 
-      post(new ConnectEvent(this));
-
-      sock.handleError((err) {
-        post(new ErrorEvent(this, err: err, type: "socket"));
-      });
-
       runZoned(() {
-        sock.timeout(new Duration(minutes: 3, seconds: 5), onTimeout: (EventSink sink) {
-          sink.close();
-          throw new TimeoutException("IRC Client timed out");
+        post(new ConnectEvent(this));
+
+        sock.handleError((err) {
+          post(new ErrorEvent(this, err: err, type: "socket"));
         }).transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).listen((message) {
           post(new LineReceiveEvent(this, message));
         });
       }, onError: (err) {
-        post(new ErrorEvent(this, err: err, type: "transform"));
+        post(new ErrorEvent(this, err: err, type: "socket-zone"));
       });
     });
   }
