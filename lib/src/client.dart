@@ -88,6 +88,13 @@ class Client extends EventDispatcher<Event> {
           String message = match[4];
           post(new ErrorEvent(this, message: message, type: "server"));
           break;
+        case "KICK":
+          String who = _parse_nick(match[1])[0];
+
+          if (who == _nickname) { // Temporary Bug Fix
+            post(new BotPartEvent(this, channel(match[3])));
+          }
+          break;
         case "353":
           List<String> users = match[4].split(" ");
           Channel channel = this.channel(match[3].split(" ")[2]);
