@@ -11,6 +11,7 @@ class Client extends EventDispatcher<Event> {
   bool _ready = false;
   bool _receivedAny;
   String _nickname;
+  bool _errored;
 
   Client(BotConfig config) {
     this.config = config;
@@ -208,7 +209,7 @@ class Client extends EventDispatcher<Event> {
       });
 
       runZoned(() {
-        sock.timeout(new Duration(seconds: 60 * 2), onTimeout: (EventSink sink) {
+        sock.timeout(new Duration(minutes: 3, seconds: 5), onTimeout: (EventSink sink) {
           sink.close();
           throw new TimeoutException("IRC Client timed out");
         }).transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).listen((message) {
@@ -270,5 +271,13 @@ class Client extends EventDispatcher<Event> {
     send("QUIT :${reason}");
     sleep(new Duration(milliseconds: 5));
     _socket.close();
+  }
+
+  @override
+  void post(Event event) {
+    if (event is ErrorEvent) {
+      _errored = true;
+    }
+    super.post(event);
   }
 }
