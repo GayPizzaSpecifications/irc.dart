@@ -1,8 +1,6 @@
 import 'package:irc/irc.dart';
 import 'dart:io';
 import 'dart:mirrors';
-import 'dart:collection';
-import 'dart:async';
 import 'dart:convert';
 
 void main() {
