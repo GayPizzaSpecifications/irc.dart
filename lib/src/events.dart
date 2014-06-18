@@ -34,7 +34,14 @@ class MessageEvent extends Event {
   Channel get channel => client.channel(target);
 
   void reply(String message) {
-    client.message(target, message);
+    if (isPrivate())
+      client.message(from, message);
+    else
+      client.message(target, message);
+  }
+
+  bool isPrivate() {
+    return target == client.getNickname();
   }
 }
 

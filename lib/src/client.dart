@@ -58,6 +58,7 @@ class Client extends EventDispatcher<Event> {
           String from = _parse_nick(match[1])[0];
           String target = _parse_nick(match[3])[0];
           String message = match[4];
+          print("Event posted: $from $target $message"); // DEBUG
           post(new MessageEvent(this, from, target, message));
           break;
         case "PART":
@@ -252,6 +253,10 @@ class Client extends EventDispatcher<Event> {
   void nickname(String nickname) {
     _nickname = nickname;
     send("NICK ${nickname}");
+  }
+
+  String getNickname() {
+    return _nickname;
   }
 
   void identify({String username: "PLEASE_INJECT_DEFAULT", String password: "password", String nickserv: "NickServ"}) {
