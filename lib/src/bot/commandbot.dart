@@ -45,9 +45,7 @@ class CommandBot extends Bot {
     });
   }
 
-  Set<String> commandNames() {
-    return commands.keys;
-  }
+  Set<String> commandNames() => commands.keys;
 }
 
 class CommandEvent extends MessageEvent {
