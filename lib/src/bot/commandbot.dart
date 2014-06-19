@@ -34,7 +34,7 @@ class CommandBot extends Bot {
     if (message.startsWith(prefix)) {
       List<String> split = message.split(" ");
 
-      String command = split[0].substring(1);
+      String command = split[0].substring(prefix.length);
 
       List<String> args = new List.from(split);
       args.removeAt(0);
