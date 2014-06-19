@@ -59,7 +59,6 @@ class Client extends EventDispatcher {
           String from = _parse_nick(match[1])[0];
           String target = _parse_nick(match[3])[0];
           String message = match[4];
-          print("Event posted: $from $target $message"); // DEBUG
           post(new MessageEvent(this, from, target, message));
           break;
         case "PART":
