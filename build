@@ -5,6 +5,7 @@ check_for_command() {
   if [ ${?} -ne 0 ]
   then
     echo "ERROR: The Command '${1}' is required for the Build Script!"
+    exit 1
   fi
 }
 
