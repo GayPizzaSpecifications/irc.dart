@@ -64,6 +64,10 @@ void main() {
     event.reply("> ${event.channel.topic}");
   })
 
+  ..command("raw").listen((CommandEvent event) {
+    bot.client().send(event.args.join(" "));
+  })
+
   ..command("list-libs").listen((CommandEvent event) {
     Set<String> libraries = [].toSet();
     currentMirrorSystem().libraries.forEach((key, value) {
@@ -120,6 +124,34 @@ void main() {
 
   ..register((PartEvent event) {
     print("<${event.channel.name}> ${event.user} has left");
+  })
+
+  ..register((WhoisEvent event) {
+    bot.message("kaendfinger", "${event.builder.toString()}");
+  })
+
+  ..register((ErrorEvent event) {
+    print("-------------------------------------------------------------------");
+    switch (event.type) {
+      case "socket":
+        print(event.err);
+        print(event.err.stackTrace);
+        break;
+      case "server":
+        print("Server Error: ${event.message}");
+        break;
+      case "socket-zone":
+        print(event.err);
+        print(event.err.stackTrace);
+        break;
+      default:
+        print("Error Type: ${event.type}");
+        print("Message: ${event.message}");
+        print("Error: ${event.err}");
+        break;
+    }
+    print("-------------------------------------------------------------------");
+    exit(1);
   })
 
   ..connect();

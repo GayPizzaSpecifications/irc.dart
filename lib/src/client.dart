@@ -1,22 +1,24 @@
 part of irc;
 
 class Client extends EventDispatcher {
-
-  static RegExp REGEX = new RegExp(r"^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$");
+  static final RegExp REGEX = new RegExp(r"^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$");
 
   BotConfig config;
   List<Channel> channels = [];
 
+  Map<String, WhoisBuilder> _whois_builders;
+
   Socket _socket;
   bool _ready = false;
-  bool _receivedAny;
+  bool _receivedAny = false;
   String _nickname;
-  bool _errored;
+  bool _errored = false;
 
   Client(BotConfig config) {
     this.config = config;
     _registerHandlers();
     _nickname = config.nickname;
+    _whois_builders = new Map<String, WhoisBuilder>();
   }
 
   void _registerHandlers() {
@@ -113,6 +115,7 @@ class Client extends EventDispatcher {
             }
           });
           break;
+
         case "433":
           var original = match[3];
           post(new NickInUseEvent(this, original));
@@ -124,6 +127,7 @@ class Client extends EventDispatcher {
 
           post(new NickChangeEvent(this, original, now));
           break;
+
         case "MODE":
           List<String> split = match[3].split(" ");
 
@@ -137,7 +141,75 @@ class Client extends EventDispatcher {
 
           post(new ModeEvent(this, mode, who, channel));
           break;
-        default: /* Command not Handled */
+
+        case "311": /* Begin WHOIS */
+          String between = match[3];
+          List<String> split = between.split(" ");
+          var nickname = split[1];
+          var username = split[2];
+          var hostname = split[3];
+          var realname = match[4];
+          var builder = new WhoisBuilder(nickname);
+          builder
+            ..username = username
+            ..hostname = hostname
+            ..realname = realname;
+          _whois_builders[nickname] = builder;
+          break;
+
+        case "312":
+          var split = match[3].split(" ");
+          var nickname = split[1];
+          var message = match[4];
+          var server_name = split[2];
+          var builder = _whois_builders[nickname];
+          assert(builder != null);
+          builder.server_name = server_name;
+          builder.server_info = message;
+          break;
+
+        case "313":
+          var nickname = match[3];
+          var builder = _whois_builders[nickname];
+          assert(builder != null);
+          builder.server_operator = true;
+          break;
+
+        case "317":
+          var split = match[3].split(" ");
+          var nickname = split[1];
+          var idle = int.parse(split[2]);
+          var builder = _whois_builders[nickname];
+          assert(builder != null);
+          builder.idle = true;
+          builder.idle_time  = idle;
+          break;
+
+        /* End of WHOIS */
+        case "318":
+          var nickname = match[3].split(" ")[1];
+          var builder = _whois_builders.remove(nickname);
+          post(new WhoisEvent(this, builder));
+          break;
+
+        case "319":
+          var nickname = match[3].split(" ")[1];
+          var message = match[4].trim();
+          var builder = _whois_builders[nickname];
+          assert(builder != null);
+          message.split(" ").forEach((chan) {
+            if (chan.startsWith("@")) {
+              var c = chan.substring(1);
+              builder.channels.add(c);
+              builder.op_in.add(c);
+            } else if (chan.startsWith("+")) {
+              var c = chan.substring(1);
+              builder.channels.add(c);
+              builder.voice_in.add(c);
+            } else {
+              builder.channels.add(chan);
+            }
+          });
           break;
       }
 
@@ -248,8 +320,29 @@ class Client extends EventDispatcher {
     });
   }
 
-  void message(String target, String message) {
-    send("PRIVMSG ${target} :${message}");
+  void message(String target, String input) {
+    var all = [];
+
+    var begin = "PRIVMSG ${target} :";
+
+    if ((input.length + begin.length) > 454) {
+      var max_msg = 454 - (begin.length + 1);
+      var sb = new StringBuffer();
+      for (int i = 0; i < input.length; i++) {
+        sb.write(input[i]);
+        if ((i != 0 && (i % max_msg) == 0) || i == input.length - 1) {
+          all.add(sb.toString());
+          sb.clear();
+        }
+      }
+    } else {
+      all = [input];
+    }
+    print(all.join("|||||"));
+    assert(all.join("").length == input.length);
+    for (String msg in all) {
+      send(begin + msg);
+    }
   }
 
   void notice(String target, String message) {
@@ -257,8 +350,10 @@ class Client extends EventDispatcher {
   }
 
   void send(String line) {
-    post(new LineSentEvent(this, line));
+    if (line.length > 510)
+      post(new ErrorEvent(this, type: "general", message: "The length of '${line}' is greater than 510 characters"));
     _socket.writeln(line);
+    post(new LineSentEvent(this, line));
   }
 
   void join(String channel) {

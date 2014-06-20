@@ -102,10 +102,10 @@ class DisconnectEvent extends Event {
 
 class ErrorEvent extends Event {
   String message;
-  dynamic err;
+  Error err;
   String type;
 
-  ErrorEvent(Client client, {this.message: null, this.err: null, type: "unspecified"}) : super(client);
+  ErrorEvent(Client client, {this.message: null, this.err: null, this.type: "unspecified"}) : super(client);
 }
 
 class ModeEvent extends Event {
@@ -134,4 +134,10 @@ class NickChangeEvent extends Event {
   String now;
 
   NickChangeEvent(Client client, this.original, this.now) : super(client);
+}
+
+class WhoisEvent extends Event {
+  WhoisBuilder builder;
+
+  WhoisEvent(Client client, this.builder) : super(client);
 }
