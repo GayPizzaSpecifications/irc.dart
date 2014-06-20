@@ -146,12 +146,10 @@ class Client extends EventDispatcher {
           String between = match[3];
           List<String> split = between.split(" ");
           var nickname = split[1];
-          var username = split[2];
           var hostname = split[3];
           var realname = match[4];
           var builder = new WhoisBuilder(nickname);
           builder
-            ..username = username
             ..hostname = hostname
             ..realname = realname;
           _whois_builders[nickname] = builder;
@@ -210,6 +208,12 @@ class Client extends EventDispatcher {
               builder.channels.add(chan);
             }
           });
+          break;
+
+        case "330":
+          var split = match[3].split(" ");
+          var builder = _whois_builders[split[1]];
+          builder.username = split[2];
           break;
       }
 

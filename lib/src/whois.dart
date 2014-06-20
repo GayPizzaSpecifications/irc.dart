@@ -5,6 +5,7 @@ class WhoisBuilder {
     "nickname",
     "realname",
     "hostname",
+    "username",
     "away_message",
     "away",
     "channels",
@@ -30,7 +31,7 @@ class WhoisBuilder {
   bool idle;
   int idle_time;
   bool server_operator;
-  bool away;
+  bool away = false;
 
   WhoisBuilder(this.nickname);
 
