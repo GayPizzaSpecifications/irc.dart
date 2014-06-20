@@ -15,6 +15,8 @@ class BotConfig {
     nickname = map["nickname"];
     username = map["username"];
   }
+
+  BotConfig.fromJSON(String input) : this.fromMap(JSON.decoder.convert(input));
 }
 
 class Channel {
