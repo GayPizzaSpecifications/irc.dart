@@ -126,10 +126,6 @@ void main() {
     print("<${event.channel.name}> ${event.user} has left");
   })
 
-  ..register((WhoisEvent event) {
-    bot.message("kaendfinger", "${event.builder.toString()}");
-  })
-
   ..register((ErrorEvent event) {
     print("-------------------------------------------------------------------");
     switch (event.type) {
