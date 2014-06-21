@@ -1,9 +1,9 @@
 part of hop_runner;
 
 Future<int> inheritIO(Process process) {
-    process.stdin.addStream(stdin);
-    stdout.addStream(process.stdout);
-    stderr.addStream(process.stderr);
+  process.stdin.addStream(stdin);
+  stdout.addStream(process.stdout);
+  stderr.addStream(process.stderr);
 
-    return process.exitCode;
+  return process.exitCode;
 }
