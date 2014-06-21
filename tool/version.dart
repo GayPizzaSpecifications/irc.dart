@@ -11,7 +11,7 @@ Task createVersionTask() {
             var next = null;
             
             if (ctx.arguments.rest.length != 1) {
-                next = guessNextVersion(old);
+                next = incrementVersion(old);
             } else {
                 next = ctx.arguments.rest[0];
             }
@@ -21,17 +21,6 @@ Task createVersionTask() {
             ctx.info("Updated Version: v${old} => v${next}");
         });
     }, description: "Updates the Version");
-}
-
-String guessNextVersion(String old) {
-    if (old.contains("dev")) {
-        String dev = old.substring(0, old.lastIndexOf("."));
-        int devNumber = int.parse(old.substring(old.lastIndexOf(".") + 1));
-        devNumber++;
-        return dev + "." + devNumber.toString();
-    } else {
-        return incrementVersion(old);
-    }
 }
 
 String incrementVersion(String old) {
