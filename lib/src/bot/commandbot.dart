@@ -47,7 +47,7 @@ class CommandBot extends Bot {
     }
   }
 
-  Set<String> commandNames() => commands.keys;
+  Iterable<String> commandNames() => commands.keys;
 }
 
 class CommandEvent extends MessageEvent {

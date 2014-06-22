@@ -7,7 +7,7 @@ void main() {
 
   BotConfig config = new BotConfig(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot");
 
-  CommandBot bot = new CommandBot(config, prefix: ".");
+  CommandBot bot = new CommandBot(config, prefix: "?");
 
   File configFile = new File("${Platform.environment["HOME"]}/.irc_debug.cfg");
 
