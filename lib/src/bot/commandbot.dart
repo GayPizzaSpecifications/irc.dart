@@ -1,12 +1,14 @@
 part of irc.bot;
 
+typedef CommandNotFoundHandler(CommandEvent event);
+
 class CommandBot extends Bot {
   Client _client;
 
   Map<String, StreamController<CommandEvent>> commands = {
   };
 
-  Function commandNotFound = (CommandEvent event) => null;
+  CommandNotFoundHandler commandNotFound = (event) => null;
 
   String prefix;
 
