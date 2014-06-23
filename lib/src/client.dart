@@ -343,8 +343,7 @@ class Client extends EventDispatcher {
     } else {
       all = [input];
     }
-    print(all.join("|||||"));
-    assert(all.join("").length == input.length);
+
     for (String msg in all) {
       send(begin + msg);
     }
