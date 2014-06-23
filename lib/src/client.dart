@@ -216,6 +216,11 @@ class Client extends EventDispatcher {
           var builder = _whois_builders[split[1]];
           builder.username = split[2];
           break;
+
+        case "PONG":
+          var message = match[4];
+          post(new PongEvent(this, message));
+          break;
       }
 
       register((QuitEvent event) {

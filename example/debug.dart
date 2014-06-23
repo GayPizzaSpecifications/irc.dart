@@ -43,7 +43,13 @@ void main() {
   })
 
   ..command("ping").listen((CommandEvent event) {
-    event.reply("> Pong!");
+    event.client.send("PING :cmd_${event.channel.name}");
+  })
+
+  ..register((PongEvent event) {
+    if (event.message.startsWith("cmd_")) {
+      event.client.message(event.message.replaceFirst("cmd_", ""), "> PONG!");
+    }
   })
 
   ..command("opall").listen((CommandEvent event) {

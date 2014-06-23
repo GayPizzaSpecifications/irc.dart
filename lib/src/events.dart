@@ -141,3 +141,9 @@ class WhoisEvent extends Event {
 
   WhoisEvent(Client client, this.builder) : super(client);
 }
+
+class PongEvent extends Event {
+  String message;
+
+  PongEvent(Client client, this.message) : super(client);
+}
