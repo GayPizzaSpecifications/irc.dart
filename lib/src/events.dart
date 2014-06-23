@@ -140,6 +140,27 @@ class WhoisEvent extends Event {
   WhoisBuilder builder;
 
   WhoisEvent(Client client, this.builder) : super(client);
+
+  List<String> get member_in {
+    var list = <String>[];
+    list.addAll(builder.channels.where((i) => !op_in.contains(i) && !voice_in.contains(i)));
+  }
+
+  List<String> get op_in => builder.op_in;
+  List<String> get voice_in => builder.voice_in;
+  bool get away => builder.away;
+  String get away_message => builder.away_message;
+  bool get server_operator => builder.server_operator;
+  String get server_name => builder.server_name;
+  String get server_info => builder.server_info;
+  String get username => builder.username;
+  String get hostname => builder.hostname;
+  bool get idle => builder.idle;
+  int get idle_time => builder.idle_time;
+  String get realname => builder.realname;
+  String get nickname => builder.nickname;
+
+  String toString() => builder.toString();
 }
 
 class PongEvent extends Event {
