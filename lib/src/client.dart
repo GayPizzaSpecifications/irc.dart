@@ -25,6 +25,7 @@ class Client extends EventDispatcher {
     register((LineReceiveEvent event) {
       if (!_receivedAny) {
         _receivedAny = true;
+        // TODO: review if this sleep is necessary
         sleep(new Duration(milliseconds: 200));
         send("NICK ${config.nickname}");
         send("USER ${config.username} 8 * :${config.realname}");
