@@ -1,23 +1,6 @@
 part of irc;
 
 class WhoisBuilder {
-  static final List<String> FIELDS = [
-    "nickname",
-    "realname",
-    "hostname",
-    "username",
-    "away_message",
-    "away",
-    "channels",
-    "op_in",
-    "voice_in",
-    "server_name",
-    "server_info",
-    "idle",
-    "idle_time",
-    "server_operator"
-  ];
-
   final String nickname;
   String username;
   String realname;
@@ -37,10 +20,13 @@ class WhoisBuilder {
 
   @override
   String toString() {
+    var instance = reflect(this);
     var sb = new StringBuffer("WHOIS(");
-    for (String field in FIELDS) {
-      var last = FIELDS.last == field;
-      var obj = reflect(this).getField(MirrorSystem.getSymbol(field)).reflectee;
+    var fields = instance.type.declarations.values.where((f) => f is VariableMirror && !f.isPrivate);
+    var names = fields.map((f) => MirrorSystem.getName(f.simpleName));
+    for (String field in names) {
+      var last = names.last == field;
+      var obj = instance.getField(MirrorSystem.getSymbol(field)).reflectee;
       sb
         ..write(field)
         ..write(": ")
