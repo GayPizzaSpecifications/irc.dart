@@ -1,5 +1,8 @@
 part of irc;
 
+/*
+ Development Note: This breaks this style guide recommendation: http://goo.gl/KymG6T
+*/
 abstract class Color {
   static final String BLUE = "\u000312";
   static final String RESET = "\u000f";
