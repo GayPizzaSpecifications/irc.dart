@@ -1,7 +1,7 @@
 part of irc.parser;
 
 class RegexIrcParser extends IrcParser {
-  static final RegExp REGEX = new RegExp(r"^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$");
+  static final REGEX = new RegExp(r"^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$");
 
   @override
   Message convert(String line) {

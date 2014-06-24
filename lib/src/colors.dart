@@ -4,24 +4,24 @@ part of irc;
  Development Note: This breaks this style guide recommendation: http://goo.gl/KymG6T
 */
 abstract class Color {
-  static final String BLUE = "\u000312";
-  static final String RESET = "\u000f";
-  static final String BOLD = "\u0002";
-  static final String UNDERLINE = "\u001f";
-  static final String REVERSE = "\u0016";
-  static final String WHITE = "\u000300";
-  static final String BLACK = "\u000301";
-  static final String DARK_BLUE = "\u000302";
-  static final String DARK_GREEN = "\u000303";
-  static final String RED = "\u000304";
-  static final String BROWN = "\u000305";
-  static final String PURPLE = "\u000306";
-  static final String OLIVE = "\u000307";
-  static final String YELLOW = "\u000308";
-  static final String GREEN = "\u000309";
-  static final String TEAL = "\u000310";
-  static final String CYAN = "\u000311";
-  static final String MAGENTA = "\u000313";
-  static final String DARK_GRAY = "\u000314";
-  static final String LIGHT_GRAY = "\u000315";
+  static final BLUE = "\u000312";
+  static final RESET = "\u000f";
+  static final BOLD = "\u0002";
+  static final UNDERLINE = "\u001f";
+  static final REVERSE = "\u0016";
+  static final WHITE = "\u000300";
+  static final BLACK = "\u000301";
+  static final DARK_BLUE = "\u000302";
+  static final DARK_GREEN = "\u000303";
+  static final RED = "\u000304";
+  static final BROWN = "\u000305";
+  static final PURPLE = "\u000306";
+  static final OLIVE = "\u000307";
+  static final YELLOW = "\u000308";
+  static final GREEN = "\u000309";
+  static final TEAL = "\u000310";
+  static final CYAN = "\u000311";
+  static final MAGENTA = "\u000313";
+  static final DARK_GRAY = "\u000314";
+  static final LIGHT_GRAY = "\u000315";
 }
