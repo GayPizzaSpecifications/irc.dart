@@ -2,6 +2,9 @@ part of irc.bot;
 
 typedef CommandNotFoundHandler(CommandEvent event);
 
+/**
+ * Command Bot - Fully Customizable
+ */
 class CommandBot extends Bot {
   Client _client;
 

@@ -1,6 +1,14 @@
 part of irc.parser;
 
+/**
+ * Regular Expression based IRC Parser
+ */
 class RegexIrcParser extends IrcParser {
+  /**
+   * Basic Regular Expression for IRC Parsing.
+   *
+   * Expression: ^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$
+   */
   static final REGEX = new RegExp(r"^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$");
 
   @override

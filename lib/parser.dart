@@ -1,3 +1,6 @@
+/**
+ * IRC Line Parsing Support
+ */
 library irc.parser;
 
 import "dart:convert" show Converter, StringConversionSink, StringConversionSinkBase;

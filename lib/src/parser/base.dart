@@ -1,9 +1,18 @@
 part of irc.parser;
 
+/**
+ * Base class for IRC Parsers
+ */
 abstract class IrcParser extends Converter<String, Message> {
+  /**
+   * Parses an IRC Line and outputs a [Message]
+   */
   @override
   Message convert(String line);
 
+  /**
+   * Provides support for chunked IRC Line parsing
+   */
   @override
   IrcParserSink startChunkedConversion(Sink<String> sink) {
     if (sink is! StringConversionSink) {
@@ -13,6 +22,9 @@ abstract class IrcParser extends Converter<String, Message> {
   }
 }
 
+/**
+ * Sink Implementation for IRC Parsers
+ */
 class IrcParserSink extends StringConversionSinkBase {
   final IrcParser _converter;
   final StringConversionSink _sink;

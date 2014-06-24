@@ -1,4 +1,6 @@
-/* Bot Abstraction */
+/**
+ * Bot Abstraction System
+ */
 library irc.bot;
 
 import 'package:irc/irc.dart';

@@ -1,5 +1,8 @@
 part of irc.parser;
 
+/**
+ * IRC Message
+ */
 class Message {
   String line;
   String command;
