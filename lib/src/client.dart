@@ -1,22 +1,68 @@
 part of irc;
 
+/**
+ * IRC Client is the most important class in irc.dart
+ *
+ *      var config = new BotConfig(
+ *        nickname: "DartBot",
+ *        host: "irc.esper.net",
+ *        port: 6667
+ *      );
+ *      var client = new Client(config);
+ *      // Use Client
+ */
 class Client extends EventDispatcher {
-  static final RegExp REGEX = new RegExp(r"^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$");
-
   BotConfig config;
+
+  /**
+   * Channels that the Client is in.
+   */
   List<Channel> channels = [];
 
+  /**
+   * WHOIS Implementation Builder Storage
+   */
   Map<String, WhoisBuilder> _whois_builders;
 
+  /**
+   * Socket used for Communication between server and client
+   */
   Socket _socket;
+
+  /**
+   * Flag for if the Client has sent a ReadyEvent
+   */
   bool _ready = false;
+
+  /**
+   * Flag for if the Client has received any data from the server yet
+   */
   bool _receivedAny = false;
+
+  /**
+   * Privately Stored Nickname
+   */
   String _nickname;
+
+  /**
+   * The Client's Nickname
+   */
   String get nickname => _nickname;
+
+  /**
+   * Flog for if the Client has hit an error
+   */
   bool _errored = false;
 
+  /**
+   * IRC Parser to use
+   */
   final IrcParser parser;
 
+  /**
+   * Creates a new IRC Client using the specified configuration
+   * If parser is specified, then the parser is used for the current client
+   */
   Client(BotConfig config, [IrcParser parser])
       : this.parser = parser == null ? new RegexIrcParser() : parser {
     this.config = config;
@@ -25,6 +71,10 @@ class Client extends EventDispatcher {
     _whois_builders = new Map<String, WhoisBuilder>();
   }
 
+  /**
+   * Registers all the default handlers.
+   * TODO: Implement the irc.protocol library so we can make this cleaner
+   */
   void _registerHandlers() {
     register((LineReceiveEvent event) {
       if (!_receivedAny) {
@@ -288,8 +338,15 @@ class Client extends EventDispatcher {
     register((BotPartEvent event) => channels.remove(event.channel));
   }
 
+  /**
+   * Parses a nickname
+   * TODO: Use irc.parser implementation
+   */
   List<String> _parse_nick(String nick) => nick.split(new RegExp(r"!~|!|@"));
 
+  /**
+   * Fires the Ready Event if it hasn't been fired yet
+   */
   void _fire_ready() {
     if (!_ready) {
       _ready = true;
@@ -297,6 +354,10 @@ class Client extends EventDispatcher {
     }
   }
 
+  /**
+   * Connects to the IRC Server
+   * Any errors are sent through the [ErrorEvent]
+   */
   void connect() {
     Socket.connect(config.host, config.port).then((Socket sock) {
       _socket = sock;
@@ -313,11 +374,29 @@ class Client extends EventDispatcher {
     });
   }
 
-  void message(String target, String input) {
-    var all = [];
-
+  /**
+   * Sends the [input] to the [target] as a message
+   *
+   *    client.message("ExampleUser", "Hello World");
+   *
+   * Note that this handles long messages. If the length of the message is 454
+   * characters or bigger, it will split it up into multiple messages
+   */
+  void message(String target, String message) {
     var begin = "PRIVMSG ${target} :";
 
+    var all = _handle_message_sending(begin, message);
+
+    for (String msg in all) {
+      send(begin + msg);
+    }
+  }
+
+  /**
+   * Splits the Messages if required.
+   */
+  List<String> _handle_message_sending(String begin, String input) {
+    var all = [];
     if ((input.length + begin.length) > 454) {
       var max_msg = 454 - (begin.length + 1);
       var sb = new StringBuffer();
@@ -331,14 +410,32 @@ class Client extends EventDispatcher {
     } else {
       all = [input];
     }
+    return all;
+  }
 
+  /**
+   * Sends the [input] to the [target] as a notice
+   *
+   *    client.notice("ExampleUser", "Hello World");
+   *
+   * Note that this handles long messages. If the length of the message is 454
+   * characters or bigger, it will split it up into multiple messages
+   */
+  void notice(String target, String message) {
+    var begin = "NOTICE ${target} :";
+    var all = _handle_message_sending(begin, message);
     for (String msg in all) {
       send(begin + msg);
     }
   }
 
-  void notice(String target, String message) => send("NOTICE ${target} :${message}");
-
+  /**
+   * Sends [line] to the server
+   *
+   *    client.send("WHOIS ExampleUser");
+   *
+   * Will throw an error if [line] is greater than 510 characters
+   */
   void send(String line) {
     if (line.length > 510) {
       post(new ErrorEvent(this, type: "general", message: "The length of '${line}' is greater than 510 characters"));
@@ -348,17 +445,35 @@ class Client extends EventDispatcher {
     post(new LineSentEvent(this, line));
   }
 
+  /**
+   * Joins the specified [channel]
+   */
   void join(String channel) => send("JOIN ${channel}");
 
+  /**
+   * Parts the specified [channel]
+   */
   void part(String channel) => send("PART ${channel}");
 
+  /**
+   * Gets a Channel object for the channel's [name]
+   */
   Channel channel(String name) => channels.firstWhere((channel) => channel.name == name, orElse: () => null);
 
+  /**
+   * Changes the Client's Nickname
+   */
   void changeNickname(String nickname) {
     _nickname = nickname;
     send("NICK ${nickname}");
   }
 
+  /**
+   * Identifies the user with the [nickserv].
+   * the default [username] is your configured username.
+   * the default [password] is password
+   * the default [nickserv] is NickServ
+   */
   void identify({String username: "PLEASE_INJECT_DEFAULT", String password: "password", String nickserv: "NickServ"}) {
     if (username == "PLEASE_INJECT_DEFAULT") {
       username = config.username;
@@ -366,11 +481,19 @@ class Client extends EventDispatcher {
     message(nickserv, "identify ${username} ${password}");
   }
 
+  /**
+   * Disconnects the Client with the specified [reason].
+   * If [force] is true, then the socket is forcibly closed.
+   */
   void disconnect({String reason: "Client Disconnecting", bool force: false}) {
     send("QUIT :${reason}");
     if (force) _socket.close();
   }
 
+  /**
+   * Posts a Event to the Event Dispatching System
+   * The purpose of this method was to assist in checking for Error Events.
+   */
   @override
   void post(Event event) {
     if (event is ErrorEvent) {
