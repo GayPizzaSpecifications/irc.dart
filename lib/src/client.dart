@@ -377,7 +377,7 @@ class Client extends EventDispatcher {
   /**
    * Sends the [input] to the [target] as a message
    *
-   *    client.message("ExampleUser", "Hello World");
+   *      client.message("ExampleUser", "Hello World");
    *
    * Note that this handles long messages. If the length of the message is 454
    * characters or bigger, it will split it up into multiple messages
@@ -416,7 +416,7 @@ class Client extends EventDispatcher {
   /**
    * Sends the [input] to the [target] as a notice
    *
-   *    client.notice("ExampleUser", "Hello World");
+   *      client.notice("ExampleUser", "Hello World");
    *
    * Note that this handles long messages. If the length of the message is 454
    * characters or bigger, it will split it up into multiple messages
@@ -432,7 +432,7 @@ class Client extends EventDispatcher {
   /**
    * Sends [line] to the server
    *
-   *    client.send("WHOIS ExampleUser");
+   *      client.send("WHOIS ExampleUser");
    *
    * Will throw an error if [line] is greater than 510 characters
    */
