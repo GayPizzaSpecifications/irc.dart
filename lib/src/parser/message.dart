@@ -4,18 +4,40 @@ part of irc.parser;
  * IRC Message
  */
 class Message {
+  /**
+   * Original Line
+   */
   String line;
+
+  /**
+   * IRC Command
+   */
   String command;
+
+  /**
+   * Message
+   */
   String message;
+
   String _hostmask;
+
+  /**
+   * Parameters
+   */
   List<String> parameters;
 
+  /**
+   * Creates a new Message
+   */
   Message({this.line, hostmask, this.command, this.message, this.parameters})
       : _hostmask = hostmask;
 
   @override
   String toString() => line;
 
+  /**
+   * Gets the Parsed Hostmask
+   */
   ParsedHostmask get hostmask {
     var regex = new RegExp("[!@]");
     var parts = _hostmask.split(regex);

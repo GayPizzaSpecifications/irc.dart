@@ -5,7 +5,7 @@ part of irc.parser;
  */
 abstract class IrcParser extends Converter<String, Message> {
   /**
-   * Parses an IRC Line and outputs a [Message]
+   * Parses [line] as an IRC line and outputs a [Message]
    */
   @override
   Message convert(String line);
