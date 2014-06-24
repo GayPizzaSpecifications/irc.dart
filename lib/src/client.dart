@@ -14,7 +14,9 @@ class Client extends EventDispatcher {
   String _nickname;
   bool _errored = false;
 
-  Client(BotConfig config) {
+  final IRCParser parser;
+
+  Client(BotConfig config, [Parser parser = null]) : this.parser = parser == null ? new RegexIRCParser() : parser {
     this.config = config;
     _registerHandlers();
     _nickname = config.nickname;
@@ -31,77 +33,75 @@ class Client extends EventDispatcher {
         send("USER ${config.username} 8 * :${config.realname}");
       }
 
-      List<String> match = [];
-      {
-        Match parsed = REGEX.firstMatch(event.line);
-        for (int i = 0; i <= parsed.groupCount; i++)
-          match.add(parsed.group(i));
-      }
+      var input = parser.convert(event.line);
 
       // Switches on Command
-      switch (match[2]) {
+      switch (input.command) {
         case "376": /* End of MOTD */
           _fire_ready();
           break;
         case "PING": /* Server Ping */
-          send("PONG ${match[4]}");
+          send("PONG :${input.message}");
           break;
         case "JOIN": /* Join Event */
-          String who = _parse_nick(match[1])[0];
+          var who = input.hostmask.nickname;
+          var chan_name = input.parameters[0];
           if (who == _nickname) {
             // We Joined a New Channel
-            if (channel(match[3]) == null) {
-              channels.add(new Channel(this, match[3]));
+            if (channel(chan_name) == null) {
+              channels.add(new Channel(this, chan_name));
             }
-            post(new BotJoinEvent(this, channel(match[3])));
+            post(new BotJoinEvent(this, channel(chan_name)));
           } else {
-            post(new JoinEvent(this, who, channel(match[3])));
+            post(new JoinEvent(this, who, channel(chan_name)));
           }
           break;
         case "PRIVMSG":
-          String from = _parse_nick(match[1])[0];
-          String target = _parse_nick(match[3])[0];
-          String message = match[4];
+          String from = input.hostmask.nickname;
+          String target = _parse_nick(input.parameters[0])[0];
+          String message = input.message;
           post(new MessageEvent(this, from, target, message));
           break;
         case "PART":
-          String who = _parse_nick(match[1])[0];
+          String who = input.hostmask.nickname;
+
+          var chan_name = input.parameters[0];
 
           if (who == _nickname) {
-            post(new BotPartEvent(this, channel(match[3])));
+            post(new BotPartEvent(this, channel(chan_name)));
           } else {
-            post(new PartEvent(this, who, channel(match[3])));
+            post(new PartEvent(this, who, channel(chan_name)));
           }
           break;
         case "QUIT":
-          String who = _parse_nick(match[1])[0];
+          String who = input.hostmask.nickname;
 
           if (who == _nickname) {
             post(new DisconnectEvent(this));
           } else {
-            post(new QuitEvent(this, who, channel(match[3])));
+            post(new QuitEvent(this, who, channel(input.parameters[0])));
           }
           break;
         case "332":
-          String topic = match[4];
-          var chan = channel(match[3].split(" ")[1]);
+          String topic = input.message;
+          var chan = channel(input.parameters[1]);
           chan._topic = topic;
           post(new TopicEvent(this, chan, topic));
           break;
         case "ERROR":
-          String message = match[4];
+          String message = input.message;
           post(new ErrorEvent(this, message: message, type: "server"));
           break;
         case "KICK":
-          String who = _parse_nick(match[1])[0];
+          String who = input.hostmask.nickname;
 
           if (who == _nickname) { // Temporary Bug Fix
-            post(new BotPartEvent(this, channel(match[3])));
+            post(new BotPartEvent(this, channel(input.parameters[0])));
           }
           break;
         case "353":
-          List<String> users = match[4].split(" ");
-          Channel channel = this.channel(match[3].split(" ")[2]);
+          List<String> users = input.message.split(" ");
+          Channel channel = this.channel(input.parameters[2]);
           users.forEach((user) {
             switch (user[0]) {
               case "@":
@@ -118,19 +118,19 @@ class Client extends EventDispatcher {
           break;
 
         case "433":
-          var original = match[3];
+          var original = input.parameters[0];
           post(new NickInUseEvent(this, original));
           break;
 
         case "NICK":
-          var original = _parse_nick(match[1])[0];
-          var now = match[4];
+          var original = input.hostmask.nickname;
+          var now = input.message;
 
           post(new NickChangeEvent(this, original, now));
           break;
 
         case "MODE":
-          List<String> split = match[3].split(" ");
+          List<String> split = input.parameters;
 
           if (split.length < 3) {
             break;
@@ -144,11 +144,10 @@ class Client extends EventDispatcher {
           break;
 
         case "311": /* Begin WHOIS */
-          String between = match[3];
-          List<String> split = between.split(" ");
+          List<String> split = input.parameters;
           var nickname = split[1];
           var hostname = split[3];
-          var realname = match[4];
+          var realname = input.message;
           var builder = new WhoisBuilder(nickname);
           builder
             ..hostname = hostname
@@ -157,9 +156,9 @@ class Client extends EventDispatcher {
           break;
 
         case "312":
-          var split = match[3].split(" ");
+          var split = input.parameters;
           var nickname = split[1];
-          var message = match[4];
+          var message = input.message;
           var server_name = split[2];
           var builder = _whois_builders[nickname];
           assert(builder != null);
@@ -168,14 +167,14 @@ class Client extends EventDispatcher {
           break;
 
         case "313":
-          var nickname = match[3];
+          var nickname = input.parameters[0];
           var builder = _whois_builders[nickname];
           assert(builder != null);
           builder.server_operator = true;
           break;
 
         case "317":
-          var split = match[3].split(" ");
+          var split = input.parameters;
           var nickname = split[1];
           var idle = int.parse(split[2]);
           var builder = _whois_builders[nickname];
@@ -186,14 +185,14 @@ class Client extends EventDispatcher {
 
         /* End of WHOIS */
         case "318":
-          var nickname = match[3].split(" ")[1];
+          var nickname = input.parameters[1];
           var builder = _whois_builders.remove(nickname);
           post(new WhoisEvent(this, builder));
           break;
 
         case "319":
-          var nickname = match[3].split(" ")[1];
-          var message = match[4].trim();
+          var nickname = input.parameters[1];
+          var message = input.message.trim();
           var builder = _whois_builders[nickname];
           assert(builder != null);
           message.split(" ").forEach((chan) {
@@ -212,13 +211,13 @@ class Client extends EventDispatcher {
           break;
 
         case "330":
-          var split = match[3].split(" ");
+          var split = input.parameters;
           var builder = _whois_builders[split[1]];
           builder.username = split[2];
           break;
 
         case "PONG":
-          var message = match[4];
+          var message = input.message;
           post(new PongEvent(this, message));
           break;
       }
