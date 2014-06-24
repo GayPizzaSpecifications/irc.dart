@@ -22,11 +22,11 @@ irc.dart follows the [Dart Style Guide](https://www.dartlang.org/articles/style-
 
 ## Efficiency
 
-irc.dart is commited to efficiency as much as possible. If your code is not efficient, then we will probably reject your Pull Request.
+irc.dart is committed to efficiency as much as possible. If your code is not efficient, then we will probably reject your Pull Request.
 
 ## Rejections
 
-Pull Request rejections are not a bad thing. It just means you need to fix something. Perhaps it is important to define 'rejection' as it is used in this case. A rejection is when a irc.dart commiter comments on a Pull Request with a comment like 'rejected due to incorrect formatting'.
+Pull Request rejections are not a bad thing. It just means you need to fix something. Perhaps it is important to define 'rejection' as it is used in this case. A rejection is when a irc.dart committer comments on a Pull Request with a comment like 'rejected due to incorrect formatting'.
 
 ## Contacting Us
 
