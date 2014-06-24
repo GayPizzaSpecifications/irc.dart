@@ -129,7 +129,7 @@ class Client extends EventDispatcher {
           if (who == _nickname) {
             post(new DisconnectEvent(this));
           } else {
-            post(new QuitEvent(this, who, channel(input.parameters[0])));
+            post(new QuitEvent(this, who));
           }
           break;
         case "332":
