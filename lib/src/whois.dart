@@ -1,5 +1,8 @@
 part of irc;
 
+/**
+ * Builder for WHOIS Server Replies
+ */
 class WhoisBuilder {
   final String nickname;
   String username;

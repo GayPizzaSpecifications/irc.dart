@@ -1,11 +1,12 @@
 part of irc;
 
-/*
- Development Note: This breaks this style guide recommendation: http://goo.gl/KymG6T
-*/
+/**
+ * IRC Message Colors
+ */
 abstract class Color {
   static final BLUE = "\u000312";
   static final RESET = "\u000f";
+  static final NORMAL = "\u000f";
   static final BOLD = "\u0002";
   static final UNDERLINE = "\u001f";
   static final REVERSE = "\u0016";
