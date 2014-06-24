@@ -79,9 +79,7 @@ class PartEvent extends Event {
   PartEvent(Client client, this.user, this.channel)
       : super(client);
 
-  void reply(String message) {
-    channel.message(message);
-  }
+  void reply(String message) => channel.message(message);
 }
 
 class BotPartEvent extends Event {
