@@ -9,16 +9,20 @@ Report any issues [here](https://github.com/DirectMyFile/irc.dart/issues/new)!
 - [Wiki](https://github.com/DirectMyFile/irc.dart/wiki)
 - [Issues](https://github.com/DirectMyFile/irc.dart/issues)
 
+## Contributing
+
+See the [Contributing Guide](https://github.com/DirectMyFile/irc.dart/blob/master/CONTRIBUTING.md).
+
 ## Design
 
 irc.dart is designed to work out of the box in a very configurable way.
 
-- Optional Synchronous System
 - Builtin Bot System
 - Ability to create your own bots
 - Easy to Understand API
-- Use of a lot of Language Features
-- Optionally use only what you need
+- Makes use of a lot of Language Features
+- Use only what you need
+- Event-based System
 
 ## Bots
 
