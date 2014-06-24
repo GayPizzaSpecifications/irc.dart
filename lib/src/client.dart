@@ -17,7 +17,7 @@ class Client extends EventDispatcher {
 
   final IrcParser parser;
 
-  Client(BotConfig config, [IrcParser parser = null])
+  Client(BotConfig config, [IrcParser parser])
       : this.parser = parser == null ? new RegexIrcParser() : parser {
     this.config = config;
     _registerHandlers();
@@ -57,13 +57,13 @@ class Client extends EventDispatcher {
           }
           break;
         case "PRIVMSG":
-          String from = input.hostmask.nickname;
-          String target = _parse_nick(input.parameters[0])[0];
-          String message = input.message;
+          var from = input.hostmask.nickname;
+          var target = _parse_nick(input.parameters[0])[0];
+          var message = input.message;
           post(new MessageEvent(this, from, target, message));
           break;
         case "PART":
-          String who = input.hostmask.nickname;
+          var who = input.hostmask.nickname;
 
           var chan_name = input.parameters[0];
 
@@ -74,7 +74,7 @@ class Client extends EventDispatcher {
           }
           break;
         case "QUIT":
-          String who = input.hostmask.nickname;
+          var who = input.hostmask.nickname;
 
           if (who == _nickname) {
             post(new DisconnectEvent(this));
@@ -83,25 +83,25 @@ class Client extends EventDispatcher {
           }
           break;
         case "332":
-          String topic = input.message;
+          var topic = input.message;
           var chan = channel(input.parameters[1]);
           chan._topic = topic;
           post(new TopicEvent(this, chan, topic));
           break;
         case "ERROR":
-          String message = input.message;
+          var message = input.message;
           post(new ErrorEvent(this, message: message, type: "server"));
           break;
         case "KICK":
-          String who = input.hostmask.nickname;
+          var who = input.hostmask.nickname;
 
           if (who == _nickname) { // Temporary Bug Fix
             post(new BotPartEvent(this, channel(input.parameters[0])));
           }
           break;
         case "353":
-          List<String> users = input.message.split(" ");
-          Channel channel = this.channel(input.parameters[2]);
+          var users = input.message.split(" ");
+          var channel = this.channel(input.parameters[2]);
           users.forEach((user) {
             switch (user[0]) {
               case "@":
@@ -130,21 +130,21 @@ class Client extends EventDispatcher {
           break;
 
         case "MODE":
-          List<String> split = input.parameters;
+          var split = input.parameters;
 
           if (split.length < 3) {
             break;
           }
 
-          Channel channel = this.channel(split[0]);
-          String mode = split[1];
-          String who = split[2];
+          var channel = this.channel(split[0]);
+          var mode = split[1];
+          var who = split[2];
 
           post(new ModeEvent(this, mode, who, channel));
           break;
 
         case "311": /* Begin WHOIS */
-          List<String> split = input.parameters;
+          var split = input.parameters;
           var nickname = split[1];
           var hostname = split[3];
           var realname = input.message;
@@ -161,7 +161,6 @@ class Client extends EventDispatcher {
           var message = input.message;
           var server_name = split[2];
           var builder = _whois_builders[nickname];
-          assert(builder != null);
           builder.server_name = server_name;
           builder.server_info = message;
           break;
@@ -169,7 +168,6 @@ class Client extends EventDispatcher {
         case "313":
           var nickname = input.parameters[0];
           var builder = _whois_builders[nickname];
-          assert(builder != null);
           builder.server_operator = true;
           break;
 
@@ -178,12 +176,11 @@ class Client extends EventDispatcher {
           var nickname = split[1];
           var idle = int.parse(split[2]);
           var builder = _whois_builders[nickname];
-          assert(builder != null);
           builder.idle = true;
           builder.idle_time  = idle;
           break;
 
-      /* End of WHOIS */
+        /* End of WHOIS */
         case "318":
           var nickname = input.parameters[1];
           var builder = _whois_builders.remove(nickname);
@@ -194,7 +191,6 @@ class Client extends EventDispatcher {
           var nickname = input.parameters[1];
           var message = input.message.trim();
           var builder = _whois_builders[nickname];
-          assert(builder != null);
           message.split(" ").forEach((chan) {
             if (chan.startsWith("@")) {
               var c = chan.substring(1);
@@ -233,7 +229,7 @@ class Client extends EventDispatcher {
       register((JoinEvent event) => event.channel.members.add(event.user));
 
       register((PartEvent event) {
-        Channel channel = event.channel;
+        var channel = event.channel;
         channel.members.remove(event.user);
         channel.voices.remove(event.user);
         channel.ops.remove(event.user);
@@ -292,9 +288,7 @@ class Client extends EventDispatcher {
     register((BotPartEvent event) => channels.remove(event.channel));
   }
 
-  List<String> _parse_nick(String nick) {
-    return nick.split(new RegExp(r"!~|!|@"));
-  }
+  List<String> _parse_nick(String nick) => nick.split(new RegExp(r"!~|!|@"));
 
   void _fire_ready() {
     if (!_ready) {
@@ -343,34 +337,22 @@ class Client extends EventDispatcher {
     }
   }
 
-  void notice(String target, String message) {
-    send("NOTICE ${target} :${message}");
-  }
+  void notice(String target, String message) => send("NOTICE ${target} :${message}");
 
   void send(String line) {
     if (line.length > 510) {
       post(new ErrorEvent(this, type: "general", message: "The length of '${line}' is greater than 510 characters"));
     }
+    /* Sending the Line has Priority over then Event */
     _socket.writeln(line);
     post(new LineSentEvent(this, line));
   }
 
-  void join(String channel) {
-    send("JOIN ${channel}");
-  }
+  void join(String channel) => send("JOIN ${channel}");
 
-  void part(String channel) {
-    send("PART ${channel}");
-  }
+  void part(String channel) => send("PART ${channel}");
 
-  Channel channel(String name) {
-    for (var channel in channels) {
-      if (channel.name == name) {
-        return channel;
-      }
-    }
-    return null;
-  }
+  Channel channel(String name) => channels.firstWhere((channel) => channel.name == name, orElse: () => null);
 
   void changeNickname(String nickname) {
     _nickname = nickname;
@@ -384,10 +366,9 @@ class Client extends EventDispatcher {
     message(nickserv, "identify ${username} ${password}");
   }
 
-  void disconnect({String reason: "Client Disconnecting"}) {
+  void disconnect({String reason: "Client Disconnecting", bool force: false}) {
     send("QUIT :${reason}");
-    sleep(new Duration(milliseconds: 5));
-    _socket.close();
+    if (force) _socket.close();
   }
 
   @override

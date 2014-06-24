@@ -38,15 +38,14 @@ class MessageEvent extends Event {
   Channel get channel => client.channel(target);
 
   void reply(String message) {
-    if (isPrivate())
+    if (isPrivate) {
       client.message(from, message);
-    else
+    } else {
       client.message(target, message);
+    }
   }
 
-  bool isPrivate() {
-    return target == client._nickname;
-  }
+  bool get isPrivate => target == client.nickname;
 }
 
 class JoinEvent extends Event {
@@ -56,9 +55,7 @@ class JoinEvent extends Event {
   JoinEvent(Client client, this.user, this.channel)
       : super(client);
 
-  void reply(String message) {
-    channel.message(message);
-  }
+  void reply(String message) => channel.message(message);
 }
 
 class NickInUseEvent extends Event {
@@ -98,11 +95,10 @@ class QuitEvent extends Event {
   Channel channel;
   String user;
 
-  QuitEvent(Client client, this.user, this.channel) : super(client);
+  QuitEvent(Client client, this.user, this.channel)
+      : super(client);
 
-  void reply(String message) {
-    channel.message(message);
-  }
+  void reply(String message) => channel.message(message);
 }
 
 class DisconnectEvent extends Event {
@@ -115,7 +111,7 @@ class ErrorEvent extends Event {
   Error err;
   String type;
 
-  ErrorEvent(Client client, {this.message: null, this.err: null, this.type: "unspecified"})
+  ErrorEvent(Client client, {this.message, this.err, this.type: "unspecified"})
       : super(client);
 }
 
@@ -124,7 +120,7 @@ class ModeEvent extends Event {
   String mode;
   String user;
 
-  ModeEvent(Client client, this.mode, this.user, [this.channel = null])
+  ModeEvent(Client client, this.mode, this.user, [this.channel])
       : super(client);
 }
 

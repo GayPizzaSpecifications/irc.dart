@@ -7,7 +7,12 @@ class BotConfig {
   String realname;
   String username;
 
-  BotConfig({this.host: "irc.esper.net", this.port: 6667, this.nickname:"DartBot", this.username: "DartBot", this.realname: "Dart IRC Bot"});
+  BotConfig({
+      this.host: "irc.esper.net",
+      this.port: 6667,
+      this.nickname:"DartBot",
+      this.username: "DartBot",
+      this.realname: "Dart IRC Bot"});
 
   BotConfig.fromMap(Map<String, Object> map) {
     host = map["host"];
@@ -16,7 +21,8 @@ class BotConfig {
     username = map["username"];
   }
 
-  BotConfig.fromJSON(String input) : this.fromMap(JSON.decoder.convert(input));
+  BotConfig.fromJSON(String input)
+      : this.fromMap(JSON.decoder.convert(input));
 }
 
 class Channel {
@@ -33,7 +39,7 @@ class Channel {
   void set topic(String topic) => client.send("TOPIC ${name} :${topic}");
 
   Set<String> get allUsers {
-    Set<String> all = new Set<String>();
+    var all = new Set<String>();
     all.addAll(ops);
     all.addAll(voices);
     all.addAll(members);
@@ -70,10 +76,10 @@ class Channel {
   }
 
   void mode(String mode, [String user = null]) {
-    if (user != null) {
-      client.send("MODE ${name} ${mode} ${user}");
-    } else {
+    if (user == null) {
       client.send("MODE ${name} ${mode}");
+    } else {
+      client.send("MODE ${name} ${mode} ${user}");
     }
   }
 

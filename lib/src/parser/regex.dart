@@ -5,9 +5,9 @@ class RegexIrcParser extends IrcParser {
 
   @override
   Message convert(String line) {
-    List<String> match = new List<String>(5);
+    var match = new List<String>(5);
     {
-      Match parsed = REGEX.firstMatch(line);
+      var parsed = REGEX.firstMatch(line);
       for (int i = 0; i <= parsed.groupCount; i++)
         match[i] = parsed.group(i);
     }

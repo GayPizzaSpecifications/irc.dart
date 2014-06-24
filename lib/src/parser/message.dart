@@ -14,8 +14,8 @@ class Message {
   String toString() => line;
 
   ParsedHostmask get hostmask {
-    RegExp regex = new RegExp("[!@]");
-    List<String> parts = _hostmask.split(regex);
+    var regex = new RegExp("[!@]");
+    var parts = _hostmask.split(regex);
     return new ParsedHostmask(nickname: parts[0], identity: parts[1], hostname: parts[2]);
   }
 
