@@ -33,24 +33,24 @@ The command bot is just a normal bot implementation of commands.
 import 'package:irc/irc.dart';
 
 void main() {
-    BotConfig config = new BotConfig(
-        host: "irc.freenode.net",
-        port: 6667,
-        nickname: "DartBot",
-        username: "DartBot"
-    );
+  BotConfig config = new BotConfig(
+    host: "irc.esper.net",
+    port: 6667,
+    nickname: "DartBot",
+    username: "DartBot"
+  );
 
-    CommandBot bot = new CommandBot(config, prefix: ".");
+  CommandBot bot = new CommandBot(config, prefix: ".");
 
-    bot.register((ReadyEvent event) {
-        event.join("#irc.dart");
-    });
+  bot.register((ReadyEvent event) {
+    event.join("#directcode");
+  });
 
-    bot.command("help").listen((CommandEvent event) {
-        event.reply("> ${Color.BLUE}Commands${Color.RESET}: ${bot.commands.keys.join(', ')}");
-    });
+  bot.command("help").listen((CommandEvent event) {
+    event.reply("> ${Color.BLUE}Commands${Color.RESET}: ${bot.commands.keys.join(', ')}");
+  });
 
-    bot.connect();
+  bot.connect();
 }
 ```
 
@@ -62,20 +62,20 @@ This bot just prints messages to the console.
 import 'package:irc/irc.dart';
 
 void main() {
-    BotConfig config = new BotConfig(
-        host: "irc.freenode.net",
-        port: 6667,
-        nickname: "DartBot",
-        username: "DartBot"
-    );
+  BotConfig config = new BotConfig(
+    host: "irc.esper.net",
+    port: 6667,
+    nickname: "DartBot",
+    username: "DartBot"
+  );
 
-    CommandBot bot = new DumbBot(config);
+  CommandBot bot = new DumbBot(config);
 
-    bot.register((ReadyEvent event) {
-        event.join("#irc.dart");
-    });
+  bot.register((ReadyEvent event) {
+    event.join("#directcode");
+  });
 
-    bot.connect();
+  bot.connect();
 }
 ```
 
@@ -87,19 +87,19 @@ There is also a plain library to write your own IRC Bots!
 import 'package:irc/irc.dart';
 
 void main() {
-    BotConfig config = new BotConfig(
-        host: "irc.esper.net",
-        port: 6667,
-        nickname: "DartBot",
-        username: "DartBot"
-    );
+  BotConfig config = new BotConfig(
+    host: "irc.esper.net",
+    port: 6667,
+    nickname: "DartBot",
+    username: "DartBot"
+  );
 
-    Client client = new Client(config);
+  Client client = new Client(config);
 
-    client.register((ReadyEvent event) {
-        event.join("#DirectCode");
-    });
+  client.register((ReadyEvent event) {
+      event.join("#directcode");
+  });
 
-    client.connect();
+  client.connect();
 }
 ```
