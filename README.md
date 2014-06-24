@@ -1,105 +1,33 @@
-# Dart IRC [![Build Status](https://drone.io/github.com/DirectMyFile/irc.dart/status.png)](https://drone.io/github.com/DirectMyFile/irc.dart/latest)
+# Dart IRC [![Build Status](https://drone.io/github.com/DirectMyFile/irc.dart/status.png)](https://drone.io/github.com/DirectMyFile/irc.dart/latest) [![Latest Version](http://img.shields.io/badge/pub-1.2.6-blue.svg)](http://pub.dartlang.org/packages/irc)
 
 The Beautiful IRC Library for Dart
 
-Report any issues [here](https://github.com/DirectMyFile/irc.dart/issues/new)!
-
 ## Links
 
-- [Wiki](https://github.com/DirectMyFile/irc.dart/wiki)
-- [Issues](https://github.com/DirectMyFile/irc.dart/issues)
+- [Wiki]
+- [Issue Tracker]
 
-## Contributing
+## Get Started
 
-See the [Contributing Guide](https://github.com/DirectMyFile/irc.dart/blob/master/CONTRIBUTING.md).
+Visit the [Getting Started] wiki page.
 
 ## Design
 
-irc.dart is designed to work out of the box in a very configurable way.
+irc.dart is designed to be the one-stop shop for all your irc needs in Dart.
 
-- Builtin Bot System
-- Ability to create your own bots
-- Easy to Understand API
-- Makes use of a lot of Language Features
-- Use only what you need
-- Event-based System
+- Different Functions split into Libraries
+- Client API
+- Parsing API
+- Bot API
+- Event Based
+- Asynchronous
 
-## Bots
+## Contributing
 
-### Command Bot
-The command bot is just a normal bot implementation of commands.
+See the [Contributing Guide].
 
-```dart
-import 'package:irc/irc.dart';
-
-void main() {
-  BotConfig config = new BotConfig(
-    host: "irc.esper.net",
-    port: 6667,
-    nickname: "DartBot",
-    username: "DartBot"
-  );
-
-  CommandBot bot = new CommandBot(config, prefix: ".");
-
-  bot.register((ReadyEvent event) {
-    event.join("#directcode");
-  });
-
-  bot.command("help").listen((CommandEvent event) {
-    event.reply("> ${Color.BLUE}Commands${Color.RESET}: ${bot.commands.keys.join(', ')}");
-  });
-
-  bot.connect();
-}
-```
-
-### Dumb Bot
-
-This bot just prints messages to the console.
-
-```dart
-import 'package:irc/irc.dart';
-
-void main() {
-  BotConfig config = new BotConfig(
-    host: "irc.esper.net",
-    port: 6667,
-    nickname: "DartBot",
-    username: "DartBot"
-  );
-
-  CommandBot bot = new DumbBot(config);
-
-  bot.register((ReadyEvent event) {
-    event.join("#directcode");
-  });
-
-  bot.connect();
-}
-```
-
-## Library
-
-There is also a plain library to write your own IRC Bots!
-
-```dart
-import 'package:irc/irc.dart';
-
-void main() {
-  BotConfig config = new BotConfig(
-    host: "irc.esper.net",
-    port: 6667,
-    nickname: "DartBot",
-    username: "DartBot"
-  );
-
-  Client client = new Client(config);
-
-  client.register((ReadyEvent event) {
-      event.join("#directcode");
-  });
-
-  client.connect();
-}
-```
+[Getting Started]: https://github.com/DirectMyFile/irc.dart/wiki/Getting-Started
+[Wiki]: https://github.com/DirectMyFile/irc.dart/wiki/Home
+[Issue Tracker]: https://github.com/DirectMyFile/irc.dart/issues
+[Contributing Guide]: https://github.com/DirectMyFile/irc.dart/blob/master/CONTRIBUTING.md
+[Pub Package]: https://pub.dartlang.org/packages/irc
