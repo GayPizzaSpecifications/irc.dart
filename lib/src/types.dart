@@ -75,7 +75,7 @@ class Channel {
     message("\u0001ACTION ${msg}\u0001");
   }
 
-  void mode(String mode, [String user = null]) {
+  void mode(String mode, [String user]) {
     if (user == null) {
       client.send("MODE ${name} ${mode}");
     } else {
