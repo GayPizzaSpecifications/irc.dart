@@ -1,6 +1,6 @@
 library irc.parser;
 
-import "dart:convert";
+import "dart:convert" show Converter, StringConversionSink, StringConversionSinkBase;
 
 part 'src/parser/base.dart';
 part 'src/parser/message.dart';

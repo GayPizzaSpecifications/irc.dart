@@ -144,6 +144,7 @@ class WhoisEvent extends Event {
   List<String> get member_in {
     var list = <String>[];
     list.addAll(builder.channels.where((i) => !op_in.contains(i) && !voice_in.contains(i)));
+    return list;
   }
 
   List<String> get op_in => builder.op_in;

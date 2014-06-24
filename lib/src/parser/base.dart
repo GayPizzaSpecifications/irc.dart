@@ -22,9 +22,11 @@ class IRCParserSink extends StringConversionSinkBase {
   @override
   void addSlice(String chunk, int start, int end, bool isLast) {
     var result = this._converter.convert(chunk);
-
     _sink.add(result);
     if (isLast)
       _sink.close();
   }
+
+  @override
+  void close() => super.close();
 }

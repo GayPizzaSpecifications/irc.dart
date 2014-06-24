@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:mirrors';
-import 'dart:math' as Math;
 
 import 'package:event_dispatcher/event_dispatcher.dart';
 
