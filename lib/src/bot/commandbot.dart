@@ -37,12 +37,9 @@ class CommandBot extends Bot {
     String message = event.message;
 
     if (message.startsWith(prefix)) {
-      List<String> split = message.split(" ");
-
-      String command = split[0].substring(prefix.length);
-
-      List<String> args = new List.from(split);
-      args.removeAt(0);
+      var end = message.contains(" ") ? message.indexOf(" ", prefix.length) : message.length;
+      var command = message.substring(prefix.length, end);
+      var args = message.substring(end != message.length ? end + 1 : end).split(" ");
 
       if (commands.containsKey(command)) {
         commands[command].add(new CommandEvent(event, command, args));
