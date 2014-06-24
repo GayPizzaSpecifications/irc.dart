@@ -1,13 +1,13 @@
-# Dart IRC [![Build Status](https://drone.io/github.com/kaendfinger/irc.dart/status.png)](https://drone.io/github.com/kaendfinger/irc.dart/latest)
+# Dart IRC [![Build Status](https://drone.io/github.com/DirectMyFile/irc.dart/status.png)](https://drone.io/github.com/DirectMyFile/irc.dart/latest)
 
 The Beautiful IRC Library for Dart
 
-Report any issues [here](https://github.com/kaendfinger/irc.dart/issues/new)!
+Report any issues [here](https://github.com/DirectMyFile/irc.dart/issues/new)!
 
 ## Links
 
-- [Wiki](https://github.com/kaendfinger/irc.dart/wiki)
-- [Issues](https://github.com/kaendfinger/irc.dart/issues)
+- [Wiki](https://github.com/DirectMyFile/irc.dart/wiki)
+- [Issues](https://github.com/DirectMyFile/irc.dart/issues)
 
 ## Design
 
