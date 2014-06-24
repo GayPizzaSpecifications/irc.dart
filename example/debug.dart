@@ -57,7 +57,7 @@ void main() {
   })
 
   ..command("nick").listen((CommandEvent event) {
-    bot.client().nickname(event.args[0]);
+    bot.client().changeNickname(event.args[0]);
   })
 
   ..command("join").listen((CommandEvent event) {

@@ -7,11 +7,13 @@ abstract class Event {
 }
 
 class ConnectEvent extends Event {
-  ConnectEvent(Client client) : super(client);
+  ConnectEvent(Client client)
+      : super(client);
 }
 
 class ReadyEvent extends Event {
-  ReadyEvent(Client client) : super(client);
+  ReadyEvent(Client client)
+      : super(client);
 
   void join(String channel) {
     client.join(channel);
@@ -21,7 +23,8 @@ class ReadyEvent extends Event {
 class LineReceiveEvent extends Event {
   String line;
 
-  LineReceiveEvent(Client client, this.line) : super(client);
+  LineReceiveEvent(Client client, this.line)
+      : super(client);
 }
 
 class MessageEvent extends Event {
@@ -29,7 +32,8 @@ class MessageEvent extends Event {
   String target;
   String message;
 
-  MessageEvent(Client client, this.from, this.target, this.message) : super(client);
+  MessageEvent(Client client, this.from, this.target, this.message)
+      : super(client);
 
   Channel get channel => client.channel(target);
 
@@ -41,7 +45,7 @@ class MessageEvent extends Event {
   }
 
   bool isPrivate() {
-    return target == client.getNickname();
+    return target == client._nickname;
   }
 }
 
@@ -49,7 +53,8 @@ class JoinEvent extends Event {
   Channel channel;
   String user;
 
-  JoinEvent(Client client, this.user, this.channel) : super(client);
+  JoinEvent(Client client, this.user, this.channel)
+      : super(client);
 
   void reply(String message) {
     channel.message(message);
@@ -59,20 +64,23 @@ class JoinEvent extends Event {
 class NickInUseEvent extends Event {
   String original;
 
-  NickInUseEvent(Client client, this.original) : super(client);
+  NickInUseEvent(Client client, this.original)
+      : super(client);
 }
 
 class BotJoinEvent extends Event {
   Channel channel;
 
-  BotJoinEvent(Client client, this.channel) : super(client);
+  BotJoinEvent(Client client, this.channel)
+      : super(client);
 }
 
 class PartEvent extends Event {
   Channel channel;
   String user;
 
-  PartEvent(Client client, this.user, this.channel) : super(client);
+  PartEvent(Client client, this.user, this.channel)
+      : super(client);
 
   void reply(String message) {
     channel.message(message);
@@ -82,7 +90,8 @@ class PartEvent extends Event {
 class BotPartEvent extends Event {
   Channel channel;
 
-  BotPartEvent(Client client, this.channel) : super(client);
+  BotPartEvent(Client client, this.channel)
+      : super(client);
 }
 
 class QuitEvent extends Event {
@@ -97,7 +106,8 @@ class QuitEvent extends Event {
 }
 
 class DisconnectEvent extends Event {
-  DisconnectEvent(Client client) : super(client);
+  DisconnectEvent(Client client)
+      : super(client);
 }
 
 class ErrorEvent extends Event {
@@ -105,7 +115,8 @@ class ErrorEvent extends Event {
   Error err;
   String type;
 
-  ErrorEvent(Client client, {this.message: null, this.err: null, this.type: "unspecified"}) : super(client);
+  ErrorEvent(Client client, {this.message: null, this.err: null, this.type: "unspecified"})
+      : super(client);
 }
 
 class ModeEvent extends Event {
@@ -113,33 +124,38 @@ class ModeEvent extends Event {
   String mode;
   String user;
 
-  ModeEvent(Client client, this.mode, this.user, [this.channel = null]) : super(client);
+  ModeEvent(Client client, this.mode, this.user, [this.channel = null])
+      : super(client);
 }
 
 class LineSentEvent extends Event {
   String line;
 
-  LineSentEvent(Client client, this.line) : super(client);
+  LineSentEvent(Client client, this.line)
+      : super(client);
 }
 
 class TopicEvent extends Event {
   Channel channel;
   String topic;
 
-  TopicEvent(Client client, this.channel, this.topic) : super(client);
+  TopicEvent(Client client, this.channel, this.topic)
+      : super(client);
 }
 
 class NickChangeEvent extends Event {
   String original;
   String now;
 
-  NickChangeEvent(Client client, this.original, this.now) : super(client);
+  NickChangeEvent(Client client, this.original, this.now)
+      : super(client);
 }
 
 class WhoisEvent extends Event {
   WhoisBuilder builder;
 
-  WhoisEvent(Client client, this.builder) : super(client);
+  WhoisEvent(Client client, this.builder)
+      : super(client);
 
   List<String> get member_in {
     var list = <String>[];
@@ -167,5 +183,6 @@ class WhoisEvent extends Event {
 class PongEvent extends Event {
   String message;
 
-  PongEvent(Client client, this.message) : super(client);
+  PongEvent(Client client, this.message)
+      : super(client);
 }

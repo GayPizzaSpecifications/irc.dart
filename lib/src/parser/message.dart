@@ -7,7 +7,8 @@ class Message {
   String _hostmask;
   List<String> parameters;
 
-  Message({this.line, hostmask, this.command, this.message, this.parameters}) : _hostmask = hostmask;
+  Message({this.line, hostmask, this.command, this.message, this.parameters})
+      : _hostmask = hostmask;
 
   @override
   String toString() => line;

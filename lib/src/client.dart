@@ -12,11 +12,13 @@ class Client extends EventDispatcher {
   bool _ready = false;
   bool _receivedAny = false;
   String _nickname;
+  String get nickname => _nickname;
   bool _errored = false;
 
   final IrcParser parser;
 
-  Client(BotConfig config, [IrcParser parser = null]) : this.parser = parser == null ? new RegexIrcParser() : parser {
+  Client(BotConfig config, [IrcParser parser = null])
+      : this.parser = parser == null ? new RegexIrcParser() : parser {
     this.config = config;
     _registerHandlers();
     _nickname = config.nickname;
@@ -27,8 +29,6 @@ class Client extends EventDispatcher {
     register((LineReceiveEvent event) {
       if (!_receivedAny) {
         _receivedAny = true;
-        // TODO: review if this sleep is necessary
-        sleep(new Duration(milliseconds: 200));
         send("NICK ${config.nickname}");
         send("USER ${config.username} 8 * :${config.realname}");
       }
@@ -150,8 +150,8 @@ class Client extends EventDispatcher {
           var realname = input.message;
           var builder = new WhoisBuilder(nickname);
           builder
-            ..hostname = hostname
-            ..realname = realname;
+              ..hostname = hostname
+              ..realname = realname;
           _whois_builders[nickname] = builder;
           break;
 
@@ -183,7 +183,7 @@ class Client extends EventDispatcher {
           builder.idle_time  = idle;
           break;
 
-        /* End of WHOIS */
+      /* End of WHOIS */
         case "318":
           var nickname = input.parameters[1];
           var builder = _whois_builders.remove(nickname);
@@ -230,9 +230,7 @@ class Client extends EventDispatcher {
         }
       });
 
-      register((JoinEvent event) {
-        event.channel.members.add(event.user);
-      });
+      register((JoinEvent event) => event.channel.members.add(event.user));
 
       register((PartEvent event) {
         Channel channel = event.channel;
@@ -294,12 +292,6 @@ class Client extends EventDispatcher {
     register((BotPartEvent event) => channels.remove(event.channel));
   }
 
-  /*
-   * [0] = user
-   * [1] = realname
-   * [2] = hostmask
-   */
-
   List<String> _parse_nick(String nick) {
     return nick.split(new RegExp(r"!~|!|@"));
   }
@@ -323,9 +315,7 @@ class Client extends EventDispatcher {
         }).transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).listen((message) {
           post(new LineReceiveEvent(this, message));
         });
-      }, onError: (err) {
-        post(new ErrorEvent(this, err: err, type: "socket-zone"));
-      });
+      }, onError: (err) => post(new ErrorEvent(this, err: err, type: "socket-zone")));
     });
   }
 
@@ -358,8 +348,9 @@ class Client extends EventDispatcher {
   }
 
   void send(String line) {
-    if (line.length > 510)
+    if (line.length > 510) {
       post(new ErrorEvent(this, type: "general", message: "The length of '${line}' is greater than 510 characters"));
+    }
     _socket.writeln(line);
     post(new LineSentEvent(this, line));
   }
@@ -381,13 +372,9 @@ class Client extends EventDispatcher {
     return null;
   }
 
-  void nickname(String nickname) {
+  void changeNickname(String nickname) {
     _nickname = nickname;
     send("NICK ${nickname}");
-  }
-
-  String getNickname() {
-    return _nickname;
   }
 
   void identify({String username: "PLEASE_INJECT_DEFAULT", String password: "password", String nickserv: "NickServ"}) {
