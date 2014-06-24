@@ -1,23 +1,23 @@
 part of irc.parser;
 
-abstract class IRCParser extends Converter<String, Message> {
+abstract class IrcParser extends Converter<String, Message> {
   @override
   Message convert(String line);
 
   @override
-  IRCParserSink startChunkedConversion(Sink<String> sink) {
+  IrcParserSink startChunkedConversion(Sink<String> sink) {
     if (sink is! StringConversionSink) {
       sink = new StringConversionSink.from(sink);
     }
-    return new IRCParserSink(this, sink);
+    return new IrcParserSink(this, sink);
   }
 }
 
-class IRCParserSink extends StringConversionSinkBase {
-  final IRCParser _converter;
+class IrcParserSink extends StringConversionSinkBase {
+  final IrcParser _converter;
   final StringConversionSink _sink;
 
-  IRCParserSink(this._converter, this._sink);
+  IrcParserSink(this._converter, this._sink);
 
   @override
   void addSlice(String chunk, int start, int end, bool isLast) {

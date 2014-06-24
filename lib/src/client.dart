@@ -14,9 +14,9 @@ class Client extends EventDispatcher {
   String _nickname;
   bool _errored = false;
 
-  final IRCParser parser;
+  final IrcParser parser;
 
-  Client(BotConfig config, [IRCParser parser = null]) : this.parser = parser == null ? new RegexIRCParser() : parser {
+  Client(BotConfig config, [IrcParser parser = null]) : this.parser = parser == null ? new RegexIrcParser() : parser {
     this.config = config;
     _registerHandlers();
     _nickname = config.nickname;

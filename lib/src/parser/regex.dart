@@ -1,6 +1,6 @@
 part of irc.parser;
 
-class RegexIRCParser extends IRCParser {
+class RegexIrcParser extends IrcParser {
   static final RegExp REGEX = new RegExp(r"^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$");
 
   @override
