@@ -39,10 +39,10 @@ class Channel {
   void set topic(String topic) => client.send("TOPIC ${name} :${topic}");
 
   Set<String> get allUsers {
-    var all = new Set<String>();
-    all.addAll(ops);
-    all.addAll(voices);
-    all.addAll(members);
+    var all = new Set<String>()
+        ..addAll(ops)
+        ..addAll(voices)
+        ..addAll(members);
     return all;
   }
 
