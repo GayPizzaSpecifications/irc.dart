@@ -1,3 +1,6 @@
+/**
+ * IRC for Dart
+ */
 library irc;
 
 import 'dart:io';

@@ -1,5 +1,5 @@
 /**
- * A basic bot abstraction system
+ * Bot API
  *
  * All Bots extend [Bot].
  *
