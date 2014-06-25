@@ -49,13 +49,33 @@ class Message {
     return new ParsedHostmask(nickname: parts[0], identity: parts[1], hostname: parts[2]);
   }
 
+  /**
+   * The Plain Hostmask
+   */
   String get plain_hostmask => _hostmask;
 }
 
+/**
+ * Represents a Hostmask that has been parsed
+ */
 class ParsedHostmask {
+  /**
+   * Nickname is Hostmask
+   */
   String nickname;
+
+  /**
+   * User's Identity
+   */
   String identity;
+
+  /**
+   * User's Hostname
+   */
   String hostname;
 
+  /**
+   * Creates a ParsedHostmask instance
+   */
   ParsedHostmask({this.nickname, this.identity, this.hostname});
 }

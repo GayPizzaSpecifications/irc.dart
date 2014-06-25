@@ -2,6 +2,12 @@ part of irc.parser;
 
 /**
  * Base class for IRC Parsers
+ *
+ * ```
+ * var parser = new SomeIrcParser();
+ * var message = parser.convert(":some.server PRIVMSG #SomeChannel :Some Message");
+ * // Use Message Instance
+ * ```
  */
 abstract class IrcParser extends Converter<String, Message> {
   /**
@@ -11,7 +17,7 @@ abstract class IrcParser extends Converter<String, Message> {
   Message convert(String line);
 
   /**
-   * Provides support for chunked IRC Line parsing
+   * Provides support for chunked parsing
    */
   @override
   IrcParserSink startChunkedConversion(Sink<String> sink) {
@@ -39,6 +45,9 @@ class IrcParserSink extends StringConversionSinkBase {
       _sink.close();
   }
 
+  /**
+   * Closes the Sink
+   */
   @override
   void close() => super.close();
 }

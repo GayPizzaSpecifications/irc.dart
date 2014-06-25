@@ -22,7 +22,11 @@ import 'package:irc/irc.dart';
 import 'dart:async';
 import 'dart:io';
 
-part 'src/bot/dumbbot.dart';
-part 'src/bot/commandbot.dart';
+/* Bot API Base */
 part 'src/bot/base.dart';
+/* Dumb IRC Bot */
+part 'src/bot/dumbbot.dart';
+/* Command IRC Bot */
+part 'src/bot/commandbot.dart';
+/* Logging IRC Bot */
 part 'src/bot/logbot.dart';

@@ -379,6 +379,9 @@ class WhoisEvent extends Event {
 }
 
 class PongEvent extends Event {
+  /**
+   * Message in the PONG
+   */
   String message;
 
   PongEvent(Client client, this.message)
