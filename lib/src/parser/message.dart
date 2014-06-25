@@ -22,6 +22,11 @@ class Message {
   String _hostmask;
 
   /**
+   * IRC v3 Tags
+   */
+  Map<String, String> tags;
+
+  /**
    * Parameters
    */
   List<String> parameters;
