@@ -176,6 +176,10 @@ class Client extends EventDispatcher {
           var original = input.hostmask.nickname;
           var now = input.message;
 
+          if (original == _nickname) {
+            _nickname = now;
+          }
+
           post(new NickChangeEvent(this, original, now));
           break;
 
@@ -462,17 +466,19 @@ class Client extends EventDispatcher {
 
   /**
    * Changes the Client's Nickname
+   *
+   * [nickname] is the nickname to change to
    */
   void changeNickname(String nickname) {
-    _nickname = nickname;
     send("NICK ${nickname}");
   }
 
   /**
    * Identifies the user with the [nickserv].
+   *
    * the default [username] is your configured username.
-   * the default [password] is password
-   * the default [nickserv] is NickServ
+   * the default [password] is password.
+   * the default [nickserv] is NickServ.
    */
   void identify({String username: "PLEASE_INJECT_DEFAULT", String password: "password", String nickserv: "NickServ"}) {
     if (username == "PLEASE_INJECT_DEFAULT") {
@@ -493,6 +499,8 @@ class Client extends EventDispatcher {
   /**
    * Posts a Event to the Event Dispatching System
    * The purpose of this method was to assist in checking for Error Events.
+   *
+   * [event] is the event to post.
    */
   @override
   void post(Event event) {
