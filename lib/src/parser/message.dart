@@ -43,11 +43,7 @@ class Message {
   /**
    * Gets the Parsed Hostmask
    */
-  ParsedHostmask get hostmask {
-    var regex = new RegExp("[!@]");
-    var parts = _hostmask.split(regex);
-    return new ParsedHostmask(nickname: parts[0], identity: parts[1], hostname: parts[2]);
-  }
+  ParsedHostmask get hostmask => new ParsedHostmask.parse(_hostmask);
 
   /**
    * The Plain Hostmask
@@ -79,13 +75,13 @@ class ParsedHostmask {
   /**
    * Creates a ParsedHostmask instance
    */
-  ParsedHostmask({this.nickname, this.identity, this.hostname, String input}) {
-    if (input != null) {
-      var parts = input.split(HOSTMASK_REGEX);
+  ParsedHostmask({this.nickname, this.identity, this.hostname});
 
-      this.nickname = parts[0];
-      this.identity = parts[1];
-      this.hostname = parts[2];
-    }
+  ParsedHostmask.parse(String input) {
+    var parts = input.split(HOSTMASK_REGEX);
+
+    this.nickname = parts[0];
+    this.identity = parts[1];
+    this.hostname = parts[2];
   }
 }
