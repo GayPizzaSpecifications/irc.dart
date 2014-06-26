@@ -43,7 +43,7 @@ class Message {
   /**
    * Gets the Parsed Hostmask
    */
-  ParsedHostmask get hostmask => new ParsedHostmask.parse(_hostmask);
+  Hostmask get hostmask => new Hostmask.parse(_hostmask);
 
   /**
    * The Plain Hostmask
@@ -54,7 +54,7 @@ class Message {
 /**
  * Represents a Hostmask that has been parsed
  */
-class ParsedHostmask {
+class Hostmask {
   static final HOSTMASK_REGEX = new RegExp("[!@]");
 
   /**
@@ -73,11 +73,11 @@ class ParsedHostmask {
   String hostname;
 
   /**
-   * Creates a ParsedHostmask instance
+   * Creates a Hostmask instance
    */
-  ParsedHostmask({this.nickname, this.identity, this.hostname});
+  Hostmask({this.nickname, this.identity, this.hostname});
 
-  ParsedHostmask.parse(String input) {
+  Hostmask.parse(String input) {
     var parts = input.split(HOSTMASK_REGEX);
 
     this.nickname = parts[0];
