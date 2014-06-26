@@ -77,6 +77,10 @@ class Client extends EventDispatcher {
    */
   void _registerHandlers() {
     register((LineReceiveEvent event) {
+
+      /**
+       * Send initial information after we receive the first line
+       */
       if (!_receivedAny) {
         _receivedAny = true;
         send("NICK ${config.nickname}");
@@ -87,13 +91,15 @@ class Client extends EventDispatcher {
 
       // Switches on Command
       switch (input.command) {
-        case "376": /* End of MOTD */
+        case "376": // End of MOTD
           _fire_ready();
           break;
+
         case "PING": /* Server Ping */
           send("PONG :${input.message}");
           break;
-        case "JOIN": /* Join Event */
+
+        case "JOIN": // User Joined Channel
           var who = input.hostmask.nickname;
           var chan_name = input.parameters[0];
           if (who == _nickname) {
@@ -106,13 +112,15 @@ class Client extends EventDispatcher {
             post(new JoinEvent(this, who, channel(chan_name)));
           }
           break;
-        case "PRIVMSG":
+
+        case "PRIVMSG": // Message
           var from = input.hostmask.nickname;
           var target = _parse_nick(input.parameters[0])[0];
           var message = input.message;
           post(new MessageEvent(this, from, target, message));
           break;
-        case "PART":
+
+        case "PART": // User Left Channel
           var who = input.hostmask.nickname;
 
           var chan_name = input.parameters[0];
@@ -123,7 +131,8 @@ class Client extends EventDispatcher {
             post(new PartEvent(this, who, channel(chan_name)));
           }
           break;
-        case "QUIT":
+
+        case "QUIT": // User Quit
           var who = input.hostmask.nickname;
 
           if (who == _nickname) {
@@ -132,26 +141,29 @@ class Client extends EventDispatcher {
             post(new QuitEvent(this, who));
           }
           break;
-        case "332":
+
+        case "332": // Topic
           var topic = input.message;
           var chan = channel(input.parameters[1]);
           chan._topic = topic;
           post(new TopicEvent(this, chan, topic));
           break;
-        case "ERROR":
+        case "ERROR": // Server Error
           var message = input.message;
           post(new ErrorEvent(this, message: message, type: "server"));
           break;
-        case "KICK":
+
+        case "KICK": // User Kicked
           var who = input.hostmask.nickname;
 
           if (who == _nickname) { // Temporary Bug Fix
             post(new BotPartEvent(this, channel(input.parameters[0])));
           }
           break;
-        case "353":
+        case "353": // Channel List
           var users = input.message.split(" ");
           var channel = this.channel(input.parameters[2]);
+
           users.forEach((user) {
             switch (user[0]) {
               case "@":
@@ -167,19 +179,24 @@ class Client extends EventDispatcher {
           });
           break;
 
-        case "433":
+        case "433": // Nickname is in Use
           var original = input.parameters[0];
           post(new NickInUseEvent(this, original));
           break;
 
-        case "NICK":
+        case "NICK": // Nickname Changed
           var original = input.hostmask.nickname;
           var now = input.message;
 
+          /**
+           * Posts the Nickname Change Event
+           * No need for checking if we are the original nickname.
+           */
           post(new NickChangeEvent(this, original, now));
+
           break;
 
-        case "MODE":
+        case "MODE": // Mode Changed
           var split = input.parameters;
 
           if (split.length < 3) {
@@ -193,7 +210,7 @@ class Client extends EventDispatcher {
           post(new ModeEvent(this, mode, who, channel));
           break;
 
-        case "311": /* Begin WHOIS */
+        case "311": // Beginning of WHOIS
           var split = input.parameters;
           var nickname = split[1];
           var hostname = split[3];
@@ -205,7 +222,7 @@ class Client extends EventDispatcher {
           _whois_builders[nickname] = builder;
           break;
 
-        case "312":
+        case "312": // WHOIS Server Information
           var split = input.parameters;
           var nickname = split[1];
           var message = input.message;
@@ -215,13 +232,13 @@ class Client extends EventDispatcher {
           builder.server_info = message;
           break;
 
-        case "313":
+        case "313": // WHOIS Operator Information
           var nickname = input.parameters[0];
           var builder = _whois_builders[nickname];
           builder.server_operator = true;
           break;
 
-        case "317":
+        case "317": // WHOIS Idle Information
           var split = input.parameters;
           var nickname = split[1];
           var idle = int.parse(split[2]);
@@ -230,14 +247,13 @@ class Client extends EventDispatcher {
           builder.idle_time  = idle;
           break;
 
-        /* End of WHOIS */
-        case "318":
+        case "318": // End of WHOIS
           var nickname = input.parameters[1];
           var builder = _whois_builders.remove(nickname);
           post(new WhoisEvent(this, builder));
           break;
 
-        case "319":
+        case "319": // WHOIS Channel Information
           var nickname = input.parameters[1];
           var message = input.message.trim();
           var builder = _whois_builders[nickname];
@@ -256,13 +272,13 @@ class Client extends EventDispatcher {
           });
           break;
 
-        case "330":
+        case "330": // WHOIS Account Information
           var split = input.parameters;
           var builder = _whois_builders[split[1]];
           builder.username = split[2];
           break;
 
-        case "PONG":
+        case "PONG": // PONG from Server
           var message = input.message;
           post(new PongEvent(this, message));
           break;
@@ -500,6 +516,9 @@ class Client extends EventDispatcher {
    */
   @override
   void post(Event event) {
+    /**
+     * Handle Error Events
+     */
     if (event is ErrorEvent) {
       _errored = true;
     }
