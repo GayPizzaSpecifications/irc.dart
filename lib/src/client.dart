@@ -115,7 +115,7 @@ class Client extends EventDispatcher {
 
         case "PRIVMSG": // Message
           var from = input.hostmask.nickname;
-          var target = _parse_nick(input.parameters[0])[0];
+          var target = input.parameters[0];
           var message = input.message;
           post(new MessageEvent(this, from, target, message));
           break;
@@ -353,12 +353,6 @@ class Client extends EventDispatcher {
 
     register((BotPartEvent event) => channels.remove(event.channel));
   }
-
-  /**
-   * Parses a nickname
-   * TODO: Use irc.parser implementation
-   */
-  List<String> _parse_nick(String nick) => nick.split(new RegExp(r"!~|!|@"));
 
   /**
    * Fires the Ready Event if it hasn't been fired yet
