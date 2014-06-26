@@ -37,14 +37,14 @@ class LogBot extends Bot {
     });
 
     register((MessageEvent event) {
-      String line = "<${event.from}> ${event.message}";
+      var line = "<${event.from}> ${event.message}";
       print("<${event.target}>${line}");
       writeToLog(line, channel: event.channel);
     });
   }
 
   void writeToLog(String message, {Channel channel: null}) {
-    File file = new File("${_logLocation.path}/bot.log");
+    var file = new File("${_logLocation.path}/bot.log");
     if (channel != null) {
       file = new File("${_channelLogs.path}/${channel.name.substring(1)}.log");
     }
