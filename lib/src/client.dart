@@ -175,7 +175,7 @@ class Client extends EventDispatcher {
         case "NICK":
           var original = input.hostmask.nickname;
           var now = input.message;
-          
+
           post(new NickChangeEvent(this, original, now));
           break;
 
