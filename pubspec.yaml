@@ -4,7 +4,7 @@ authors:
 - Kenneth Endfinger <kaendfinger@gmail.com>
 - samrg472 <samrg472@gmail.com>
 - TheMike <zeusintraining@gmail.com>
-description: A feature-full Dart IRC library
+description: A beautiful all-purpose IRC library
 # TODO: Create Polymer-based site
 homepage: https://github.com/DirectMyFile/irc.dart/
 environment:
