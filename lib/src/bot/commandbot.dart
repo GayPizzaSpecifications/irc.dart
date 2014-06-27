@@ -41,6 +41,8 @@ class CommandBot extends Bot {
       var command = message.substring(prefix.length, end);
       var args = message.substring(end != message.length ? end + 1 : end).split(" ");
 
+      args.removeWhere((i) => i.isEmpty || i == " ");
+
       if (commands.containsKey(command)) {
         commands[command].add(new CommandEvent(event, command, args));
       } else {
