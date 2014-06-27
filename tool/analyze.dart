@@ -6,5 +6,5 @@ Task createAnalyzerTask(List<String> files, [List<String> extra_args]) {
   if (extra_args != null) {
     args.addAll(extra_args);
   }
-  return createProcessTask("dartanalyzer", args: args);
+  return createProcessTask("dartanalyzer", args: args, description: "Statically Analyze Code");
 }
