@@ -4,8 +4,9 @@ The Beautiful IRC Library for Dart
 
 ## Links
 
-- [Wiki]
-- [Issue Tracker]
+- [Wiki](https://github.com/DirectMyFile/irc.dart/wiki/Home)
+- [Issue Tracker](https://github.com/DirectMyFile/irc.dart/issues)
+- [Pub Package](https://pub.dartlang.org/packages/irc)
 
 ## Get Started
 
@@ -25,7 +26,3 @@ irc.dart is designed to be the one-stop shop for all your irc needs in Dart.
 ## Contributing
 
 See the [Contributing Guide](https://github.com/DirectMyFile/irc.dart/blob/master/CONTRIBUTING.md).
-
-[Wiki]: https://github.com/DirectMyFile/irc.dart/wiki/Home
-[Issue Tracker]: https://github.com/DirectMyFile/irc.dart/issues
-[Pub Package]: https://pub.dartlang.org/packages/irc
