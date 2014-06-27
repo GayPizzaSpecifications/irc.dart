@@ -28,6 +28,9 @@ library irc.parser;
 
 import "dart:convert" show Converter, StringConversionSink, StringConversionSinkBase;
 
+import "package:quiver/pattern.dart";
+
 part 'src/parser/base.dart';
 part 'src/parser/message.dart';
 part 'src/parser/regex.dart';
+part 'src/parser/hostmask.dart';

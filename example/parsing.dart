@@ -6,7 +6,20 @@ typedef bool CheckOutput(Message message);
 
 Map<String, CheckOutput> inputs = {};
 
+List<InputHostmaskGlob> glob_masks = [];
+
+class InputHostmaskGlob {
+  String pattern;
+  String against;
+  bool match;
+
+  InputHostmaskGlob(this.pattern, this.against, this.match);
+}
+
 main() {
+  glob_masks.add(new InputHostmaskGlob("*@ool-182e0a55.dyn.optonline.net", "blood!~blood@ool-182e0a55.dyn.optonline.net", true));
+  glob_masks.add(new InputHostmaskGlob("*@oo-182e0a55.dyn.optonline.net", "blood!~blood@ool-182e0a55.dyn.optonline.net", false));
+  glob_masks.add(new InputHostmaskGlob("*.optonline.net", "blood!~blood@ool-182e0a55.dyn.optonline.net", true));
   var parser = new RegexIrcParser();
   load_inputs();
   inputs.forEach((input, checker) {
@@ -15,6 +28,11 @@ main() {
     } else {
       print("Failed to Parse '${input}'");
       exit(1);
+    }
+  });
+  glob_masks.forEach((input) {
+    if (new GlobHostmask(input.pattern).matches(input.against) != input.match) {
+      print("ERROR: Expected matching '${input.against}' against '${input.pattern}' to be '${input.match}'");
     }
   });
 }
