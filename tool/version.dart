@@ -9,6 +9,7 @@ Task createVersionTask() {
       var content = file.readAsStringSync();
       var pubspec = loadYaml(content);
       var old = pubspec["version"];
+      var readme = new File("README.md");
 
       var next = null;
 
@@ -24,6 +25,7 @@ Task createVersionTask() {
       }
 
       content = content.replaceAll(old, next);
+      readme.writeAsStringSync(readme.readAsStringSync().replace(old, next));
       file.writeAsStringSync(content);
       ctx.info("Updated Version: v${old} => v${next}");
     });
