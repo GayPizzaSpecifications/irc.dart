@@ -35,12 +35,32 @@ class Hostmask {
   }
 }
 
+/**
+ * A Hostmask Pattern
+ *
+ * This is generally used for Ban Lists
+ */
 class GlobHostmask {
+  /**
+   * Hostmask Pattern
+   */
   String pattern;
 
+  /**
+   * Creates a new Hostmask Pattern
+   *
+   * [pattern] is the glob pattern
+   */
   GlobHostmask(this.pattern);
 
+  /**
+   * Checks if [hostmask] matches [pattern]
+   */
   bool matches(String hostmask) => new Glob(pattern).hasMatch(hostmask);
 
-  toString() => pattern;
+  /**
+   * Gives a String Representation of this hostmask pattern
+   */
+  @override
+  String toString() => pattern;
 }
