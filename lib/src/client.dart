@@ -108,6 +108,7 @@ class Client extends EventDispatcher {
               channels.add(new Channel(this, chan_name));
             }
             post(new BotJoinEvent(this, channel(chan_name)));
+            channel(chan_name).reload_bans();
           } else {
             post(new JoinEvent(this, who, channel(chan_name)));
           }
@@ -207,6 +208,10 @@ class Client extends EventDispatcher {
           var mode = split[1];
           var who = split[2];
 
+          if (mode == "+b" || mode == "-b") {
+            channel.reload_bans();
+          }
+
           post(new ModeEvent(this, mode, who, channel));
           break;
 
@@ -281,6 +286,12 @@ class Client extends EventDispatcher {
         case "PONG": // PONG from Server
           var message = input.message;
           post(new PongEvent(this, message));
+          break;
+
+        case "367":
+          var channel = this.channel(input.parameters[1]);
+          var ban = input.parameters[2];
+          channel.bans.add(new GlobHostmask(ban));
           break;
       }
 

@@ -70,6 +70,10 @@ void main() {
     event.reply("> ${event.channel.topic}");
   })
 
+  ..command("bans").listen((CommandEvent event) {
+    event.reply("> ${event.channel.bans}");
+  })
+
   ..command("raw").listen((CommandEvent event) {
     bot.client().send(event.args.join(" "));
   })

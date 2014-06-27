@@ -41,4 +41,6 @@ class GlobHostmask {
   GlobHostmask(this.pattern);
 
   bool matches(String hostmask) => new Glob(pattern).hasMatch(hostmask);
+
+  toString() => pattern;
 }

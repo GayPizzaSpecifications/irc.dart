@@ -107,6 +107,11 @@ class Channel {
   }
 
   /**
+   * Banned Hostmasks
+   */
+  List<GlobHostmask> bans = [];
+
+  /**
    * Creates a new channel associated with [client] named [name].
    */
   Channel(this.client, this.name);
@@ -172,18 +177,26 @@ class Channel {
   }
 
   /**
-   * Sets [mode] on [user]
+   * Reloads the Ban List
    */
-  void mode(String mode, [String user]) {
-    if (user == null) {
-      client.send("MODE ${name} ${mode}");
-    } else {
-      client.send("MODE ${name} ${mode} ${user}");
-    }
+  void reload_bans() {
+    bans.clear();
+    mode("+b");
   }
 
-  /**
-   * Compares [object] to this. Only true if channels names are equal.
-   */
-  bool operator ==(Object object) => object is Channel && this.name == object.name;
+    /**
+     * Sets [mode] on [user]
+     */
+    void mode(String mode, [String user]) {
+      if (user == null) {
+        client.send("MODE ${name} ${mode}");
+      } else {
+        client.send("MODE ${name} ${mode} ${user}");
+      }
+    }
+
+    /**
+     * Compares [object] to this. Only true if channels names are equal.
+     */
+    bool operator ==(Object object) => object is Channel && this.name == object.name;
 }
