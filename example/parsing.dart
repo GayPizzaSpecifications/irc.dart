@@ -20,6 +20,7 @@ main() {
   glob_masks.add(new InputHostmaskGlob("*@ool-182e0a55.dyn.optonline.net", "blood!~blood@ool-182e0a55.dyn.optonline.net", true));
   glob_masks.add(new InputHostmaskGlob("*@oo-182e0a55.dyn.optonline.net", "blood!~blood@ool-182e0a55.dyn.optonline.net", false));
   glob_masks.add(new InputHostmaskGlob("*.optonline.net", "blood!~blood@ool-182e0a55.dyn.optonline.net", true));
+  glob_masks.add(new InputHostmaskGlob("*!*@oo-182e0a55.dyn.optonline.net", "blood!~blood@ool-182e0a55.dyn.optonline.net", true));
   var parser = new RegexIrcParser();
   load_inputs();
   inputs.forEach((input, checker) {
