@@ -5,7 +5,6 @@ authors:
 - samrg472 <samrg472@gmail.com>
 - TheMike <zeusintraining@gmail.com>
 description: A beautiful all-purpose IRC library
-# TODO: Create Polymer-based site
 homepage: https://github.com/DirectMyFile/irc.dart/
 environment:
   sdk: '>=1.5.0'
