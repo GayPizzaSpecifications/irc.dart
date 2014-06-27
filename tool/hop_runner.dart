@@ -17,6 +17,7 @@ void main(List<String> args) {
   addTask("analyze", createAnalyzerTask(["lib/irc.dart", "example/log.dart", "example/debug.dart", "example/example.dart"]));
   addTask("version", createVersionTask());
   addTask("publish", createProcessTask("pub", args: ["publish", "-f"], description: "Publishes a New Version"), dependencies: ["version"]);
+  addTask("bench", createBenchTask());
   addChainedTask("check", ["analyze"]);
   runHop(args);
 }
