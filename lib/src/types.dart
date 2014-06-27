@@ -172,9 +172,7 @@ class Channel {
   /**
    * Sends [msg] as a channel actions
    */
-  void action(String msg) {
-    message("\u0001ACTION ${msg}\u0001");
-  }
+  void action(String msg) => message("\u0001ACTION ${msg}\u0001");
 
   /**
    * Reloads the Ban List
