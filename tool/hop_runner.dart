@@ -12,7 +12,7 @@ part 'utils.dart';
 part 'version.dart';
 
 void main(List<String> args) {
-  addTask("docs", createDocGenTask("."));
+  addTask("docs", createDocGenTask(".", out_dir: "out/docs"));
   addTask("analyze", createAnalyzerTask(["lib/irc.dart", "example/log.dart", "example/debug.dart", "example/example.dart"]));
   addTask("version", createVersionTask());
   addTask("publish", createProcessTask("pub", args: ["publish", "-f"], description: "Publishes a New Version"), dependencies: ["version"]);
