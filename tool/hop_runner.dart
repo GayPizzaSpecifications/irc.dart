@@ -4,12 +4,13 @@ import 'dart:async';
 import "dart:io";
 
 import 'package:hop/hop.dart';
-import 'package:hop/hop_tasks.dart';
+import 'package:hop/hop_tasks.dart' hide createAnalyzerTask;
 import 'package:yaml/yaml.dart';
 
 part 'docgen.dart';
 part 'utils.dart';
 part 'version.dart';
+part 'analyze.dart';
 
 void main(List<String> args) {
   addTask("docs", createDocGenTask(".", out_dir: "out/docs"));
