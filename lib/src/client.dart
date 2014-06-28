@@ -118,7 +118,13 @@ class Client extends EventDispatcher {
           var from = input.hostmask.nickname;
           var target = input.parameters[0];
           var message = input.message;
-          post(new MessageEvent(this, from, target, message));
+
+          if (message.startsWith("\u0001ACTION")) {
+            post(new ActionEvent(this, from, target, message.substring(8, message.length - 1)));
+          } else {
+            post(new MessageEvent(this, from, target, message));
+          }
+
           break;
 
         case "PART": // User Left Channel
@@ -512,6 +518,11 @@ class Client extends EventDispatcher {
     send("QUIT :${reason}");
     if (force) _socket.close();
   }
+
+  /**
+   * Sends [msg] to [target] as an action.
+   */
+  void action(String target, String msg) => message(target, "\u0001ACTION ${msg}\u0001");
 
   /**
    * Posts a Event to the Event Dispatching System

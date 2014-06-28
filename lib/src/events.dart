@@ -387,3 +387,17 @@ class PongEvent extends Event {
   PongEvent(Client client, this.message)
       : super(client);
 }
+
+/**
+ * An Action Event
+ */
+class ActionEvent extends MessageEvent {
+  ActionEvent(Client client, String from, String target, String message)
+    : super(client, from, target, message);
+
+  /**
+   * Sends [message] to [target] as a action.
+   */
+  @override
+  void reply(String message) => client.action(from, message);
+}
