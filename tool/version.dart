@@ -25,7 +25,7 @@ Task createVersionTask() {
       }
 
       content = content.replaceAll(old, next);
-      readme.writeAsStringSync(readme.readAsStringSync().replace(old, next));
+      readme.writeAsStringSync(readme.readAsStringSync().replaceAll(old, next));
       file.writeAsStringSync(content);
       ctx.info("Updated Version: v${old} => v${next}");
     });
