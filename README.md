@@ -1,4 +1,4 @@
-# Dart IRC [![Build Status](https://drone.io/github.com/DirectMyFile/irc.dart/status.png)](https://drone.io/github.com/DirectMyFile/irc.dart/latest) [![Latest Version](http://img.shields.io/badge/pub-1.2.9-blue.svg)](http://pub.dartlang.org/packages/irc)
+# Dart IRC [![Build Status](https://drone.io/github.com/DirectMyFile/irc.dart/status.png)](https://drone.io/github.com/DirectMyFile/irc.dart/latest) [![Latest Version](http://img.shields.io/badge/pub-1.3.0-blue.svg)](http://pub.dartlang.org/packages/irc)
 
 The Beautiful IRC Library for Dart
 
