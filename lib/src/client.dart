@@ -402,7 +402,7 @@ class Client extends EventDispatcher {
   }
 
   /**
-   * Sends the [input] to the [target] as a message
+   * Sends the [message] to the [target] as a message
    *
    *      client.message("ExampleUser", "Hello World");
    *
