@@ -4,3 +4,6 @@ pubspec.lock
 *.iml
 docs/
 dartdoc-viewer/
+.project
+.settings
+.buildlog
