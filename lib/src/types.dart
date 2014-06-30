@@ -32,12 +32,7 @@ class BotConfig {
   /**
    * Creates a new Client Configuration with default values.
    */
-  BotConfig({
-      this.host: "irc.esper.net",
-      this.port: 6667,
-      this.nickname:"DartBot",
-      this.username: "DartBot",
-      this.realname: "Dart IRC Bot"});
+  BotConfig({this.host: "irc.esper.net", this.port: 6667, this.nickname: "DartBot", this.username: "DartBot", this.realname: "Dart IRC Bot"});
 
   /**
    * Loads the Client Configuration from [map] using field names as keys
@@ -182,19 +177,19 @@ class Channel {
     mode("+b");
   }
 
-    /**
-     * Sets [mode] on [user]
-     */
-    void mode(String mode, [String user]) {
-      if (user == null) {
-        client.send("MODE ${name} ${mode}");
-      } else {
-        client.send("MODE ${name} ${mode} ${user}");
-      }
+  /**
+   * Sets the Mode on the Channel or if the user if [user] is specified.
+   */
+  void mode(String mode, [String user]) {
+    if (user == null) {
+      client.send("MODE ${name} ${mode}");
+    } else {
+      client.send("MODE ${name} ${mode} ${user}");
     }
+  }
 
-    /**
-     * Compares [object] to this. Only true if channels names are equal.
-     */
-    bool operator ==(Object object) => object is Channel && this.name == object.name;
+  /**
+   * Compares [object] to this. Only true if channels names are equal.
+   */
+  bool operator ==(Object object) => object is Channel && identical(client, object.client) && this.name == object.name;
 }

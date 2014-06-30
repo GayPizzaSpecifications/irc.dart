@@ -78,18 +78,16 @@ class Client extends EventDispatcher {
   void _registerHandlers() {
     register((LineReceiveEvent event) {
 
-      /**
-       * Send initial information after we receive the first line
-       */
+      /* Send initial information after we receive the first line */
       if (!_receivedAny) {
         _receivedAny = true;
         send("NICK ${config.nickname}");
         send("USER ${config.username} 8 * :${config.realname}");
       }
 
+      /* Parse the IRC Input */
       var input = parser.convert(event.line);
-
-      // Switches on Command
+      
       switch (input.command) {
         case "376": // End of MOTD
           _fire_ready();
@@ -124,7 +122,6 @@ class Client extends EventDispatcher {
           } else {
             post(new MessageEvent(this, from, target, message));
           }
-
           break;
 
         case "PART": // User Left Channel
@@ -155,6 +152,7 @@ class Client extends EventDispatcher {
           chan._topic = topic;
           post(new TopicEvent(this, chan, topic));
           break;
+ 
         case "ERROR": // Server Error
           var message = input.message;
           post(new ErrorEvent(this, message: message, type: "server"));
@@ -294,13 +292,14 @@ class Client extends EventDispatcher {
           post(new PongEvent(this, message));
           break;
 
-        case "367":
+        case "367": // Ban List Entry
           var channel = this.channel(input.parameters[1]);
           var ban = input.parameters[2];
           channel.bans.add(new GlobHostmask(ban));
           break;
       }
 
+      /* Handles when the user quits */
       register((QuitEvent event) {
         for (var chan in channels) {
           chan.members.remove(event.user);
@@ -308,9 +307,11 @@ class Client extends EventDispatcher {
           chan.ops.remove(event.user);
         }
       });
-
+      
+      /* Handles User Tracking in Channels when a user joins. A user is a member until it is changed. */
       register((JoinEvent event) => event.channel.members.add(event.user));
 
+      /* Handles User Tracking in Channels when a user leaves */
       register((PartEvent event) {
         var channel = event.channel;
         channel.members.remove(event.user);
@@ -318,6 +319,7 @@ class Client extends EventDispatcher {
         channel.ops.remove(event.user);
       });
 
+      /* Handles Nickname Changes */
       register((NickChangeEvent event) {
         if (event.original == _nickname) {
           _nickname = event.now;
@@ -343,6 +345,7 @@ class Client extends EventDispatcher {
         }
       });
 
+      /* Handles Channel User Tracking */
       register((ModeEvent event) {
         if (event.channel != null) {
           var channel = event.channel;
@@ -368,11 +371,12 @@ class Client extends EventDispatcher {
       });
     });
 
+    /* When the Bot leaves a channel, we no longer retain the object. */
     register((BotPartEvent event) => channels.remove(event.channel));
   }
 
   /**
-   * Fires the Ready Event if it hasn't been fired yet
+   * Fires the Ready Event if it hasn't been fired yet.
    */
   void _fire_ready() {
     if (!_ready) {
@@ -383,7 +387,7 @@ class Client extends EventDispatcher {
 
   /**
    * Connects to the IRC Server
-   * Any errors are sent through the [ErrorEvent]
+   * Any errors are sent through the [ErrorEvent].
    */
   void connect() {
     Socket.connect(config.host, config.port).then((Socket sock) {
@@ -402,7 +406,7 @@ class Client extends EventDispatcher {
   }
 
   /**
-   * Sends the [message] to the [target] as a message
+   * Sends the [message] to the [target] as a message.
    *
    *      client.message("ExampleUser", "Hello World");
    *
@@ -421,6 +425,9 @@ class Client extends EventDispatcher {
 
   /**
    * Splits the Messages if required.
+   *
+   * [begin] is the very beginning of the line (like 'PRIVMSG user :')
+   * [input] is the message
    */
   List<String> _handle_message_sending(String begin, String input) {
     var all = [];
@@ -464,6 +471,7 @@ class Client extends EventDispatcher {
    * Will throw an error if [line] is greater than 510 characters
    */
   void send(String line) {
+    /* Max Line Length for IRC is 512. With the newlines (\r\n or \n) we can only send 510 character lines */
     if (line.length > 510) {
       post(new ErrorEvent(this, type: "general", message: "The length of '${line}' is greater than 510 characters"));
     }
@@ -473,17 +481,18 @@ class Client extends EventDispatcher {
   }
 
   /**
-   * Joins the specified [channel]
+   * Joins the specified [channel].
    */
   void join(String channel) => send("JOIN ${channel}");
 
   /**
-   * Parts the specified [channel]
+   * Parts the specified [channel].
    */
   void part(String channel) => send("PART ${channel}");
 
   /**
-   * Gets a Channel object for the channel's [name]
+   * Gets a Channel object for the channel's [name].
+   * Returns null if no such channel exists.
    */
   Channel channel(String name) => channels.firstWhere((channel) => channel.name == name, orElse: () => null);
 
@@ -525,6 +534,13 @@ class Client extends EventDispatcher {
   void action(String target, String msg) => message(target, "\u0001ACTION ${msg}\u0001");
 
   /**
+   * Kicks [user] from [channel] with an optional [reason].
+   */
+  void kick(Channel channel, String user, [String reason]) {
+    send("KICK ${channel.name} ${user}${reason != null ? ' :' + reason : ''}");
+  }
+  
+  /**
    * Posts a Event to the Event Dispatching System
    * The purpose of this method was to assist in checking for Error Events.
    *
@@ -532,9 +548,7 @@ class Client extends EventDispatcher {
    */
   @override
   void post(Event event) {
-    /**
-     * Handle Error Events
-     */
+    /* Handle Error Events */
     if (event is ErrorEvent) {
       _errored = true;
     }

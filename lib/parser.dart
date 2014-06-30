@@ -1,11 +1,10 @@
 /**
  * IRC Parsing Support Library
  *
- * ```
- * var parser = new RegExIrcParser();
- * var message = parser.convert(":some.server PRIVMSG #SomeChannel :Some Message");
- * // Use Message Instance
- * ```
+ * 
+ *      var parser = new RegExIrcParser();
+ *      var message = parser.convert(":some.server PRIVMSG #SomeChannel :Some Message");
+ *      // Use Message Instance
  *
  * IRC Parsers are implemented as a Converter<String, Message>. This enables powerful socket transforms.
  *
@@ -15,14 +14,12 @@
  *
  * # Creating a Custom Parser
  *
- * ```
- * class MyIrcParser extends IrcParser {
- *   @override
- *   Message convert(String input) {
- *     // Parsing Logic
- *   }
- * }
- * ```
+ *      class MyIrcParser extends IrcParser {
+ *        @override
+ *        Message convert(String input) {
+ *          // Parsing Logic
+ *        }
+ *      }
  */
 library irc.parser;
 
