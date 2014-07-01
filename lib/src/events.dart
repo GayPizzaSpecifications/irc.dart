@@ -402,10 +402,28 @@ class ActionEvent extends MessageEvent {
   void reply(String message) => client.action(from, message);
 }
 
+/**
+ * A Kick Event
+ */
 class KickEvent extends Event {
+  /**
+   * The Channel where the event is from
+   */
   Channel channel;
+  
+  /**
+   * The User who was kicked
+   */
   String user;
+  
+  /**
+   * The User who kicked the other user
+   */
   String by;
+  
+  /**
+   * The Reason Given for [by] kicking [user]
+   */
   String reason;
   
   KickEvent(Client client, this.channel, this.user, this.by, [this.reason]) : super(client);  
