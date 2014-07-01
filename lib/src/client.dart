@@ -158,13 +158,6 @@ class Client extends EventDispatcher {
           post(new ErrorEvent(this, message: message, type: "server"));
           break;
 
-        case "KICK": // User Kicked
-          var who = input.hostmask.nickname;
-
-          if (who == _nickname) { // Temporary Bug Fix
-            post(new BotPartEvent(this, channel(input.parameters[0])));
-          }
-          break;
         case "353": // Channel List
           var users = input.message.split(" ");
           var channel = this.channel(input.parameters[2]);
@@ -193,12 +186,8 @@ class Client extends EventDispatcher {
           var original = input.hostmask.nickname;
           var now = input.message;
 
-          /**
-           * Posts the Nickname Change Event
-           * No need for checking if we are the original nickname.
-           */
+          /* Posts the Nickname Change Event. No need for checking if we are the original nickname. */
           post(new NickChangeEvent(this, original, now));
-
           break;
 
         case "MODE": // Mode Changed
@@ -297,6 +286,14 @@ class Client extends EventDispatcher {
           var ban = input.parameters[2];
           channel.bans.add(new GlobHostmask(ban));
           break;
+          
+        case "KICK": // A User was kicked from a Channel
+          var channel = this.channel(input.parameters[0]);
+          var user = input.parameters[1];
+          var reason = input.message;
+          var by = input.hostmask.nickname;
+          post(new KickEvent(this, channel, user, by, reason));
+          break;
       }
 
       /* Handles when the user quits */
@@ -317,6 +314,17 @@ class Client extends EventDispatcher {
         channel.members.remove(event.user);
         channel.voices.remove(event.user);
         channel.ops.remove(event.user);
+      });
+      
+      /* Handles User Tracking in Channels when a user is kicked. */
+      register((KickEvent event) {
+        var channel = event.channel;
+        channel.members.remove(event.user);
+        channel.voices.remove(event.user);
+        channel.ops.remove(event.user);
+        if (event.user == nickname) {
+          channels.remove(channel);
+        }
       });
 
       /* Handles Nickname Changes */

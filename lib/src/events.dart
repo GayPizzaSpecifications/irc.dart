@@ -401,3 +401,12 @@ class ActionEvent extends MessageEvent {
   @override
   void reply(String message) => client.action(from, message);
 }
+
+class KickEvent extends Event {
+  Channel channel;
+  String user;
+  String by;
+  String reason;
+  
+  KickEvent(Client client, this.channel, this.user, this.by, [this.reason]) : super(client);  
+}

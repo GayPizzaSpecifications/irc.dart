@@ -135,6 +135,12 @@ void main() {
   ..register((PartEvent event) {
     print("<${event.channel.name}> ${event.user} has left");
   })
+  
+  ..register((KickEvent event) {
+    if (event.user == event.client.nickname) {
+      event.client.join(event.channel.name);
+    }
+  })
 
   ..register((ErrorEvent event) {
     print("-------------------------------------------------------------------");
