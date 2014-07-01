@@ -152,25 +152,25 @@ class Channel {
   void unban(String user) => mode("-b", user);
 
   /**
-   * Kicks [user] from channel
+   * Kicks [user] from channel with optional [reason].
    */
-  void kick(String user) => client.send("KICK ${name} ${user}");
+  void kick(String user, [String reason]) => client.kick(this, user, reason);
 
   /**
-   * Kicks [user], then sets +b on [user]
+   * Sets +b on [user] then kicks [user] with the specified [reason]
    */
-  void kickban(String user) {
+  void kickban(String user, [String reason]) {
     ban(user);
-    kick(user);
+    kick(user, reason);
   }
 
   /**
-   * Sends [msg] as a channel actions
+   * Sends [msg] as a channel action.
    */
   void action(String msg) => message("\u0001ACTION ${msg}\u0001");
 
   /**
-   * Reloads the Ban List
+   * Reloads the Ban List.
    */
   void reload_bans() {
     bans.clear();
