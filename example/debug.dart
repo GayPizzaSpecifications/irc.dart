@@ -5,11 +5,11 @@ import 'dart:convert';
 
 void main() {
 
-  BotConfig config = new BotConfig(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot");
+  var config = new BotConfig(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot");
 
-  CommandBot bot = new CommandBot(config, prefix: "?");
+  var bot = new CommandBot(config, prefix: "?");
 
-  File configFile = new File("${Platform.environment["HOME"]}/.irc_debug.cfg");
+  var configFile = new File("${Platform.environment["HOME"]}/.irc_debug.cfg");
 
   Map<String, String> conf = {};
 
@@ -30,7 +30,7 @@ void main() {
 
   ..register((ReadyEvent event) {
     if (conf.containsKey("identityPassword"))
-      bot.client().identify(username: conf["identityUsername"], password: conf["identityPassword"]);
+      bot.client.identify(username: conf["identityUsername"], password: conf["identityPassword"]);
     event.join("#directcode");
   })
 
@@ -57,7 +57,7 @@ void main() {
   })
 
   ..command("nick").listen((CommandEvent event) {
-    bot.client().changeNickname(event.args[0]);
+    bot.client.changeNickname(event.args[0]);
   })
 
   ..command("join").listen((CommandEvent event) {
@@ -75,7 +75,7 @@ void main() {
   })
 
   ..command("raw").listen((CommandEvent event) {
-    bot.client().send(event.args.join(" "));
+    bot.client.send(event.args.join(" "));
   })
 
   ..command("list-libs").listen((CommandEvent event) {
@@ -87,7 +87,7 @@ void main() {
   })
 
   ..command("list-users").listen((CommandEvent event) {
-    var reply = (msg) => bot.client().notice(event.from, msg);
+    var reply = (msg) => bot.client.notice(event.from, msg);
     reply("> Members: ${event.channel.members.join(", ")}");
     reply("> Ops: ${event.channel.ops.join(", ")}");
     reply("> Voices: ${event.channel.voices.join(", ")}");
@@ -108,7 +108,7 @@ void main() {
 
   ..command("part").listen((CommandEvent event) {
     if (event.checkArguments(1, "> Usage: part <channel>")) {
-      bot.client().part(event.args[0]);
+      bot.client.part(event.args[0]);
     }
   })
 

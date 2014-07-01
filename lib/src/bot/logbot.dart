@@ -5,6 +5,7 @@ class LogBot extends Bot {
   List<String> channels = [];
   Directory _logLocation;
   Directory _channelLogs;
+  Client get client => _client;
 
   LogBot(BotConfig config, String location) {
     _client = new Client(config);
@@ -53,7 +54,4 @@ class LogBot extends Bot {
     }
     file.writeAsString(message + "\n", mode: FileMode.APPEND);
   }
-
-  @override
-  Client client() => _client;
 }

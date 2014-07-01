@@ -2,6 +2,8 @@ part of irc.bot;
 
 class DumbBot extends Bot {
   Client _client;
+  Client get client => _client;
+  
   List<String> channels = [];
 
   DumbBot(BotConfig config) {
@@ -14,7 +16,4 @@ class DumbBot extends Bot {
 
     register((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"));
   }
-
-  @override
-  Client client() => _client;
 }

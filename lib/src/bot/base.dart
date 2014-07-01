@@ -7,40 +7,40 @@ abstract class Bot {
   /**
    * Gets the Client
    */
-  Client client();
+  Client get client;
 
   /**
    * Connects the Bot
    */
-  void connect() => client().connect();
+  void connect() => client.connect();
 
   /**
    * Disconnects the Bot
    */
-  void disconnect() => client().disconnect();
+  void disconnect() => client.disconnect();
 
   /**
    * Gets a Channel
    */
-  Channel channel(String name) => client().channel(name);
+  Channel channel(String name) => client.channel(name);
 
   /**
    * Registers a Handler
    */
-  bool register(handler) => client().register(handler);
+  bool register(handler) => client.register(handler);
 
   /**
    * Joins a Channel
    */
-  void join(String channel) => client().join(channel);
+  void join(String channel) => client.join(channel);
 
   /**
    * Parts a Channel
    */
-  void part(String channel) => client().part(channel);
+  void part(String channel) => client.part(channel);
 
   /**
    * Sends a Message
    */
-  void message(String target, String message) => client().message(target, message);
+  void message(String target, String message) => client.message(target, message);
 }

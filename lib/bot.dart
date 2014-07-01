@@ -1,20 +1,8 @@
 /**
- * Bot API
+ * Bot Abstraction API
  *
  * All Bots extend [Bot].
- *
- * # Bots
- * ## CommandBot
- *
- * A bot with command registration and handling.
- *
- * ## LogBot
- *
- * A bot with a logger to the disk.
- *
- * ## DumbBot
- *
- * A bot that just sits in the channel.
+ * Each bot should have its own purpose.
  */
 library irc.bot;
 

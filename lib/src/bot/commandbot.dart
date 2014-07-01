@@ -8,6 +8,8 @@ typedef CommandNotFoundHandler(CommandEvent event);
 class CommandBot extends Bot {
   Client _client;
 
+  Client get client => _client;
+  
   Map<String, StreamController<CommandEvent>> commands = {
   };
 
@@ -19,9 +21,6 @@ class CommandBot extends Bot {
     _client = new Client(config);
     _registerHandlers();
   }
-
-  @override
-  Client client() => _client;
 
   Stream<CommandEvent> command(String name) {
     return commands.putIfAbsent(name, () {
