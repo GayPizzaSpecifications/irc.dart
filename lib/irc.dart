@@ -28,3 +28,6 @@ part 'src/types.dart';
 part 'src/colors.dart';
 /* WHOIS Stuff */
 part 'src/whois.dart';
+
+/* Client Pool */
+part 'src/pool.dart';
