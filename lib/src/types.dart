@@ -65,6 +65,12 @@ class Channel {
    * Channel Name (Including the #)
    */
   final String name;
+  
+  /**
+   * Storage for data about a channel.
+   * Note that this doesn't persist when the client leaves the channel.
+   */
+  final Map<String, dynamic> metadata;
 
   /**
    * Channel Operators
@@ -109,7 +115,7 @@ class Channel {
   /**
    * Creates a new channel associated with [client] named [name].
    */
-  Channel(this.client, this.name);
+  Channel(this.client, this.name) : metadata = {};
 
   /**
    * Sends [message] as a channel message

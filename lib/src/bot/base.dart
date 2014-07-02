@@ -17,7 +17,7 @@ abstract class Bot {
   /**
    * Disconnects the Bot
    */
-  void disconnect() => client.disconnect();
+  Future disconnect() => client.disconnect();
 
   /**
    * Gets a Channel

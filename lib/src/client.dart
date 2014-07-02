@@ -58,13 +58,22 @@ class Client extends EventDispatcher {
    * IRC Parser to use
    */
   final IrcParser parser;
+  
+  bool connected = false;
+  
+  /**
+   * Storage for any data.
+   * This will persist when you connect and disconnect.
+   */
+  final Map<String, dynamic> metadata;
 
   /**
    * Creates a new IRC Client using the specified configuration
    * If parser is specified, then the parser is used for the current client
    */
   Client(BotConfig config, [IrcParser parser])
-      : this.parser = parser == null ? new RegexIrcParser() : parser {
+      : this.parser = parser == null ? new RegexIrcParser() : parser,
+        this.metadata = {} {
     this.config = config;
     _registerHandlers();
     _nickname = config.nickname;
@@ -294,6 +303,10 @@ class Client extends EventDispatcher {
           post(new KickEvent(this, channel, user, by, reason));
           break;
       }
+      
+      /* Set the Connection Status */
+      register((ConnectEvent event) => connected = true);
+      register((DisconnectEvent event) => connected = false);
 
       /* Handles when the user quits */
       register((QuitEvent event) {
@@ -536,10 +549,14 @@ class Client extends EventDispatcher {
   /**
    * Disconnects the Client with the specified [reason].
    * If [force] is true, then the socket is forcibly closed.
+   * When it is forcibly closed, a future is returned.
    */
-  void disconnect({String reason: "Client Disconnecting", bool force: false}) {
+  Future disconnect({String reason: "Client Disconnecting", bool force: false}) {
     send("QUIT :${reason}");
-    if (force) _socket.close();
+    if (force) {
+      return _socket.close();
+    }
+    return null;
   }
 
   /**
