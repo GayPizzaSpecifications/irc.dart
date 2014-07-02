@@ -50,15 +50,18 @@ class Client extends EventDispatcher {
   String get nickname => _nickname;
 
   /**
-   * Flag for if the Client has hit an error
+   * Flag for if the Client has hit an error.
    */
   bool _errored = false;
 
   /**
-   * IRC Parser to use
+   * The IRC Parser to use.
    */
   final IrcParser parser;
   
+  /**
+   * Flag for if the Client is connected.
+   */
   bool connected = false;
   
   /**
