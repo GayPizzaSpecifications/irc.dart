@@ -489,7 +489,7 @@ class Client extends EventDispatcher {
     if (line.length > 510) {
       post(new ErrorEvent(this, type: "general", message: "The length of '${line}' is greater than 510 characters"));
     }
-    /* Sending the Line has Priority over then Event */
+    /* Sending the Line has Priority over the Event */
     _socket.writeln(line);
     post(new LineSentEvent(this, line));
   }
