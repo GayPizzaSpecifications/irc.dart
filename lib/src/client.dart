@@ -50,7 +50,7 @@ class Client extends EventDispatcher {
   String get nickname => _nickname;
 
   /**
-   * Flog for if the Client has hit an error
+   * Flag for if the Client has hit an error
    */
   bool _errored = false;
 
