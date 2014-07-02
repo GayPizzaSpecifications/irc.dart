@@ -545,7 +545,7 @@ class Client extends EventDispatcher {
   /**
    * Sends [msg] to [target] as an action.
    */
-  void action(String target, String msg) => message(target, "\u0001ACTION ${msg}\u0001");
+  void action(String target, String msg) => ctcp(target, "ACTION ${msg}");
 
   /**
    * Kicks [user] from [channel] with an optional [reason].
@@ -553,6 +553,11 @@ class Client extends EventDispatcher {
   void kick(Channel channel, String user, [String reason]) {
     send("KICK ${channel.name} ${user}${reason != null ? ' :' + reason : ''}");
   }
+  
+  /**
+   * Sends [msg] to [target] as a CTCP message
+   */
+  void ctcp(String target, String msg) => message(target, "\u0001${msg}\u0001");
   
   /**
    * Posts a Event to the Event Dispatching System
