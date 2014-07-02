@@ -73,7 +73,6 @@ class Client extends EventDispatcher {
 
   /**
    * Registers all the default handlers.
-   * TODO: Implement the irc.protocol library so we can make this cleaner
    */
   void _registerHandlers() {
     register((LineReceiveEvent event) {
