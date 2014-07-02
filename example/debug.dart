@@ -5,7 +5,7 @@ import 'dart:convert';
 
 void main() {
 
-  var config = new BotConfig(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot");
+  var config = new BotConfig(host: "127.0.0.1", port: 6667, nickname: "DartBot", username: "DartBot");
 
   var bot = new CommandBot(config, prefix: "?");
 
@@ -31,7 +31,7 @@ void main() {
   ..register((ReadyEvent event) {
     if (conf.containsKey("identityPassword"))
       bot.client.identify(username: conf["identityUsername"], password: conf["identityPassword"]);
-    event.join("#directcode");
+    event.join("#bots");
   })
 
   ..command("help").listen((CommandEvent event) {
