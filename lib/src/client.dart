@@ -117,8 +117,8 @@ class Client extends EventDispatcher {
           var target = input.parameters[0];
           var message = input.message;
 
-          if (message.startsWith("\u0001ACTION")) {
-            post(new ActionEvent(this, from, target, message.substring(8, message.length - 1)));
+          if (message.startsWith("\u0001")) {
+            post(new CTCPEvent(this, from, target, message.substring(1, message.length - 1)));
           } else {
             post(new MessageEvent(this, from, target, message));
           }
@@ -302,6 +302,13 @@ class Client extends EventDispatcher {
           chan.members.remove(event.user);
           chan.voices.remove(event.user);
           chan.ops.remove(event.user);
+        }
+      });
+      
+      /* Handles CTCP Events so the action event can be executed */
+      register((CTCPEvent event) {
+        if (event.message.startsWith("ACTION ")) {
+          post(new ActionEvent(this, event.user, event.target, event.message.substring(7)));
         }
       });
       

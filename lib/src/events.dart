@@ -428,3 +428,26 @@ class KickEvent extends Event {
   
   KickEvent(Client client, this.channel, this.user, this.by, [this.reason]) : super(client);  
 }
+
+/**
+ * A Client to Client Protocol Event.
+ * ActionEvent is executed on this event as well.
+ */
+class CTCPEvent extends Event {
+  /**
+   * The User who sent the message
+   */
+  String user;
+  
+  /**
+   * The Target of the message
+   */
+  String target;
+  
+  /**
+   * The Message sent
+   */
+  String message;
+  
+  CTCPEvent(Client client, this.user, this.target, this.message) : super(client);
+}
