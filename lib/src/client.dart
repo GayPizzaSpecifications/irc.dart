@@ -58,12 +58,12 @@ class Client extends EventDispatcher {
    * The IRC Parser to use.
    */
   final IrcParser parser;
-  
+
   /**
    * Flag for if the Client is connected.
    */
   bool connected = false;
-  
+
   /**
    * Storage for any data.
    * This will persist when you connect and disconnect.
@@ -98,13 +98,14 @@ class Client extends EventDispatcher {
 
       /* Parse the IRC Input */
       var input = parser.convert(event.line);
-      
+
       switch (input.command) {
         case "376": // End of MOTD
           _fire_ready();
           break;
 
-        case "PING": /* Server Ping */
+        case "PING":
+          /* Server Ping */
           send("PONG :${input.message}");
           break;
 
@@ -163,7 +164,7 @@ class Client extends EventDispatcher {
           chan._topic = topic;
           post(new TopicEvent(this, chan, topic));
           break;
- 
+
         case "ERROR": // Server Error
           var message = input.message;
           post(new ErrorEvent(this, message: message, type: "server"));
@@ -253,7 +254,7 @@ class Client extends EventDispatcher {
           var idle = int.parse(split[2]);
           var builder = _whois_builders[nickname];
           builder.idle = true;
-          builder.idle_time  = idle;
+          builder.idle_time = idle;
           break;
 
         case "318": // End of WHOIS
@@ -297,7 +298,7 @@ class Client extends EventDispatcher {
           var ban = input.parameters[2];
           channel.bans.add(new GlobHostmask(ban));
           break;
-          
+
         case "KICK": // A User was kicked from a Channel
           var channel = this.channel(input.parameters[0]);
           var user = input.parameters[1];
@@ -306,7 +307,7 @@ class Client extends EventDispatcher {
           post(new KickEvent(this, channel, user, by, reason));
           break;
       }
-      
+
       /* Set the Connection Status */
       register((ConnectEvent event) => connected = true);
       register((DisconnectEvent event) => connected = false);
@@ -319,14 +320,14 @@ class Client extends EventDispatcher {
           chan.ops.remove(event.user);
         }
       });
-      
+
       /* Handles CTCP Events so the action event can be executed */
       register((CTCPEvent event) {
         if (event.message.startsWith("ACTION ")) {
           post(new ActionEvent(this, event.user, event.target, event.message.substring(7)));
         }
       });
-      
+
       /* Handles User Tracking in Channels when a user joins. A user is a member until it is changed. */
       register((JoinEvent event) => event.channel.members.add(event.user));
 
@@ -337,7 +338,7 @@ class Client extends EventDispatcher {
         channel.voices.remove(event.user);
         channel.ops.remove(event.user);
       });
-      
+
       /* Handles User Tracking in Channels when a user is kicked. */
       register((KickEvent event) {
         var channel = event.channel;
@@ -573,12 +574,12 @@ class Client extends EventDispatcher {
   void kick(Channel channel, String user, [String reason]) {
     send("KICK ${channel.name} ${user}${reason != null ? ' :' + reason : ''}");
   }
-  
+
   /**
    * Sends [msg] to [target] as a CTCP message
    */
   void ctcp(String target, String msg) => message(target, "\u0001${msg}\u0001");
-  
+
   /**
    * Posts a Event to the Event Dispatching System
    * The purpose of this method was to assist in checking for Error Events.

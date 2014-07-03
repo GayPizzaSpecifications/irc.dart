@@ -31,11 +31,10 @@ class WhoisBuilder {
       var last = names.last == field;
       var obj = instance.getField(MirrorSystem.getSymbol(field)).reflectee;
       sb
-        ..write(field)
-        ..write(": ")
-        ..write("${obj}");
-      if (!last)
-        sb.write(", ");
+          ..write(field)
+          ..write(": ")
+          ..write("${obj}");
+      if (!last) sb.write(", ");
     }
     sb.write(")");
     return sb.toString();
