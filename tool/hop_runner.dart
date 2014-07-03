@@ -12,13 +12,7 @@ part 'utils.dart';
 part 'version.dart';
 part 'analyze.dart';
 
-var files = [
-    "lib/irc.dart",
-    "example/log.dart",
-    "example/debug.dart",
-    "example/example.dart",
-    "example/parsing.dart"
-];
+var files = ["lib/irc.dart", "example/log.dart", "example/debug.dart", "example/example.dart", "example/parsing.dart"];
 
 void main(List<String> args) {
   addTask("docs", createDocGenTask(".", out_dir: "out/docs"));
