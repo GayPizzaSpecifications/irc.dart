@@ -44,10 +44,6 @@ load_inputs() {
   };
 
   inputs[":availo.esper.net 354 kaendfinger 152 #computercraft ~maxlowry1"] = (Message input) {
-    return input.command == "354" && input.plain_hostmask == "availo.esper.net" &&
-      input.parameters.contains("152") &&
-      input.parameters.contains("kaendfinger") &&
-      input.parameters.contains("#computercraft") &&
-      input.parameters.contains("~maxlowry1");
+    return input.command == "354" && input.plain_hostmask == "availo.esper.net" && input.parameters.contains("152") && input.parameters.contains("kaendfinger") && input.parameters.contains("#computercraft") && input.parameters.contains("~maxlowry1");
   };
 }

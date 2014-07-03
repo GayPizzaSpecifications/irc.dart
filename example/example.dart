@@ -2,9 +2,9 @@ import 'package:irc/irc.dart';
 import 'dart:io';
 
 void main() {
-  BotConfig config = new BotConfig(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot");
+  var config = new BotConfig(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot");
 
-  CommandBot bot = new CommandBot(config, prefix: ".");
+  var bot = new CommandBot(config, prefix: ".");
 
   bot.register((ReadyEvent event) {
     event.join("#directcode");
