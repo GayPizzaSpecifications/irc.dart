@@ -65,7 +65,7 @@ class Channel {
    * Channel Name (Including the #)
    */
   final String name;
-  
+
   /**
    * Storage for data about a channel.
    * Note that this doesn't persist when the client leaves the channel.
