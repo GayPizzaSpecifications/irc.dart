@@ -393,7 +393,7 @@ class PongEvent extends Event {
  */
 class ActionEvent extends MessageEvent {
   ActionEvent(Client client, String from, String target, String message)
-    : super(client, from, target, message);
+      : super(client, from, target, message);
 
   /**
    * Sends [message] to [target] as a action.
@@ -410,23 +410,23 @@ class KickEvent extends Event {
    * The Channel where the event is from
    */
   Channel channel;
-  
+
   /**
    * The User who was kicked
    */
   String user;
-  
+
   /**
    * The User who kicked the other user
    */
   String by;
-  
+
   /**
    * The Reason Given for [by] kicking [user]
    */
   String reason;
-  
-  KickEvent(Client client, this.channel, this.user, this.by, [this.reason]) : super(client);  
+
+  KickEvent(Client client, this.channel, this.user, this.by, [this.reason]) : super(client);
 }
 
 /**
@@ -438,16 +438,16 @@ class CTCPEvent extends Event {
    * The User who sent the message
    */
   String user;
-  
+
   /**
    * The Target of the message
    */
   String target;
-  
+
   /**
    * The Message sent
    */
   String message;
-  
+
   CTCPEvent(Client client, this.user, this.target, this.message) : super(client);
 }
