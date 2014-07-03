@@ -18,7 +18,9 @@ export 'parser.dart';
 /* Exports the Bot API */
 export 'bot.dart';
 
-/* Base IRC Client */
+/* Base Classes */
+part 'src/base.dart';
+/* IRC Client */
 part 'src/client.dart';
 /* IRC Events */
 part 'src/events.dart';

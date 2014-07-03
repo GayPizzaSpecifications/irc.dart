@@ -11,7 +11,7 @@ part of irc;
  *      var client = new Client(config);
  *      // Use Client
  */
-class Client extends EventDispatcher {
+class Client extends ClientBase with EventDispatcher {
   BotConfig config;
 
   /**
