@@ -1,8 +1,17 @@
 part of irc;
 
+/**
+ * Control Multiple Clients
+ */
 class ClientPool {
+  /**
+   * All Clients
+   */
   List<Client> clients;
 
+  /**
+   * Adds a Client using the [config]
+   */
   int addClient(BotConfig config) {
     var client = new Client(config);
     clients.add(client);
