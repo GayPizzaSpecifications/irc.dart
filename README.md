@@ -21,7 +21,6 @@ irc.dart is designed to be the one-stop shop for all your irc needs in Dart.
 - Parsing API
 - Bot API
 - Event Based
-- Asynchronous
 
 ## Contributing
 

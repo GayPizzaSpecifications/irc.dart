@@ -44,7 +44,7 @@ class LogBot extends Bot {
     });
   }
 
-  void writeToLog(String message, {Channel channel: null}) {
+  void writeToLog(String message, {Channel channel}) {
     var file = new File("${_logLocation.path}/bot.log");
     if (channel != null) {
       file = new File("${_channelLogs.path}/${channel.name.substring(1)}.log");
