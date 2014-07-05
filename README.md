@@ -25,3 +25,7 @@ irc.dart is designed to be the one-stop shop for all your irc needs in Dart.
 ## Contributing
 
 See the [Contributing Guide](https://github.com/DirectMyFile/irc.dart/blob/master/CONTRIBUTING.md).
+
+## Notices
+
+irc.dart is a no-license project. We really don't care what you do. Use it and abuse it.
