@@ -157,7 +157,6 @@ class PartEvent extends Event {
 
   /**
    * Replies to the Event by sending [message] to the channel the user left
-   * TODO: Possibly change this to message the user who left
    */
   void reply(String message) => channel.message(message);
 }
