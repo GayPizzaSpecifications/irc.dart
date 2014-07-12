@@ -7,7 +7,7 @@ class Hostmask {
   static final HOSTMASK_REGEX = new RegExp("[!@]");
 
   /**
-   * Nickname is Hostmask
+   * User's Nickname
    */
   String nickname;
 
