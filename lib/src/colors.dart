@@ -25,4 +25,38 @@ abstract class Color {
   static final MAGENTA = "\u000313";
   static final DARK_GRAY = "\u000314";
   static final LIGHT_GRAY = "\u000315";
+  
+  static String wrap(String input, String color, [String end_color = "reset"]) => "${forName(color)}${input}${forName(end_color)}";
+  
+  static String forName(String input) {
+    var name = input.replaceAll(" ", "_").toUpperCase();
+    var field;
+    try {
+      field = reflectClass(Color).getField(MirrorSystem.getSymbol(name));
+      if (field.reflectee is! String) {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+    return field.reflectee;
+  }
+  
+  static Map<String, String> all_colors() {
+    var all = <String, String>{};
+    var clazz = reflectClass(Color);
+    clazz.declarations.forEach((key, value) {
+      var name = MirrorSystem.getName(key).replaceAll("_", " ").toLowerCase();
+      var field;
+      try {
+        field = clazz.getField(key);
+      } catch (e) {
+        return;
+      }
+      if (field.reflectee is String) {
+        all[name] = field.reflectee;
+      }
+    });
+    return all;
+  }
 }
