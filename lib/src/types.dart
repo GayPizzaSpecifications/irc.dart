@@ -90,6 +90,11 @@ class Channel {
   String _topic;
 
   /**
+   * Banned Hostmasks
+   */
+  final List<GlobHostmask> bans = [];
+  
+  /**
    * Channel Topic
    */
   String get topic => _topic;
@@ -106,11 +111,6 @@ class Channel {
         ..addAll(members);
     return all;
   }
-
-  /**
-   * Banned Hostmasks
-   */
-  List<GlobHostmask> bans = [];
 
   /**
    * Creates a new channel associated with [client] named [name].

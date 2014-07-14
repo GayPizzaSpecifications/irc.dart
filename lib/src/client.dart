@@ -295,6 +295,9 @@ class Client extends ClientBase with EventDispatcher {
 
         case "367": // Ban List Entry
           var channel = this.channel(input.parameters[1]);
+          if (channel == null) { // We Were Banned
+            break;
+          }
           var ban = input.parameters[2];
           channel.bans.add(new GlobHostmask(ban));
           break;
