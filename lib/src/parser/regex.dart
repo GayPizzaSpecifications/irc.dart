@@ -13,11 +13,10 @@ class RegexIrcParser extends IrcParser {
 
   @override
   Message convert(String line) {
-    var match = new List<String>(5);
+    List<String> match;
     {
       var parsed = REGEX.firstMatch(line);
-      for (int i = 0; i <= parsed.groupCount; i++)
-        match[i] = parsed.group(i);
+      match = new List.generate(parsed.groupCount + 1, parsed.group);
     }
     var hostmask = match[1];
     var command = match[2];
