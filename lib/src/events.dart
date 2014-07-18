@@ -450,3 +450,15 @@ class CTCPEvent extends Event {
 
   CTCPEvent(Client client, this.user, this.target, this.message) : super(client);
 }
+
+/**
+ * Server MOTD Recieved
+ */
+class MOTDEvent extends Event {
+  /**
+   * MOTD Message
+   */
+  String message;
+  
+  MOTDEvent(Client client, this.message) : super(client);
+}

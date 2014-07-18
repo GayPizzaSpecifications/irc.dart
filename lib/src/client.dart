@@ -69,7 +69,18 @@ class Client extends ClientBase with EventDispatcher {
    * This will persist when you connect and disconnect.
    */
   final Map<String, dynamic> metadata;
+  
+  /**
+   * Stores the MOTD
+   */
+  String _motd = "";
 
+  /**
+   * Gets the Server's MOTD
+   * Not Ready until the ReadyEvent is posted
+   */
+  String get motd => _motd;
+  
   /**
    * Creates a new IRC Client using the specified configuration
    * If parser is specified, then the parser is used for the current client
@@ -101,6 +112,7 @@ class Client extends ClientBase with EventDispatcher {
 
       switch (input.command) {
         case "376": // End of MOTD
+          post(new MOTDEvent(this, _motd));
           _fire_ready();
           break;
 
@@ -308,6 +320,10 @@ class Client extends ClientBase with EventDispatcher {
           var reason = input.message;
           var by = input.hostmask.nickname;
           post(new KickEvent(this, channel, user, by, reason));
+          break;
+        case "372":
+          var part = input.message;
+          _motd += part + "\n";
           break;
       }
 

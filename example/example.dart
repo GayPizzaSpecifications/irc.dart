@@ -6,6 +6,10 @@ void main() {
 
   var bot = new CommandBot(config, prefix: ".");
 
+  bot.register((MOTDEvent event) {
+    print(event.message);
+  });
+  
   bot.register((ReadyEvent event) {
     event.join("#directcode");
   });
