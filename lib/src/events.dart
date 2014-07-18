@@ -462,3 +462,25 @@ class MOTDEvent extends Event {
   
   MOTDEvent(Client client, this.message) : super(client);
 }
+
+/**
+ * Server ISUPPORT Event
+ */
+class ServerSupportsEvent extends Event {
+  /**
+   * Supported Stuff
+   */
+  Map<String, dynamic> supported;
+  
+  ServerSupportsEvent(Client client, String message) : super(client) {
+    var split = message.split(" ");
+    split.forEach((it) {
+      if (it.contains("=")) {
+        var keyValue = it.split("=");
+        supported[keyValue[0]] = keyValue[1];
+      } else {
+        supported[it] = true;
+      }
+    });
+  }
+}

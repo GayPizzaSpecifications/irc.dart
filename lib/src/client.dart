@@ -325,6 +325,12 @@ class Client extends ClientBase with EventDispatcher {
           var part = input.message;
           _motd += part + "\n";
           break;
+        case "005":
+          var params = input.parameters;
+          params.removeAt(0);
+          var message = params.join(" ");
+          post(new ServerSupportsEvent(this, message));
+          break;
       }
 
       /* Set the Connection Status */
