@@ -11,7 +11,7 @@ void main() {
 
   var configFile = new File("${Platform.environment["HOME"]}/.irc_debug.json");
 
-  var conf = <String, String> {};
+  var conf = <String, String>{};
 
   if (configFile.existsSync()) {
     conf = JSON.decode(configFile.readAsStringSync());
