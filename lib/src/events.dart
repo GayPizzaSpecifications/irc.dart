@@ -473,11 +473,18 @@ class ServerSupportsEvent extends Event {
   Map<String, dynamic> supported;
   
   ServerSupportsEvent(Client client, String message) : super(client) {
+    supported = {};
     var split = message.split(" ");
     split.forEach((it) {
       if (it.contains("=")) {
         var keyValue = it.split("=");
-        supported[keyValue[0]] = keyValue[1];
+        var key = keyValue[0];
+        var value = keyValue[1];
+        try {
+          value = num.parse(value);
+        } catch (e) {
+        }
+        supported[key] = value;
       } else {
         supported[it] = true;
       }
