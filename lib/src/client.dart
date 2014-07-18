@@ -69,7 +69,7 @@ class Client extends ClientBase with EventDispatcher {
    * This will persist when you connect and disconnect.
    */
   final Map<String, dynamic> metadata;
-  
+
   /**
    * Stores the MOTD
    */
@@ -80,7 +80,7 @@ class Client extends ClientBase with EventDispatcher {
    * Not Ready until the ReadyEvent is posted
    */
   String get motd => _motd;
-  
+
   /**
    * Creates a new IRC Client using the specified configuration
    * If parser is specified, then the parser is used for the current client
@@ -146,6 +146,16 @@ class Client extends ClientBase with EventDispatcher {
           } else {
             post(new MessageEvent(this, from, target, message));
           }
+          break;
+
+        case "NOTICE":
+          var from = input.plain_hostmask;
+          if (input.parameters[0] != "*")
+            from = input.hostmask.nickname;
+
+          var target = input.parameters[0];
+          var message = input.message;
+          post(new NoticeEvent(this, from, target, message));
           break;
 
         case "PART": // User Left Channel

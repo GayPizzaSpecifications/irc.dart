@@ -90,6 +90,26 @@ class MessageEvent extends Event {
 }
 
 /**
+ * Notice Event is dispatched when a notice is received
+ */
+class NoticeEvent extends MessageEvent {
+
+  /**
+   * Returns whether the notice is from the system or not.
+   */
+  bool get isSystem => target == "*";
+
+  NoticeEvent(Client client, String from, String target, String message)
+      : super(client, from, target, message);
+
+  /**
+   * Sends [message] to [target] as a notice.
+   */
+  @override
+  void reply(String message) => client.notice(from, message);
+}
+
+/**
  * Join Event is dispatched when another user joins a channel we are in
  */
 class JoinEvent extends Event {
@@ -459,7 +479,7 @@ class MOTDEvent extends Event {
    * MOTD Message
    */
   String message;
-  
+
   MOTDEvent(Client client, this.message) : super(client);
 }
 
@@ -471,7 +491,7 @@ class ServerSupportsEvent extends Event {
    * Supported Stuff
    */
   Map<String, dynamic> supported;
-  
+
   ServerSupportsEvent(Client client, String message) : super(client) {
     supported = {};
     var split = message.split(" ");
