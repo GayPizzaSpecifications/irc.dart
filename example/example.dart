@@ -10,11 +10,11 @@ void main() {
     event.join("#directcode");
   });
 
-  bot.command("help").listen((CommandEvent event) {
+  bot.command("help", (CommandEvent event) {
     event.reply("> ${Color.BLUE}Commands${Color.RESET}: ${bot.commandNames().join(', ')}");
   });
 
-  bot.command("dart").listen((CommandEvent event) {
+  bot.command("dart", (CommandEvent event) {
     event.reply("> Dart VM: ${Platform.version}");
   });
 

@@ -33,15 +33,15 @@ void main() {
         event.join("#directcode");
       })
 
-      ..command("help").listen((CommandEvent event) {
+      ..command("help", (CommandEvent event) {
         event.reply("> ${Color.BLUE}Commands${Color.RESET}: ${bot.commandNames().join(', ')}");
       })
 
-      ..command("dart").listen((CommandEvent event) {
+      ..command("dart", (CommandEvent event) {
         event.reply("> Dart VM: ${Platform.version}");
       })
 
-      ..command("ping").listen((CommandEvent event) {
+      ..command("ping", (CommandEvent event) {
         event.client.send("PING :cmd_${event.channel.name}");
       })
 
@@ -51,33 +51,33 @@ void main() {
         }
       })
 
-      ..command("opall").listen((CommandEvent event) {
+      ..command("opall", (CommandEvent event) {
         event.args.forEach((it) => event.channel.op(it));
       })
 
-      ..command("nick").listen((CommandEvent event) {
+      ..command("nick", (CommandEvent event) {
         bot.client.changeNickname(event.args[0]);
       })
 
-      ..command("join").listen((CommandEvent event) {
+      ..command("join", (CommandEvent event) {
         if (event.checkArguments(1, "> Usage: join <channel>")) {
           bot.join(event.args[0]);
         }
       })
 
-      ..command("topic").listen((CommandEvent event) {
+      ..command("topic", (CommandEvent event) {
         event.reply("> ${event.channel.topic}");
       })
 
-      ..command("bans").listen((CommandEvent event) {
+      ..command("bans", (CommandEvent event) {
         event.reply("> ${event.channel.bans}");
       })
 
-      ..command("raw").listen((CommandEvent event) {
+      ..command("raw", (CommandEvent event) {
         bot.client.send(event.args.join(" "));
       })
 
-      ..command("list-libs").listen((CommandEvent event) {
+      ..command("list-libs", (CommandEvent event) {
         Set<String> libraries = [].toSet();
         currentMirrorSystem().libraries.forEach((key, value) {
           libraries.add(MirrorSystem.getName(value.qualifiedName));
@@ -85,14 +85,14 @@ void main() {
         event.reply("> Libraries: ${libraries.join(', ')}");
       })
 
-      ..command("list-users").listen((CommandEvent event) {
+      ..command("list-users", (CommandEvent event) {
         var reply = (msg) => bot.client.notice(event.from, msg);
         reply("> Members: ${event.channel.members.join(", ")}");
         reply("> Ops: ${event.channel.ops.join(", ")}");
         reply("> Voices: ${event.channel.voices.join(", ")}");
       })
 
-      ..command("library").listen((CommandEvent event) {
+      ..command("library", (CommandEvent event) {
         if (event.checkArguments(1, "> Usage: library <name>")) {
           String libName = event.args[0];
           try {
@@ -105,13 +105,13 @@ void main() {
         }
       })
 
-      ..command("part").listen((CommandEvent event) {
+      ..command("part", (CommandEvent event) {
         if (event.checkArguments(1, "> Usage: part <channel>")) {
           bot.client.part(event.args[0]);
         }
       })
 
-      ..command("quit").listen((CommandEvent event) {
+      ..command("quit", (CommandEvent event) {
         bot.disconnect();
       })
 

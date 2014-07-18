@@ -1,6 +1,6 @@
 part of irc.bot;
 
-typedef CommandNotFoundHandler(CommandEvent event);
+typedef CommandHandler(CommandEvent event);
 
 /**
  * Command Bot - Fully Customizable
@@ -13,7 +13,7 @@ class CommandBot extends Bot {
   Map<String, StreamController<CommandEvent>> commands = {
   };
 
-  CommandNotFoundHandler commandNotFound = (event) => null;
+  CommandHandler commandNotFound = (event) => null;
 
   String prefix;
 
@@ -22,10 +22,10 @@ class CommandBot extends Bot {
     _registerHandlers();
   }
 
-  Stream<CommandEvent> command(String name) {
-    return commands.putIfAbsent(name, () {
+  void command(String name, CommandHandler handler) {
+    commands.putIfAbsent(name, () {
       return new StreamController.broadcast();
-    }).stream;
+    }).stream.listen(handler);
   }
 
   void _registerHandlers() {
