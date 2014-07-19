@@ -3,7 +3,7 @@ part of irc;
 /**
  * IRC Message Colors
  */
-abstract class Color {
+class Color {
   static final BLUE = "\u000312";
   static final RESET = "\u000f";
   static final NORMAL = "\u000f";
@@ -25,6 +25,11 @@ abstract class Color {
   static final MAGENTA = "\u000313";
   static final DARK_GRAY = "\u000314";
   static final LIGHT_GRAY = "\u000315";
+  
+  /**
+   * Color can't be instantiated.
+   */
+  factory Color() => throw new UnsupportedError("Sorry, Color can't be instantiated");
   
   /**
    * Puts the Color String of [color] in front of [input] and ends with [end_color].
