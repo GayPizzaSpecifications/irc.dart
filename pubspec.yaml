@@ -14,3 +14,4 @@ dependencies:
 dev_dependencies:
   hop: '>=0.31.0+1 <0.32.0'
   yaml: '>=1.1.1 <2.0.0'
+  unittest: '>=0.11.0+2 <0.12.0'
