@@ -28,11 +28,11 @@ String parse_config_value(String input) {
 
 dynamic getvar(String path, [dynamic defaultValue = false]) {
   var current = config;
-  
+
   if (current.containsKey(path)) {
     return current[path];
   }
-  
+
   var parts = path.split(r"\.");
   for (var part in parts) {
     if (current == null) {
