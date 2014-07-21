@@ -14,9 +14,7 @@ abstract class IrcParser extends Converter<String, Message> {
   /**
    * Creates the default parser [RegexIrcParser].
    */
-  factory IrcParser() {
-    return new RegexIrcParser();
-  }
+  factory IrcParser() => new RegexIrcParser();
   
   /**
    * Parses [line] as an IRC line and outputs a [Message]
