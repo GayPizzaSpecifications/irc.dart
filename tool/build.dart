@@ -17,7 +17,7 @@ void main(List<String> args) {
   });
 }
 
-execute(String cmdline) {
+dynamic execute(String cmdline) {
   var split = cmdline.split(" ");
   var command = split[0];
   split.remove(command);
