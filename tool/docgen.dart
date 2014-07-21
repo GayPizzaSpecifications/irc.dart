@@ -19,17 +19,9 @@ Task createDocGenTask(String path, {compile: false, Iterable<String> excludes: n
       args.add("--compile");
     }
 
-    if (include_sdk) {
-      args.add("--include-sdk");
-    } else {
-      args.add("--no-include-sdk");
-    }
+    args.add(_flag("include-sdk", include_sdk));
 
-    if (include_deps) {
-      args.add("--include-dependent-packages");
-    } else {
-      args.add("--no-include-dependent-packages");
-    }
+    args.add(_flag("include-dependent-packages", include_deps));
 
     args.add("--out=${out_dir}");
 
@@ -48,3 +40,5 @@ Task createDocGenTask(String path, {compile: false, Iterable<String> excludes: n
     });
   }, description: "Generates Documentation");
 }
+
+String _flag(String it, bool flag) => flag ? it : "--no-" + it; 
