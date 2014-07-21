@@ -53,7 +53,7 @@ class Message {
 
 class IrcParserSupport {
   static Map<String, dynamic> parse_tags(String input) {
-    var out = {};
+    var out = <String, dynamic>{};
     var parts = input.substring(1).split(";");
     for (var part in parts) {
       if (part.contains("=")) {

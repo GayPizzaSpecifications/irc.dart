@@ -24,7 +24,7 @@ class RegexIrcParser extends IrcParser {
     var param_string = match[4];
     var msg = match[5];
     var parameters = param_string != null ? param_string.split(" ") : [];
-    var tags = {};
+    var tags = <String, dynamic>{};
     
     if (tag_stuff.trim().isNotEmpty) {
       tags = IrcParserSupport.parse_tags(tag_stuff);
