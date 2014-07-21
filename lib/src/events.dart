@@ -27,6 +27,9 @@ class ReadyEvent extends Event {
   ReadyEvent(Client client)
       : super(client);
 
+  /**
+   * Joins the specified [channel].
+   */
   void join(String channel) {
     client.join(channel);
   }
