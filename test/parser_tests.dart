@@ -8,19 +8,10 @@ typedef dynamic InputChecker<T>(T value);
 main() {
   group("Hostmask", () {
     var inputs = <String, InputChecker<Hostmask>>{
-      "samrg472!~deathcraz@I.got.g-lined.cu.cc": (it) {
-        if (it.nickname != "samrg472") {
-          throw new Exception("nickname: ${it.nickname}");
-        }
-
-        if (it.hostname != "I.got.g-lined.cu.cc") {
-          throw new Exception("hostmask: ${it.hostmask}");
-        }
-
-        if (it.identity != "~deathcraz") {
-          throw new Exception("identity: ${it.identity}");
-        }
-        return true;
+      "samrg472!~deathcraz@I.got.g-lined.cu.cc": (Hostmask it) {
+        expect(it.nickname, equals("samrg472"), reason: "nickname should be 'samrg472'");
+        expect(it.identity, equals("~deathcraz"), reason: "identity should be '~deathcraz'");
+        expect(it.hostname, equals("I.got.g-lined.cu.cc"), reason: "hostname should be 'I.got.g-lined.cu.cc'");
       }
     };
 
@@ -28,7 +19,7 @@ main() {
       test(input, () {
         var hostmask = new Hostmask.parse(input);
         var checker = inputs[input];
-        expect(checker(hostmask), equals(true));
+        checker(hostmask);
       });
     }
   });
@@ -37,50 +28,19 @@ main() {
     var parser = new RegexIrcParser();
     var inputs = <String, InputChecker<Message>>{
       ":OverbotDL1!~OverbotDL@74.195.31.2 PRIVMSG kaendfinger :Overbot 0.1.14": (Message it) {
-        if (it.parameters.length != 1) {
-          throw new Exception("parameters length: ${it.parameters.length}");
-        }
-
-        if (it.parameters[0] != "kaendfinger") {
-          throw new Exception("target: ${it.parameters[1]}");
-        }
-
-        if (it.message != "Overbot 0.1.14") {
-          throw new Exception("message: ${it.message}");
-        }
-
-        return true;
+        expect(it.hostmask.nickname, equals("OverbotDL1"), reason: "hostmask nickname should be 'OverbotDL1'");
+        expect(it.hostmask.hostname, equals("74.195.31.2"), reason: "hostmask hostname should be '74.195.31.2'");
+        expect(it.hostmask.identity, equals("~OverbotDL"), reason: "identity should be '~OverbotDL'");
+        expect(it.parameters.length, equals(1), reason: "there should be one parameter");
+        expect(it.parameters[0], equals("kaendfinger"), reason: "first parameter should be 'kaendfinger'");
+        expect(it.message, equals("Overbot 0.1.14"), reason: "message should be 'Overbot 0.1.14'");
       },
       "@test=super;single :test!me@test.ing FOO bar baz quux :This is a test": (Message it) {
-        if (it.tags == null) {
-          throw new Exception("tags are null");
-        }
-
-        if (!it.tags.containsKey("test")) {
-          throw new Exception("tag not found: test");
-        }
-
-        if (!it.tags.containsKey("single")) {
-          throw new Exception("tag not found: single");
-        }
-
-        if (it.tags["test"] != "super") {
-          throw new Exception("tag value not correct: ${it.tags["test"]}");
-        }
-
-        if (it.command != "FOO") {
-          throw new Exception("command not correct: ${it.command}");
-        }
-
-        if (it.parameters.length != 3) {
-          throw new Exception("parameters not correct: ${it.parameters}");
-        }
-
-        if (it.message != "This is a test") {
-          throw new Exception("message not correct: ${it.message}");
-        }
-
-        return true;
+        expect(it.tags, isNotNull, reason: "tags should not be null");
+        expect(it.tags, containsPair("test", "super"), reason: "tag 'test' should be 'super'");
+        expect(it.command, equals("FOO"), reason: "command should be 'FOO'");
+        expect(it.parameters.length, equals(3), reason: "there should be 3 parameters");
+        expect(it.message, equals("This is a test"), reason: "message should be 'This is a test'");
       }
     };
 
@@ -88,7 +48,7 @@ main() {
       test(input, () {
         var checker = inputs[input];
         var message = parser.convert(input);
-        expect(checker(message), equals(true));
+        checker(message);
       });
     }
   });

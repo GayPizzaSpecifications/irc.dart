@@ -25,7 +25,6 @@ dynamic execute(String cmdline) {
   return Process.start(command, args).then((Process process) {
     stdout.addStream(process.stdout);
     stderr.addStream(process.stderr);
-    process.stdin.addStream(stdin);
     return process.exitCode;
   }).then((int exitCode) {
     if (exitCode != 0) {
