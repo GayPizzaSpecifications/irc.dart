@@ -63,7 +63,6 @@ class IrcParserSupport {
         out[part] = true;
       }
     }
-    print(out);
     return out;
   }
 }
