@@ -26,6 +26,9 @@ class Hostmask {
    */
   Hostmask({this.nickname, this.identity, this.hostname});
 
+  /**
+   * Creates a Hostmask from the parsed [input].
+   */
   Hostmask.parse(String input) {
     var parts = input.split(HOSTMASK_REGEX);
 
