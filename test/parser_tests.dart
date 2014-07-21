@@ -38,11 +38,11 @@ main() {
     var inputs = <String, InputChecker<Message>>{
       ":OverbotDL1!~OverbotDL@74.195.31.2 PRIVMSG kaendfinger :Overbot 0.1.14": (Message it) {
         if (it.parameters.length != 1) {
-          throw new Exception("parameters length: ${it.params.length}");
+          throw new Exception("parameters length: ${it.parameters.length}");
         }
 
         if (it.parameters[0] != "kaendfinger") {
-          throw new Exception("target: ${it.params[1]}");
+          throw new Exception("target: ${it.parameters[1]}");
         }
 
         if (it.message != "Overbot 0.1.14") {
