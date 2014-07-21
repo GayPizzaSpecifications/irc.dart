@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Publishes an irc.dart release
 ./tool/build.dart publish
-VERSION=`grep 'version:' pubspec.yaml | sed 's/version://'`
+VERSION=`grep 'version:' pubspec.yaml | sed 's/version: //'`
 echo Releasing ${VERSION}
 git add .
 git tag v${VERSION}
