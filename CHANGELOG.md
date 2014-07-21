@@ -1,3 +1,8 @@
+## v1.4.0
+
+- [Fix Bug in Parser](https://github.com/DirectMyFile/irc.dart/commit/14480493d7c3ad0831781f7d6b0f1300e61472a4)
+- [Added Invite Event](https://github.com/DirectMyFile/irc.dart/commit/14480493d7c3ad0831781f7d6b0f1300e61472a4)
+
 ## v1.3.9
 
 - [IRC v3 Tag Support](https://github.com/DirectMyFile/irc.dart/issues/7)
