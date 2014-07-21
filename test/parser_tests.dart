@@ -46,6 +46,10 @@ main() {
         expect(it.command, equals("FOO"), reason: "command should be 'FOO'");
         expect(it.parameters.length, equals(3), reason: "there should be 3 parameters");
         expect(it.message, equals("This is a test"), reason: "message should be 'This is a test'");
+      },
+      "PING :Test": (Message it) {
+        expect(it.command, equals("PING"), reason: "command should be 'PING'");
+        expect(it.message, equals("Test"), reason: "message should be 'Test'");
       }
     };
 
