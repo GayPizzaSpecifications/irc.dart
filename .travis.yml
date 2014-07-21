@@ -10,6 +10,6 @@ install:
 - "wget http://gsdview.appspot.com/dart-archive/channels/${DART_CHANNEL}/release/latest/sdk/dartsdk-linux-x64-release.zip -O sdk.zip"
 - "unzip sdk.zip"
 - "cd .."
-- "export PATH=${PATH}:${PWD}/tools/sdk/dart-sdk/bin"
+- "export PATH=${PATH}:${PWD}/tools/dart-sdk/bin"
 script:
 - "./tool/build.dart check"
