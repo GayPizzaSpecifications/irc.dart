@@ -5,7 +5,13 @@ Map<String, dynamic> config;
 Directory get tool_dir => new File.fromUri(Platform.script).parent.absolute;
 Directory get root_dir => tool_dir.parent;
 
-Map<String, dynamic> load_config() => loadYaml(new File("${tool_dir.path}/build.yaml").readAsStringSync());
+Map<String, dynamic> load_config() {
+  var it = loadYaml(new File("${tool_dir.path}/build.yaml").readAsStringSync());
+  if (it.containsKey("variables")) {
+    variables.addAll(it["variables"]);
+  }
+  return it;
+}
 
 Map<String, dynamic> variables = {
   "tool_dir": tool_dir.path,
