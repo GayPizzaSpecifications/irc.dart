@@ -41,4 +41,4 @@ Task createDocGenTask(String path, {compile: false, Iterable<String> excludes: n
   }, description: "Generates Documentation");
 }
 
-String _flag(String it, bool flag) => flag ? it : "--no-" + it; 
+String _flag(String it, bool flag) => flag ? it : "--no-" + it;
