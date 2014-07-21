@@ -12,9 +12,9 @@ part of irc.parser;
 abstract class IrcParser extends Converter<String, Message> {
   
   /**
-   * Creates the default parser [RegexIrcParser].
+   * Creates the default IrcParser, which is [RegexIrcParser].
    */
-  factory IrcParser() => new RegexIrcParser();
+  static IrcParser create() => new RegexIrcParser();
   
   /**
    * Parses [line] as an IRC line and outputs a [Message]
