@@ -1,0 +1,15 @@
+analyzer:
+  files:
+    - "lib/irc.dart"
+    - "example/log.dart"
+    - "example/debug.dart"
+    - "example/example.dart"
+    - "example/parsing.dart"
+test:
+  file: "test/all_tests.dart"
+check:
+  tasks:
+    - "analyze"
+    - "test"
+docs:
+  output: "out/docs"

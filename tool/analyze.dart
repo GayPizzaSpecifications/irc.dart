@@ -1,6 +1,6 @@
 part of hop_runner;
 
-Task createAnalyzerTask(List<String> files, [List<String> extra_args]) {
+Task createAnalyzerTask(Iterable<String> files, [Iterable<String> extra_args]) {
   var args = [];
   args.addAll(files);
   if (extra_args != null) {
