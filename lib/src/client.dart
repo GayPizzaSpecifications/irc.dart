@@ -330,11 +330,11 @@ class Client extends ClientBase with EventDispatcher {
           var by = input.hostmask.nickname;
           post(new KickEvent(this, channel, user, by, reason));
           break;
-        case "372":
+        case "372": // MOTD Part
           var part = input.message;
           _motd += part + "\n";
           break;
-        case "005":
+        case "005": // ISUPPORT
           var params = input.parameters;
           params.removeAt(0);
           var message = params.join(" ");
