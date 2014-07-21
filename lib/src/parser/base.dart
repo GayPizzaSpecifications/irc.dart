@@ -10,6 +10,14 @@ part of irc.parser;
  * ```
  */
 abstract class IrcParser extends Converter<String, Message> {
+  
+  /**
+   * Creates the default parser [RegexIrcParser].
+   */
+  factory IrcParser() {
+    return new RegexIrcParser();
+  }
+  
   /**
    * Parses [line] as an IRC line and outputs a [Message]
    */
