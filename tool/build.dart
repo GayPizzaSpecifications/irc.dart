@@ -4,7 +4,7 @@ import "dart:io";
 
 var packages_dir = new Directory("packages/");
 
-main(List<String> args) {
+void main(List<String> args) {
   var future = new Future.value(null);
 
   if (!packages_dir.existsSync()) {
@@ -13,7 +13,7 @@ main(List<String> args) {
 
   future.then((_) {
     var argz = (args.length > 0 ? " " : "") + args.join(" ");
-    return execute("dart tool/hop_runner.dart --color${argz}");
+    return execute("dart --checked tool/hop_runner.dart --color${argz}");
   });
 }
 

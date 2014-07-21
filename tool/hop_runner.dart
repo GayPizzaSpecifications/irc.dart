@@ -20,7 +20,7 @@ void main(List<String> args) {
   addTask("version", createVersionTask());
   addTask("publish", createProcessTask("pub", args: ["publish", "-f"], description: "Publishes a New Version"), dependencies: ["version"]);
   addTask("bench", createBenchTask());
-  addTask("test", createProcessTask("dart", args: ["test/all_tests.dart"]));
+  addTask("test", createProcessTask("dart", args: ["--checked", "test/all_tests.dart"]));
   addChainedTask("check", ["analyze", "test"]);
   runHop(args);
 }
