@@ -9,7 +9,7 @@ homepage: https://github.com/DirectMyFile/irc.dart/
 environment:
   sdk: '>=1.5.0'
 dependencies:
-  event_dispatcher: '>=0.1.0 <0.5.0'
+  event_dispatcher: '>=1.0.0 <2.0.0'
   quiver: '>=0.18.2 <0.20.0'
 dev_dependencies:
   hop: '>=0.31.0+1 <0.32.0'
