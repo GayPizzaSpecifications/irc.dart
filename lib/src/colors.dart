@@ -25,17 +25,17 @@ class Color {
   static final MAGENTA = "\u000313";
   static final DARK_GRAY = "\u000314";
   static final LIGHT_GRAY = "\u000315";
-  
+
   /**
    * Color can't be instantiated.
    */
   factory Color() => throw new UnsupportedError("Sorry, Color can't be instantiated");
-  
+
   /**
    * Puts the Color String of [color] in front of [input] and ends with [end_color].
    */
   static String wrap(String input, String color, [String end_color = "reset"]) => "${forName(color)}${input}${forName(end_color)}";
-  
+
   /**
    * Gets a Color by the name of [input]. If no such color exists it returns null.
    */
@@ -52,7 +52,7 @@ class Color {
     }
     return field.reflectee;
   }
- 
+
   /**
    * Gets a Mapping of Color Names to Color Beginnings
    */

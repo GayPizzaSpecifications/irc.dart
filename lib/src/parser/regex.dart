@@ -25,11 +25,11 @@ class RegexIrcParser extends IrcParser {
     var msg = match[5];
     var parameters = param_string != null ? param_string.split(" ") : [];
     var tags = <String, dynamic>{};
-    
+
     if (tag_stuff.trim().isNotEmpty) {
       tags = IrcParserSupport.parse_tags(tag_stuff);
     }
-    
+
     return new Message(line: line, hostmask: hostmask, command: command, message: msg, parameters: parameters, tags: tags);
   }
 }

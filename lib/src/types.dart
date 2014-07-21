@@ -93,7 +93,7 @@ class Channel {
    * Banned Hostmasks
    */
   final List<GlobHostmask> bans = [];
-  
+
   /**
    * Channel Topic
    */

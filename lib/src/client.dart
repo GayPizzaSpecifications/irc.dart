@@ -150,8 +150,7 @@ class Client extends ClientBase with EventDispatcher {
 
         case "NOTICE":
           var from = input.plain_hostmask;
-          if (input.parameters[0] != "*")
-            from = input.hostmask.nickname;
+          if (input.parameters[0] != "*") from = input.hostmask.nickname;
 
           var target = input.parameters[0];
           var message = input.message;

@@ -9,9 +9,8 @@ class CommandBot extends Bot {
   Client _client;
 
   Client get client => _client;
-  
-  Map<String, StreamController<CommandEvent>> commands = {
-  };
+
+  Map<String, StreamController<CommandEvent>> commands = {};
 
   CommandHandler commandNotFound = (event) => null;
 
