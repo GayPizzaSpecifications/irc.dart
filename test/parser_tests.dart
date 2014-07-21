@@ -12,6 +12,11 @@ main() {
         expect(it.nickname, equals("samrg472"), reason: "nickname should be 'samrg472'");
         expect(it.identity, equals("~deathcraz"), reason: "identity should be '~deathcraz'");
         expect(it.hostname, equals("I.got.g-lined.cu.cc"), reason: "hostname should be 'I.got.g-lined.cu.cc'");
+      },
+      "DirectBot!~DirectBot@162.216.222.179": (Hostmask it) {
+        expect(it.nickname, equals("DirectBot"), reason: "nickname should be 'DirectBot'");
+        expect(it.identity, equals("~DirectBot"), reason: "identity should be '~DirectBot'");
+        expect(it.hostname, equals("162.216.222.179"), reason: "hostname should be '162.216.222.179'");
       }
     };
 
