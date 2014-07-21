@@ -34,7 +34,7 @@ class Message {
   /**
    * Creates a new Message
    */
-  Message({this.line, hostmask, this.command, this.message, this.parameters})
+  Message({this.line, hostmask, this.command, this.message, this.parameters, this.tags})
       : _hostmask = hostmask;
 
   @override
@@ -49,4 +49,21 @@ class Message {
    * The Plain Hostmask
    */
   String get plain_hostmask => _hostmask;
+}
+
+class IrcParserSupport {
+  static Map<String, dynamic> parse_tags(String input) {
+    var out = {};
+    var parts = input.substring(1).split(";");
+    for (var part in parts) {
+      if (part.contains("=")) {
+        var keyValue = part.split("=");
+        out[keyValue[0]] = keyValue[1];
+      } else {
+        out[part] = true;
+      }
+    }
+    print(out);
+    return out;
+  }
 }

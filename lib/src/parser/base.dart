@@ -17,7 +17,7 @@ abstract class IrcParser extends Converter<String, Message> {
   static IrcParser create() => new RegexIrcParser();
   
   /**
-   * Parses [line] as an IRC line and outputs a [Message]
+   * Parses [line] as an IRC line and outputs a [Message].
    */
   @override
   Message convert(String line);
