@@ -51,7 +51,16 @@ class Message {
   String get plain_hostmask => _hostmask;
 }
 
+/**
+ * IRC Parser Helpers
+ */
 class IrcParserSupport {
+  /**
+   * Parses IRCv3 Tags from [input].
+   * 
+   * [input] should begin with the @ part of the tags
+   * and not include the space at the end.
+   */
   static Map<String, dynamic> parse_tags(String input) {
     var out = <String, dynamic>{};
     var parts = input.substring(1).split(";");
