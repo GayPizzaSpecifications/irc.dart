@@ -343,8 +343,8 @@ class Client extends ClientBase with EventDispatcher {
       }
 
       /* Set the Connection Status */
-      register((ConnectEvent event) => connected = true);
-      register((DisconnectEvent event) => connected = false);
+      register((ConnectEvent event) => this.connected = true);
+      register((DisconnectEvent event) => this.connected = false);
 
       /* Handles when the user quits */
       register((QuitEvent event) {
