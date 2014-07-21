@@ -340,6 +340,11 @@ class Client extends ClientBase with EventDispatcher {
           var message = params.join(" ");
           post(new ServerSupportsEvent(this, message));
           break;
+        case "INVITE": // We Were Invited to a Channel
+          var user = input.hostmask.nickname;
+          var channel = input.message;
+          post(new InviteEvent(this, channel, user));
+          break;
       }
 
       /* Set the Connection Status */

@@ -514,3 +514,30 @@ class ServerSupportsEvent extends Event {
     });
   }
 }
+
+/**
+ * Invite Event
+ */
+class InviteEvent extends Event {
+  /**
+   * The Channel that the client was invited to
+   */
+  String channel;
+  
+  /**
+   * The user who invited the client
+   */
+  String user;
+  
+  InviteEvent(Client client, this.channel, this.user) : super(client);
+  
+  /**
+   * Joins the Channel
+   */
+  void join() => client.join(channel);
+  
+  /**
+   * Sends a Message to the User
+   */
+  void reply(String message) => client.message(user, message);
+}

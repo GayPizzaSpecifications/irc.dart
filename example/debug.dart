@@ -148,6 +148,11 @@ void main() {
           event.client.join(event.channel.name);
         }
       })
+      
+      ..register((InviteEvent event) {
+        event.reply("Thanks for inviting me to ${event.channel}");
+        event.join();
+      })
 
       ..register((ErrorEvent event) {
         print("-------------------------------------------------------------------");
