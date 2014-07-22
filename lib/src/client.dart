@@ -12,14 +12,10 @@ part of irc;
  *      // Use Client
  */
 class Client extends ClientBase with EventDispatcher {
-  /**
-   * The Client Configuration
-   */
+  @override
   BotConfig config;
 
-  /**
-   * Channels that the Client is in.
-   */
+  @override
   List<Channel> channels = [];
 
   /**
@@ -48,23 +44,14 @@ class Client extends ClientBase with EventDispatcher {
   String _nickname;
 
   /**
-   * The Client's Nickname
-   */
-  String get nickname => _nickname;
-
-  /**
    * Flag for if the Client has hit an error.
    */
   bool _errored = false;
 
-  /**
-   * The IRC Parser to use.
-   */
+  @override
   final IrcParser parser;
-
-  /**
-   * Flag for if the Client is connected.
-   */
+  
+  @override
   bool connected = false;
 
   /**
@@ -79,12 +66,6 @@ class Client extends ClientBase with EventDispatcher {
   String _motd = "";
 
   /**
-   * Gets the Server's MOTD
-   * Not Ready until the ReadyEvent is posted
-   */
-  String get motd => _motd;
-
-  /**
    * Creates a new IRC Client using the specified configuration
    * If parser is specified, then the parser is used for the current client
    */
@@ -95,6 +76,71 @@ class Client extends ClientBase with EventDispatcher {
     _registerHandlers();
     _nickname = config.nickname;
     _whois_builders = new Map<String, WhoisBuilder>();
+  }
+  
+  @override
+  String get motd => _motd;
+
+  @override
+  String get nickname => _nickname;
+
+  @override
+  Channel channel(String name) => channels.firstWhere((channel) => channel.name == name, orElse: () => null);
+
+  @override
+  void connect() {
+    Socket.connect(config.host, config.port).then((Socket sock) {
+      _socket = sock;
+
+      runZoned(() {
+        post(new ConnectEvent(this));
+
+        sock.handleError((err) {
+          post(new ErrorEvent(this, err: err, type: "socket"));
+        }).transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).listen((message) {
+          post(new LineReceiveEvent(this, message));
+        });
+      }, onError: (err) => post(new ErrorEvent(this, err: err, type: "socket-zone")));
+    });
+  }
+
+  @override
+  Future disconnect({String reason: "Client Disconnecting", bool force: false}) {
+    send("QUIT :${reason}");
+    if (force) {
+      return _socket.close();
+    }
+    return null;
+  }
+  
+  @override
+  void post(Event event) {
+    /* Handle Error Events */
+    if (event is ErrorEvent) {
+      _errored = true;
+    }
+    super.post(event);
+  }
+
+  @override
+  void send(String line) {
+    /* Max Line Length for IRC is 512. With the newlines (\r\n or \n) we can only send 510 character lines */
+    if (line.length > 510) {
+      post(new ErrorEvent(this, type: "general", message: "The length of '${line}' is greater than 510 characters"));
+    }
+    /* Sending the Line has Priority over the Event */
+    _socket.writeln(line);
+    post(new LineSentEvent(this, line));
+  }
+
+  /**
+   * Fires the Ready Event if it hasn't been fired yet.
+   */
+  void _fire_ready() {
+    if (!_ready) {
+      _ready = true;
+      post(new ReadyEvent(this));
+    }
   }
 
   /**
@@ -446,137 +492,5 @@ class Client extends ClientBase with EventDispatcher {
 
     /* When the Bot leaves a channel, we no longer retain the object. */
     register((BotPartEvent event) => channels.remove(event.channel));
-  }
-
-  /**
-   * Fires the Ready Event if it hasn't been fired yet.
-   */
-  void _fire_ready() {
-    if (!_ready) {
-      _ready = true;
-      post(new ReadyEvent(this));
-    }
-  }
-
-  /**
-   * Connects to the IRC Server
-   * Any errors are sent through the [ErrorEvent].
-   */
-  void connect() {
-    Socket.connect(config.host, config.port).then((Socket sock) {
-      _socket = sock;
-
-      runZoned(() {
-        post(new ConnectEvent(this));
-
-        sock.handleError((err) {
-          post(new ErrorEvent(this, err: err, type: "socket"));
-        }).transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).listen((message) {
-          post(new LineReceiveEvent(this, message));
-        });
-      }, onError: (err) => post(new ErrorEvent(this, err: err, type: "socket-zone")));
-    });
-  }
-
-  /**
-   * Sends [line] to the server
-   *
-   *      client.send("WHOIS ExampleUser");
-   *
-   * Will throw an error if [line] is greater than 510 characters
-   */
-  @override
-  void send(String line) {
-    /* Max Line Length for IRC is 512. With the newlines (\r\n or \n) we can only send 510 character lines */
-    if (line.length > 510) {
-      post(new ErrorEvent(this, type: "general", message: "The length of '${line}' is greater than 510 characters"));
-    }
-    /* Sending the Line has Priority over the Event */
-    _socket.writeln(line);
-    post(new LineSentEvent(this, line));
-  }
-
-  /**
-   * Joins the specified [channel].
-   */
-  void join(String channel) => send("JOIN ${channel}");
-
-  /**
-   * Parts the specified [channel].
-   */
-  void part(String channel) => send("PART ${channel}");
-
-  /**
-   * Gets a Channel object for the channel's [name].
-   * Returns null if no such channel exists.
-   */
-  Channel channel(String name) => channels.firstWhere((channel) => channel.name == name, orElse: () => null);
-
-  /**
-   * Changes the Client's Nickname
-   *
-   * [nickname] is the nickname to change to
-   */
-  void changeNickname(String nickname) {
-    send("NICK ${nickname}");
-  }
-
-  /**
-   * Identifies the user with the [nickserv].
-   *
-   * the default [username] is your configured username.
-   * the default [password] is password.
-   * the default [nickserv] is NickServ.
-   */
-  void identify({String username: "PLEASE_INJECT_DEFAULT", String password: "password", String nickserv: "NickServ"}) {
-    if (username == "PLEASE_INJECT_DEFAULT") {
-      username = config.username;
-    }
-    message(nickserv, "identify ${username} ${password}");
-  }
-
-  /**
-   * Disconnects the Client with the specified [reason].
-   * If [force] is true, then the socket is forcibly closed.
-   * When it is forcibly closed, a future is returned.
-   */
-  Future disconnect({String reason: "Client Disconnecting", bool force: false}) {
-    send("QUIT :${reason}");
-    if (force) {
-      return _socket.close();
-    }
-    return null;
-  }
-
-  /**
-   * Sends [msg] to [target] as an action.
-   */
-  void action(String target, String msg) => ctcp(target, "ACTION ${msg}");
-
-  /**
-   * Kicks [user] from [channel] with an optional [reason].
-   */
-  void kick(Channel channel, String user, [String reason]) {
-    send("KICK ${channel.name} ${user}${reason != null ? ' :' + reason : ''}");
-  }
-
-  /**
-   * Sends [msg] to [target] as a CTCP message
-   */
-  void ctcp(String target, String msg) => message(target, "\u0001${msg}\u0001");
-
-  /**
-   * Posts a Event to the Event Dispatching System
-   * The purpose of this method was to assist in checking for Error Events.
-   *
-   * [event] is the event to post.
-   */
-  @override
-  void post(Event event) {
-    /* Handle Error Events */
-    if (event is ErrorEvent) {
-      _errored = true;
-    }
-    super.post(event);
   }
 }

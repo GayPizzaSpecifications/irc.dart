@@ -4,6 +4,38 @@ part of irc;
  * Base Class for a Client
  */
 abstract class ClientBase {
+
+  /**
+   * The IRC Parser to use.
+   */
+  IrcParser get parser;
+  
+  /**
+   * Bot Configuration
+   */
+  BotConfig get config;
+  
+  /**
+   * The Client's Nickname
+   */
+  String get nickname;
+  
+  /**
+   * Gets the Channels the Client is in
+   */
+  Iterable<Channel> get channels;
+  
+  /**
+   * Gets the Server's MOTD
+   * Not Ready until the ReadyEvent is posted
+   */
+  String get motd;
+  
+  /**
+   * Flag for if the Client is connected.
+   */
+  bool get connected;
+  
   /**
    * Sends the [message] to the [target] as a message.
    *
@@ -20,6 +52,15 @@ abstract class ClientBase {
     for (String msg in all) {
       send(begin + msg);
     }
+  }
+  
+  /**
+   * Changes the Client's Nickname
+   *
+   * [nickname] is the nickname to change to
+   */
+  void changeNickname(String nickname) {
+    send("NICK ${nickname}");
   }
 
   /**
@@ -63,6 +104,20 @@ abstract class ClientBase {
   }
   
   /**
+   * Identifies the user with the [nickserv].
+   *
+   * the default [username] is your configured username.
+   * the default [password] is password.
+   * the default [nickserv] is NickServ.
+   */
+  void identify({String username: "PLEASE_INJECT_DEFAULT", String password: "password", String nickserv: "NickServ"}) {
+    if (username == "PLEASE_INJECT_DEFAULT") {
+      username = config.username;
+    }
+    message(nickserv, "identify ${username} ${password}");
+  }
+  
+  /**
    * Sends [line] to the server
    *
    *      client.send("WHOIS ExampleUser");
@@ -70,4 +125,58 @@ abstract class ClientBase {
    * Will throw an error if [line] is greater than 510 characters
    */
   void send(String line);
+  
+  /**
+   * Gets a Channel object for the channel's [name].
+   * Returns null if no such channel exists.
+   */
+  Channel channel(String name);
+  
+  /**
+   * Joins the specified [channel].
+   */
+  void join(String channel) => send("JOIN ${channel}");
+
+  /**
+   * Parts the specified [channel].
+   */
+  void part(String channel) => send("PART ${channel}");
+  
+  /**
+   * Disconnects the Client with the specified [reason].
+   * If [force] is true, then the socket is forcibly closed.
+   * When it is forcibly closed, a future is returned.
+   */
+  Future disconnect({String reason: "Client Disconnecting", bool force: false});
+  
+  /**
+   * Connects to the IRC Server
+   * Any errors are sent through the [ErrorEvent].
+   */
+  void connect();
+  
+  /**
+   * Posts a Event to the Event Dispatching System
+   * The purpose of this method was to assist in checking for Error Events.
+   *
+   * [event] is the event to post.
+   */
+  void post(Event event);
+  
+  /**
+   * Sends [msg] to [target] as a CTCP message
+   */
+  void ctcp(String target, String msg) => message(target, "\u0001${msg}\u0001");
+  
+  /**
+   * Sends [msg] to [target] as an action.
+   */
+  void action(String target, String msg) => ctcp(target, "ACTION ${msg}");
+
+  /**
+   * Kicks [user] from [channel] with an optional [reason].
+   */
+  void kick(Channel channel, String user, [String reason]) {
+    send("KICK ${channel.name} ${user}${reason != null ? ' :' + reason : ''}");
+  }
 }
