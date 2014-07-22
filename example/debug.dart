@@ -25,17 +25,7 @@ void main() {
       ..register((LineSentEvent event) {
         print("<< ${event.line}");
       })
-
-      ..register((MessageEvent event) => print("<${event.target}><${event.from}> ${event.message}"))
-
-      ..register((NoticeEvent event) => print("<NOTICE><${event.target}><${event.from}> ${event.message}"))
-
-      ..register((ServerSupportsEvent event) {
-        event.supported.forEach((k, v) {
-          print("SUPPORTED: ${k}: ${v}");
-        });
-      })
-
+      
       ..register((ReadyEvent event) {
         if (conf.containsKey("identityPassword")) bot.client.identify(username: conf["identityUsername"], password: conf["identityPassword"]);
         event.join("#directcode");

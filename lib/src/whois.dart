@@ -12,6 +12,7 @@ class WhoisBuilder {
   List<String> channels = [];
   List<String> voice_in = [];
   List<String> op_in = [];
+  List<String> owner_in = [];
   String server_name;
   String server_info;
   bool idle;

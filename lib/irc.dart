@@ -25,10 +25,11 @@ part 'src/client.dart';
 /* IRC Events */
 part 'src/events.dart';
 /* IRC Types */
-part 'src/types.dart';
+part 'src/config.dart';
 /* Message Formatting */
 part 'src/colors.dart';
 /* WHOIS Stuff */
 part 'src/whois.dart';
 /* Client Pool */
 part 'src/pool.dart';
+part 'src/channel.dart';

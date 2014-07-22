@@ -64,6 +64,11 @@ class Client extends ClientBase with EventDispatcher {
    * Stores the MOTD
    */
   String _motd = "";
+  
+  /**
+   * Server Supports
+   */
+  Map<String, String> _supported = {};
 
   /**
    * Creates a new IRC Client using the specified configuration
@@ -172,7 +177,7 @@ class Client extends ClientBase with EventDispatcher {
 
         case "JOIN": // User Joined Channel
           var who = input.hostmask.nickname;
-          var chan_name = input.parameters[0];
+          var chan_name = input.parameters.length != 0 ? input.parameters[0] : input.message;
           if (who == _nickname) {
             // We Joined a New Channel
             if (channel(chan_name) == null) {
@@ -186,6 +191,7 @@ class Client extends ClientBase with EventDispatcher {
           break;
 
         case "PRIVMSG": // Message
+          _fire_ready();
           var from = input.hostmask.nickname;
           var target = input.parameters[0];
           var message = input.message;
@@ -209,7 +215,7 @@ class Client extends ClientBase with EventDispatcher {
         case "PART": // User Left Channel
           var who = input.hostmask.nickname;
 
-          var chan_name = input.parameters[0];
+          var chan_name = input.parameters.length != 0 ? input.parameters[0] : input.message;
 
           if (who == _nickname) {
             post(new BotPartEvent(this, channel(chan_name)));
@@ -240,8 +246,8 @@ class Client extends ClientBase with EventDispatcher {
           post(new ErrorEvent(this, message: message, type: "server"));
           break;
 
-        case "353": // Channel List
-          var users = input.message.split(" ");
+        case "353": // Channel User List
+          var users = input.message.split(" ")..removeWhere((it) => it.trim().isEmpty);
           var channel = this.channel(input.parameters[2]);
 
           users.forEach((user) {
@@ -346,6 +352,9 @@ class Client extends ClientBase with EventDispatcher {
               var c = chan.substring(1);
               builder.channels.add(c);
               builder.voice_in.add(c);
+            } else if (chan.startsWith("~")) {
+              var c = chan.substring(1);
+              builder.owner_in.add(c);
             } else {
               builder.channels.add(chan);
             }
@@ -468,6 +477,10 @@ class Client extends ClientBase with EventDispatcher {
       register((ModeEvent event) {
         if (event.channel != null) {
           var channel = event.channel;
+          var prefixes = IrcParserSupport.parse_supported_prefixes(_supported["PREFIX"]);
+          if (prefixes["modes"].contains(event.mode.substring(1))) {
+            return;
+          }
           switch (event.mode) {
             case "+o":
               channel.ops.add(event.user);
@@ -485,6 +498,18 @@ class Client extends ClientBase with EventDispatcher {
               channel.ops.remove(event.user);
               channel.members.add(event.user);
               break;
+            case "+q":
+              channel.owners.add(event.user);
+              channel.ops.remove(event.user);
+              channel.voices.remove(event.user);
+              channel.members.remove(event.user);
+              break;
+            case "-q":
+              channel.ops.remove(event.user);
+              channel.voices.remove(event.user);
+              channel.members.add(event.user);
+              channel.owners.remove(event.user);
+              break;
           }
         }
       });
@@ -492,5 +517,9 @@ class Client extends ClientBase with EventDispatcher {
 
     /* When the Bot leaves a channel, we no longer retain the object. */
     register((BotPartEvent event) => channels.remove(event.channel));
+    
+    register((ServerSupportsEvent event) {
+      _supported.addAll(event.supported);
+    });
   }
 }

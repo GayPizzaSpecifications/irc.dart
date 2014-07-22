@@ -32,9 +32,13 @@ class Hostmask {
   Hostmask.parse(String input) {
     var parts = input.split(HOSTMASK_REGEX);
 
-    this.nickname = parts[0];
-    this.identity = parts[1];
-    this.hostname = parts[2];
+    if (parts.length == 1) {
+      hostname = input;
+    } else {
+      this.nickname = parts[0];
+      this.identity = parts[1];
+      this.hostname = parts[2]; 
+    }
   }
 }
 

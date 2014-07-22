@@ -74,4 +74,12 @@ class IrcParserSupport {
     }
     return out;
   }
+  
+  static Map<String, String> parse_supported_prefixes(String input) {
+    var out = {};
+    var split = input.split(")");
+    out["modes"] = split[0].substring(1).split(".");
+    out["prefixes"] = split[1].split(".");
+    return out;
+  }
 }
