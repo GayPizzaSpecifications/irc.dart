@@ -4,10 +4,11 @@ language: node
 env:
 - DART_CHANNEL=stable
 - DART_CHANNEL=dev
+- DART_CHANNEL=be
 install:
 - "mkdir tools"
 - "cd tools"
-- "wget http://gsdview.appspot.com/dart-archive/channels/${DART_CHANNEL}/release/latest/sdk/dartsdk-linux-x64-release.zip -O sdk.zip"
+- "wget http://gsdview.appspot.com/dart-archive/channels/${DART_CHANNEL}/raw/latest/sdk/dartsdk-linux-x64-release.zip -O sdk.zip"
 - "unzip sdk.zip"
 - "cd .."
 - "export PATH=${PATH}:${PWD}/tools/dart-sdk/bin"
