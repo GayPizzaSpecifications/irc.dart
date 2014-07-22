@@ -7,16 +7,25 @@ class ClientPool {
   /**
    * All Clients
    */
-  List<Client> clients;
+  List<Client> clients = [];
 
   /**
-   * Adds a Client using the [config]
+   * Adds a Client using the [config].
    */
-  int addClient(BotConfig config) {
+  int addClient(BotConfig config, {bool connect: false}) {
     var client = new Client(config);
     clients.add(client);
+    if (connect) {
+      client.connect();
+    }
     return clients.indexOf(client);
   }
+  
+  Client clientAt(int position) => clients[position];
+  
+  int idOf(Client client) => clients.indexOf(client);
+  
+  Client operator [](int id) => clientAt(id);
 
   void connectAll() => forEach((client) => client.connect());
   void disconnectAll([String reason = null, bool force = false]) => forEach((client) => client.disconnect(reason: reason, force: force));
