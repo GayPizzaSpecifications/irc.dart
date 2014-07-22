@@ -22,6 +22,22 @@ irc.dart is designed to be the one-stop shop for all your irc needs in Dart.
 - Bot API
 - Event Based
 
+**Fully Supported Servers**:
+- [Charybdis](https://github.com/atheme/charybdis)
+
+**Partially Supported Servers**:
+- [UnrealIRCd](http://www.unrealircd.com/)
+
+**Tested On**:
+- [EsperNet](https://www.esper.net/)
+- [Freenode](https://freenode.net/)
+
+We are looking for others to help work on better server support. See [Contacting Us](#contacting-us).
+
+## Contacting Us
+
+You can find us on `irc.esper.net` at `#directcode`. Just mention you wanna help with the Dart IRC library, and we will be happy to assist you!
+
 ## Contributing
 
 See the [Contributing Guide](https://github.com/DirectMyFile/irc.dart/blob/master/CONTRIBUTING.md).
