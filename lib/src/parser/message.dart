@@ -75,6 +75,11 @@ class IrcParserSupport {
     return out;
   }
   
+  /**
+   * Parses the ISUPPORT PREFIX Property
+   * 
+   * [input] should begin with '(' and contain ')'
+   */
   static Map<String, String> parse_supported_prefixes(String input) {
     var out = {};
     var split = input.split(")");
