@@ -50,7 +50,7 @@ class Client extends ClientBase with EventDispatcher {
 
   @override
   final IrcParser parser;
-  
+
   @override
   bool connected = false;
 
@@ -64,7 +64,7 @@ class Client extends ClientBase with EventDispatcher {
    * Stores the MOTD
    */
   String _motd = "";
-  
+
   /**
    * Server Supports
    */
@@ -82,7 +82,7 @@ class Client extends ClientBase with EventDispatcher {
     _nickname = config.nickname;
     _whois_builders = new Map<String, WhoisBuilder>();
   }
-  
+
   @override
   String get motd => _motd;
 
@@ -97,15 +97,16 @@ class Client extends ClientBase with EventDispatcher {
     Socket.connect(config.host, config.port).then((Socket sock) {
       _socket = sock;
 
-      runZoned(() {
-        post(new ConnectEvent(this));
+      post(new ConnectEvent(this));
 
-        sock.handleError((err) {
-          post(new ErrorEvent(this, err: err, type: "socket"));
-        }).transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).listen((message) {
-          post(new LineReceiveEvent(this, message));
-        });
-      }, onError: (err) => post(new ErrorEvent(this, err: err, type: "socket-zone")));
+      sock
+          ..transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).listen((message) {
+            post(new LineReceiveEvent(this, message));
+          })
+
+          ..handleError((err) {
+            post(new ErrorEvent(this, err: err, type: "socket"));
+          });
     });
   }
 
@@ -115,9 +116,9 @@ class Client extends ClientBase with EventDispatcher {
     if (force) {
       return _socket.close();
     }
-    return null;
+    return _socket.done;
   }
-  
+
   @override
   void post(Event event) {
     /* Handle Error Events */
@@ -228,7 +229,9 @@ class Client extends ClientBase with EventDispatcher {
           var who = input.hostmask.nickname;
 
           if (who == _nickname) {
-            post(new DisconnectEvent(this));
+            _socket.close().then((_) {
+              post(new DisconnectEvent(this));
+            });
           } else {
             post(new QuitEvent(this, who));
           }
@@ -517,7 +520,7 @@ class Client extends ClientBase with EventDispatcher {
 
     /* When the Bot leaves a channel, we no longer retain the object. */
     register((BotPartEvent event) => channels.remove(event.channel));
-    
+
     register((ServerSupportsEvent event) {
       _supported.addAll(event.supported);
     });

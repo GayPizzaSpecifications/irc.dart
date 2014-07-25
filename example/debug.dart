@@ -110,7 +110,9 @@ void main() {
       })
 
       ..command("quit", (CommandEvent event) {
-        bot.disconnect();
+        bot.disconnect().then((_) {
+          exit(1);
+        });
       })
 
       ..register((JoinEvent event) {
@@ -153,10 +155,6 @@ void main() {
             break;
           case "server":
             print("Server Error: ${event.message}");
-            break;
-          case "socket-zone":
-            print(event.err);
-            print(event.err.stackTrace);
             break;
           default:
             print("Error Type: ${event.type}");
