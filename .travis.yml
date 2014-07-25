@@ -1,6 +1,6 @@
 # Travis CI Build for irc.dart
 # Runs on Dart development and stable releases
-language: node
+language: node_js
 
 env:
 - DART_CHANNEL=stable DART_VERSION=latest # Latest Dart Release
