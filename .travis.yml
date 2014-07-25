@@ -18,6 +18,7 @@ install:
 - "cd .."
 - "export DART_SDK=${PWD}/tools/dart-sdk"
 - "export PATH=${PATH}:${DART_SDK}/bin"
+- "dart --version"
 
 script:
 - "./tool/build.dart check"
