@@ -10,6 +10,8 @@ env:
 - DART_CHANNEL=dev DART_VERSION=latest # Dart Development Channel
 - DART_CHANNEL=be DART_VERSION=latest # Dart Bleeding Edge
 
+before_install: true
+
 install:
 - "mkdir tools"
 - "cd tools"
@@ -19,6 +21,8 @@ install:
 - "export DART_SDK=${PWD}/tools/dart-sdk"
 - "export PATH=${PATH}:${DART_SDK}/bin"
 - "dart --version"
+
+before_script: true
 
 script:
 - "./tool/build.dart check"
