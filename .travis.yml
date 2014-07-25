@@ -1,7 +1,10 @@
-# Travis CI Build for irc.dart
-# Runs on Dart development and stable releases
+# Travis CI Build for the Dart IRC Library
+
+# Since Travis CI doesn't support Dart out of the box
+# we use this as a placeholder. Not really a big deal.
 language: node_js
 
+# Build Matrix Configurations
 env:
 - DART_CHANNEL=stable DART_VERSION=latest # Latest Dart Release
 - DART_CHANNEL=stable DART_VERSION=37972 # Dart v1.5.3
@@ -11,6 +14,7 @@ env:
 - DART_CHANNEL=dev DART_VERSION=latest # Dart Development Channel
 - DART_CHANNEL=be DART_VERSION=latest # Dart Bleeding Edge Channel
 
+# Setup Dart
 install:
 - "mkdir tools"
 - "cd tools"
@@ -21,6 +25,7 @@ install:
 - "export PATH=${PATH}:${DART_SDK}/bin"
 - "dart --version"
 
+# Run the Build
 script:
-- "pub get"
-- "./tool/build.dart check"
+- "pub get" # Get Dependencies
+- "./tool/build.dart check" # Run Build System
