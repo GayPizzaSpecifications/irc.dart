@@ -62,7 +62,8 @@ class Channel {
     var all = new Set<String>()
         ..addAll(ops)
         ..addAll(voices)
-        ..addAll(members);
+        ..addAll(members)
+        ..addAll(owners);
     return all;
   }
 
