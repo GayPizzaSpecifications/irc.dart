@@ -61,4 +61,25 @@ main() {
       });
     }
   });
+  
+  group("Glob Hostmask", () {
+    var inputs = {
+      "*!*@I.got.g-lined.cu.cc": [
+        "samrg472!~deathcraz@I.got.g-lined.cu.cc",
+        "samrg472!~deathcraz@I.got.g-lined.cu.cc",
+        "kaendfinger!~kaendfing@I.got.g-lined.cu.cc",
+        "!some!~user@not.right.com"
+      ]
+    };
+    
+    for (var input in inputs.keys) {
+      test(input, () {
+        var glob = new GlobHostmask(input);
+        for (var against in inputs[input]) {
+          var matcher = against.startsWith("!") ? isFalse : isTrue;
+          expect(glob.matches(against), matcher);
+        }
+      });
+    }
+  });
 }
