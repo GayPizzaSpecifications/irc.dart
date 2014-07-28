@@ -13,5 +13,5 @@ dependencies:
   quiver: '>=0.18.2 <0.20.0'
 dev_dependencies:
   hop: '>=0.31.0+1 <0.32.0'
-  yaml: '>=1.1.1 <2.0.0'
-  unittest: '>=0.11.0+2 <0.12.0'
+  yaml: '>=2.0.0 <3.0.0'
+  unittest: '>=0.11.0+3 <0.12.0'
