@@ -1,3 +1,20 @@
+# Changelog
+
+The most up-to-date changelog is available [here](https://github.com/DirectMyFile/irc.dart/blob/master/CHANGELOG.md).
+
+## v1.4.4
+
+- [Update Dependencies](https://github.com/DirectMyFile/irc.dart/commit/f51a020a656686078f21d12a540c411474ee6647)
+- [Fix bug in Channel Owners](https://github.com/DirectMyFile/irc.dart/commit/26876e30ee28332ef188de0592806ed8b99bfd46)
+- [Travis CI now tests on multiple Dart Versions](https://github.com/DirectMyFile/irc.dart/commit/300dd7a629a8e7e32d93924ea0a12142a87594e8)
+
+## v1.4.3
+
+- [Partial Support for Owners](https://github.com/DirectMyFile/irc.dart/commit/643472e66e303a39990662c2a0bfce9af0cc8b00)
+- [Improve Client Pool](https://github.com/DirectMyFile/irc.dart/commit/88a89b270b5e902350b11a390cdc73cead3cf45c)
+- [Add Reply Constants](https://github.com/DirectMyFile/irc.dart/commit/a00c38cc02f7e53a44c90c5a0f6f222673b7fb7c)
+- [Move some stuff to ClientBase](https://github.com/DirectMyFile/irc.dart/commit/76a4b1f0cba592fdcdf2c99f8554ae24c1acfa88)
+
 ## v1.4.2
 
 Reupload Package
