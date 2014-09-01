@@ -32,12 +32,6 @@ class Client extends ClientBase with EventDispatcher {
    * Flag for if the Client has sent a ReadyEvent
    */
   bool _ready = false;
-
-  /**
-   * Flag for if the Client has received any data from the server yet
-   */
-  bool _receivedAny = false;
-
   /**
    * Privately Stored Nickname
    */
@@ -98,9 +92,9 @@ class Client extends ClientBase with EventDispatcher {
       _socket = sock;
 
       post(new ConnectEvent(this));
-
+      
       sock
-          ..transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter()).listen((message) {
+          ..transform(new Utf8Decoder()).transform(new LineSplitter()).listen((message) {
             post(new LineReceiveEvent(this, message));
           })
 
@@ -153,14 +147,13 @@ class Client extends ClientBase with EventDispatcher {
    * Registers all the default handlers.
    */
   void _registerHandlers() {
+    
+    register((ConnectEvent event) {
+      send("NICK ${config.nickname}");
+      send("USER ${config.username} ${config.username} ${config.host} :${config.realname}");
+    });
+    
     register((LineReceiveEvent event) {
-
-      /* Send initial information after we receive the first line */
-      if (!_receivedAny) {
-        _receivedAny = true;
-        send("NICK ${config.nickname}");
-        send("USER ${config.username} 8 * :${config.realname}");
-      }
 
       /* Parse the IRC Input */
       var input = parser.convert(event.line);
