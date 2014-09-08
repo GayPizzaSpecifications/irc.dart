@@ -48,7 +48,7 @@ class Message {
   /**
    * The Plain Hostmask
    */
-  String get plain_hostmask => _hostmask;
+  String get plainHostmask => _hostmask;
 }
 
 /**
@@ -61,7 +61,7 @@ class IrcParserSupport {
    * [input] should begin with the @ part of the tags
    * and not include the space at the end.
    */
-  static Map<String, dynamic> parse_tags(String input) {
+  static Map<String, dynamic> parseTags(String input) {
     var out = <String, dynamic>{};
     var parts = input.substring(1).split(";");
     for (var part in parts) {
@@ -80,7 +80,7 @@ class IrcParserSupport {
    * 
    * [input] should begin with '(' and contain ')'
    */
-  static Map<String, String> parse_supported_prefixes(String input) {
+  static Map<String, String> parseSupportedPrefixes(String input) {
     var out = {};
     var split = input.split(")");
     out["modes"] = split[0].substring(1).split(".");

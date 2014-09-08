@@ -49,5 +49,5 @@ class BotConfig {
    * Loads the Client Configuration from the [input] as JSON using field names as keys
    */
   BotConfig.fromJSON(String input)
-      : this.fromMap(JSON.decoder.convert(input));
+      : this.fromMap(JSON.decode(input));
 }

@@ -327,19 +327,19 @@ class WhoisEvent extends Event {
    */
   List<String> get member_in {
     var list = <String>[];
-    list.addAll(builder.channels.where((i) => !op_in.contains(i) && !voice_in.contains(i)));
+    list.addAll(builder.channels.where((i) => !operatorChannels.contains(i) && !voicedChannels.contains(i)));
     return list;
   }
 
   /**
    * The Channels the user is an operator in
    */
-  List<String> get op_in => builder.op_in;
+  List<String> get operatorChannels => builder.opIn;
 
   /**
    * The Channels the user is a voice in
    */
-  List<String> get voice_in => builder.voice_in;
+  List<String> get voicedChannels => builder.voiceIn;
 
   /**
    * If the user is away
@@ -349,22 +349,22 @@ class WhoisEvent extends Event {
   /**
    * If the user is away, then this is the message that was set
    */
-  String get away_message => builder.away_message;
+  String get awayMessage => builder.awayMessage;
 
   /**
    * If this user is a server operator
    */
-  bool get server_operator => builder.server_operator;
+  bool get isServerOperator => builder.isServerOperator;
 
   /**
    * The name of the server this user is on
    */
-  String get server_name => builder.server_name;
+  String get serverName => builder.serverName;
 
   /**
    * The Server Information (message) for the server this user is on
    */
-  String get server_info => builder.server_info;
+  String get serverInfo => builder.serverInfo;
 
   /**
    * The User's Username
@@ -384,7 +384,7 @@ class WhoisEvent extends Event {
   /**
    * If the user is idle, then this is the amount of time that the user has been idle
    */
-  int get idle_time => builder.idle_time;
+  int get idleTime => builder.idleTime;
 
   /**
    * The User's Real Name

@@ -136,7 +136,7 @@ class Client extends ClientBase with EventDispatcher {
   /**
    * Fires the Ready Event if it hasn't been fired yet.
    */
-  void _fire_ready() {
+  void _fireReady() {
     if (!_ready) {
       _ready = true;
       post(new ReadyEvent(this));
@@ -161,7 +161,7 @@ class Client extends ClientBase with EventDispatcher {
       switch (input.command) {
         case "376": // End of MOTD
           post(new MOTDEvent(this, _motd));
-          _fire_ready();
+          _fireReady();
           break;
 
         case "PING":
@@ -178,14 +178,14 @@ class Client extends ClientBase with EventDispatcher {
               channels.add(new Channel(this, chan_name));
             }
             post(new BotJoinEvent(this, channel(chan_name)));
-            channel(chan_name).reload_bans();
+            channel(chan_name).reloadBans();
           } else {
             post(new JoinEvent(this, who, channel(chan_name)));
           }
           break;
 
         case "PRIVMSG": // Message
-          _fire_ready();
+          _fireReady();
           var from = input.hostmask.nickname;
           var target = input.parameters[0];
           var message = input.message;
@@ -198,7 +198,7 @@ class Client extends ClientBase with EventDispatcher {
           break;
 
         case "NOTICE":
-          var from = input.plain_hostmask;
+          var from = input.plainHostmask;
           if (input.parameters[0] != "*") from = input.hostmask.nickname;
 
           var target = input.parameters[0];
@@ -286,7 +286,7 @@ class Client extends ClientBase with EventDispatcher {
           var who = split[2];
 
           if (mode == "+b" || mode == "-b") {
-            channel.reload_bans();
+            channel.reloadBans();
           }
 
           post(new ModeEvent(this, mode, who, channel));
@@ -310,14 +310,14 @@ class Client extends ClientBase with EventDispatcher {
           var message = input.message;
           var server_name = split[2];
           var builder = _whois_builders[nickname];
-          builder.server_name = server_name;
-          builder.server_info = message;
+          builder.serverName = server_name;
+          builder.serverInfo = message;
           break;
 
         case "313": // WHOIS Operator Information
           var nickname = input.parameters[0];
           var builder = _whois_builders[nickname];
-          builder.server_operator = true;
+          builder.isServerOperator = true;
           break;
 
         case "317": // WHOIS Idle Information
@@ -326,7 +326,7 @@ class Client extends ClientBase with EventDispatcher {
           var idle = int.parse(split[2]);
           var builder = _whois_builders[nickname];
           builder.idle = true;
-          builder.idle_time = idle;
+          builder.idleTime = idle;
           break;
 
         case "318": // End of WHOIS
@@ -343,14 +343,14 @@ class Client extends ClientBase with EventDispatcher {
             if (chan.startsWith("@")) {
               var c = chan.substring(1);
               builder.channels.add(c);
-              builder.op_in.add(c);
+              builder.opIn.add(c);
             } else if (chan.startsWith("+")) {
               var c = chan.substring(1);
               builder.channels.add(c);
-              builder.voice_in.add(c);
+              builder.voiceIn.add(c);
             } else if (chan.startsWith("~")) {
               var c = chan.substring(1);
-              builder.owner_in.add(c);
+              builder.ownerIn.add(c);
             } else {
               builder.channels.add(chan);
             }
@@ -473,10 +473,12 @@ class Client extends ClientBase with EventDispatcher {
       register((ModeEvent event) {
         if (event.channel != null) {
           var channel = event.channel;
-          var prefixes = IrcParserSupport.parse_supported_prefixes(_supported["PREFIX"]);
+          var prefixes = IrcParserSupport.parseSupportedPrefixes(_supported["PREFIX"]);
+          
           if (prefixes["modes"].contains(event.mode.substring(1))) {
             return;
           }
+          
           switch (event.mode) {
             case "+o":
               channel.ops.add(event.user);

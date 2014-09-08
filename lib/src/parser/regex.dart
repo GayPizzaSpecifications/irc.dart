@@ -21,7 +21,7 @@ class RegexIrcParser extends IrcParser {
         match = [match[0], null, null, match[1], null, match[3].substring(1)];
       }
     }
-    var tag_stuff = match[1];
+    var tagStuff = match[1];
     var hostmask = match[2];
     var command = match[3];
     var param_string = match[4];
@@ -29,8 +29,8 @@ class RegexIrcParser extends IrcParser {
     var parameters = param_string != null ? param_string.split(" ") : [];
     var tags = <String, dynamic>{};
     
-    if (tag_stuff != null && tag_stuff.trim().isNotEmpty) {
-      tags = IrcParserSupport.parse_tags(tag_stuff);
+    if (tagStuff != null && tagStuff.trim().isNotEmpty) {
+      tags = IrcParserSupport.parseTags(tagStuff);
     }
 
     return new Message(line: line, hostmask: hostmask, command: command, message: msg, parameters: parameters, tags: tags);

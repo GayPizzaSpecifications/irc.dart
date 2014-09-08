@@ -32,9 +32,9 @@ class Color {
   factory Color() => throw new UnsupportedError("Sorry, Color can't be instantiated");
 
   /**
-   * Puts the Color String of [color] in front of [input] and ends with [end_color].
+   * Puts the Color String of [color] in front of [input] and ends with [endColor].
    */
-  static String wrap(String input, String color, [String end_color = "reset"]) => "${forName(color)}${input}${forName(end_color)}";
+  static String wrap(String input, String color, [String endColor = "reset"]) => "${forName(color)}${input}${forName(endColor)}";
 
   /**
    * Gets a Color by the name of [input]. If no such color exists it returns null.
@@ -56,7 +56,7 @@ class Color {
   /**
    * Gets a Mapping of Color Names to Color Beginnings
    */
-  static Map<String, String> all_colors() {
+  static Map<String, String> allColors() {
     var all = <String, String>{};
     var clazz = reflectClass(Color);
     clazz.declarations.forEach((key, value) {

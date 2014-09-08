@@ -133,7 +133,7 @@ class Channel {
   /**
    * Reloads the Ban List.
    */
-  void reload_bans() {
+  void reloadBans() {
     bans.clear();
     mode("+b");
   }

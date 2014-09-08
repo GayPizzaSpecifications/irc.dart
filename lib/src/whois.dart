@@ -5,19 +5,20 @@ part of irc;
  */
 class WhoisBuilder {
   final String nickname;
+  
   String username;
   String realname;
   String hostname;
-  String away_message;
+  String awayMessage;
   List<String> channels = [];
-  List<String> voice_in = [];
-  List<String> op_in = [];
-  List<String> owner_in = [];
-  String server_name;
-  String server_info;
+  List<String> voiceIn = [];
+  List<String> opIn = [];
+  List<String> ownerIn = [];
+  String serverName;
+  String serverInfo;
   bool idle;
-  int idle_time;
-  bool server_operator;
+  int idleTime;
+  bool isServerOperator;
   bool away = false;
 
   WhoisBuilder(this.nickname);
