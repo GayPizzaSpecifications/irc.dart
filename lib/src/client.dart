@@ -94,7 +94,7 @@ class Client extends ClientBase with EventDispatcher {
       post(new ConnectEvent(this));
       
       sock
-          ..transform(new Utf8Decoder()).transform(new LineSplitter()).listen((message) {
+          ..transform(UTF8.decoder).transform(new LineSplitter()).listen((message) {
             post(new LineReceiveEvent(this, message));
           })
 
