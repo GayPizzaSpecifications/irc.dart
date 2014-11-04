@@ -163,6 +163,11 @@ class Client extends ClientBase with EventDispatcher {
           post(new MOTDEvent(this, _motd));
           _fireReady();
           break;
+        
+        case "422": // case no MOTD
+          post(new MOTDEvent(this, 'No MOTD file present of the server.'));
+          _fireReady();
+          break;
 
         case "PING":
           /* Server Ping */
