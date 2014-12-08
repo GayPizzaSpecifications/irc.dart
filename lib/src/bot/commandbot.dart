@@ -67,9 +67,9 @@ class CommandEvent extends MessageEvent {
     return true;
   }
 
-  void notice(String message, {bool user: true}) => client.notice(user ? from : target, message);
+  void notice(String message, {bool user: true}) => client.sendNotice(user ? from : target, message);
 
-  void act(String message) => channel.action(message);
+  void act(String message) => channel.sendAction(message);
 
   String argument(int index) => args[index];
 }

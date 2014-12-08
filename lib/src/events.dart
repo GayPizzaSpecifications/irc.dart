@@ -80,9 +80,9 @@ class MessageEvent extends Event {
    */
   void reply(String message) {
     if (isPrivate) {
-      client.message(from, message);
+      client.sendMessage(from, message);
     } else {
-      client.message(target, message);
+      client.sendMessage(target, message);
     }
   }
 
@@ -109,7 +109,7 @@ class NoticeEvent extends MessageEvent {
    * Sends [message] to [target] as a notice.
    */
   @override
-  void reply(String message) => client.notice(from, message);
+  void reply(String message) => client.sendNotice(from, message);
 }
 
 /**
@@ -132,7 +132,7 @@ class JoinEvent extends Event {
   /**
    * Replies to this Event by sending [message] to the channel
    */
-  void reply(String message) => channel.message(message);
+  void reply(String message) => channel.sendMessage(message);
 }
 
 /**
@@ -181,7 +181,7 @@ class PartEvent extends Event {
   /**
    * Replies to the Event by sending [message] to the channel the user left
    */
-  void reply(String message) => channel.message(message);
+  void reply(String message) => channel.sendMessage(message);
 }
 
 /**
@@ -421,7 +421,7 @@ class ActionEvent extends MessageEvent {
    * Sends [message] to [target] as a action.
    */
   @override
-  void reply(String message) => client.action(from, message);
+  void reply(String message) => client.sendAction(from, message);
 }
 
 /**
@@ -539,5 +539,5 @@ class InviteEvent extends Event {
   /**
    * Sends a Message to the User
    */
-  void reply(String message) => client.message(user, message);
+  void reply(String message) => client.sendMessage(user, message);
 }

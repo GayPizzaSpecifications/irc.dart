@@ -42,5 +42,5 @@ abstract class Bot {
   /**
    * Sends a Message
    */
-  void message(String target, String message) => client.message(target, message);
+  void message(String target, String message) => client.sendMessage(target, message);
 }

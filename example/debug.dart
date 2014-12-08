@@ -45,7 +45,7 @@ void main() {
 
       ..register((PongEvent event) {
         if (event.message.startsWith("cmd_")) {
-          event.client.message(event.message.replaceFirst("cmd_", ""), "> PONG!");
+          event.client.sendMessage(event.message.replaceFirst("cmd_", ""), "> PONG!");
         }
       })
 
@@ -84,7 +84,7 @@ void main() {
       })
 
       ..command("list-users", (CommandEvent event) {
-        var reply = (msg) => bot.client.notice(event.from, msg);
+        var reply = (msg) => bot.client.sendNotice(event.from, msg);
         reply("> Members: ${event.channel.members.join(", ")}");
         reply("> Ops: ${event.channel.ops.join(", ")}");
         reply("> Voices: ${event.channel.voices.join(", ")}");

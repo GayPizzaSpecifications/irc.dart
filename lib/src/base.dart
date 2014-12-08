@@ -44,10 +44,10 @@ abstract class ClientBase {
    * Note that this handles long messages. If the length of the message is 454
    * characters or bigger, it will split it up into multiple messages
    */
-  void message(String target, String message) {
+  void sendMessage(String target, String message) {
     var begin = "PRIVMSG ${target} :";
 
-    var all = _handle_message_sending(begin, message);
+    var all = _handleMessageSending(begin, message);
 
     for (String msg in all) {
       send(begin + msg);
@@ -69,7 +69,7 @@ abstract class ClientBase {
    * [begin] is the very beginning of the line (like 'PRIVMSG user :')
    * [input] is the message
    */
-  List<String> _handle_message_sending(String begin, String input) {
+  List<String> _handleMessageSending(String begin, String input) {
     var all = [];
     if ((input.length + begin.length) > 454) {
       var max_msg = 454 - (begin.length + 1);
@@ -95,9 +95,9 @@ abstract class ClientBase {
    * Note that this handles long messages. If the length of the message is 454
    * characters or bigger, it will split it up into multiple messages
    */
-  void notice(String target, String message) {
+  void sendNotice(String target, String message) {
     var begin = "NOTICE ${target} :";
-    var all = _handle_message_sending(begin, message);
+    var all = _handleMessageSending(begin, message);
     for (String msg in all) {
       send(begin + msg);
     }
@@ -114,7 +114,7 @@ abstract class ClientBase {
     if (username == "PLEASE_INJECT_DEFAULT") {
       username = config.username;
     }
-    message(nickserv, "identify ${username} ${password}");
+    sendMessage(nickserv, "identify ${username} ${password}");
   }
   
   /**
@@ -166,12 +166,12 @@ abstract class ClientBase {
   /**
    * Sends [msg] to [target] as a CTCP message
    */
-  void ctcp(String target, String msg) => message(target, "\u0001${msg}\u0001");
+  void sendCTCP(String target, String msg) => sendMessage(target, "\u0001${msg}\u0001");
   
   /**
    * Sends [msg] to [target] as an action.
    */
-  void action(String target, String msg) => ctcp(target, "ACTION ${msg}");
+  void sendAction(String target, String msg) => sendCTCP(target, "ACTION ${msg}");
 
   /**
    * Kicks [user] from [channel] with an optional [reason].

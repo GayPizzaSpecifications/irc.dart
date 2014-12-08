@@ -75,12 +75,12 @@ class Channel {
   /**
    * Sends [message] as a channel message
    */
-  void message(String message) => client.message(name, message);
+  void sendMessage(String message) => client.sendMessage(name, message);
 
   /**
    * Sends [message] as a channel notice
    */
-  void notice(String message) => client.notice(name, message);
+  void sendNotice(String message) => client.sendNotice(name, message);
 
   /**
    * Sets +o (Channel Operator) mode on [user]
@@ -124,11 +124,21 @@ class Channel {
     ban(user);
     kick(user, reason);
   }
+  
+  /**
+   * Sets +h (Half-Op) mode on [user]
+   */
+  void hop(String user) => mode("+h", user);
+  
+  /**
+   * Sets -h (Remove Half-Op) mode on [user]
+   */
+  void dehop(String user) => mode("-h", user);
 
   /**
    * Sends [msg] as a channel action.
    */
-  void action(String msg) => message("\u0001ACTION ${msg}\u0001");
+  void sendAction(String msg) => client.sendAction(name, msg);
 
   /**
    * Reloads the Ban List.

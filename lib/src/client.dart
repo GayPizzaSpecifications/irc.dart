@@ -322,7 +322,9 @@ class Client extends ClientBase with EventDispatcher {
         case "313": // WHOIS Operator Information
           var nickname = input.parameters[0];
           var builder = _whois_builders[nickname];
-          builder.isServerOperator = true;
+          if (builder != null) {
+            builder.isServerOperator = true;
+          }
           break;
 
         case "317": // WHOIS Idle Information
