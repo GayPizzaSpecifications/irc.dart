@@ -1,7 +1,7 @@
 part of irc.client;
 
 abstract class IrcConnection {
-  Future connect(BotConfig config);
+  Future connect(IrcConfig config);
   Future disconnect();
   
   void send(String line);
@@ -12,7 +12,7 @@ class SocketIrcConnection extends IrcConnection {
   Socket _socket;
   
   @override
-  Future connect(BotConfig config) {
+  Future connect(IrcConfig config) {
     return Socket.connect(config.host, config.port).then((socket) {
       _socket = socket;
     });

@@ -13,7 +13,7 @@ abstract class ClientBase {
   /**
    * Bot Configuration
    */
-  BotConfig get config;
+  IrcConfig get config;
   
   /**
    * The Client's Nickname

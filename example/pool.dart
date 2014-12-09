@@ -3,7 +3,7 @@ import "package:irc/client.dart";
 void main() {
   var configs = [];
   for (int i = 1; i <= 400; i++) {
-    configs.add(new BotConfig(
+    configs.add(new IrcConfig(
         nickname: "DartBot${i}",
         username: "DartBot",
         host: "irc.directcode.org",

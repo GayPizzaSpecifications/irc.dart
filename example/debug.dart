@@ -4,7 +4,7 @@ import 'dart:convert';
 
 void main() {
 
-  var config = new BotConfig(host: "irc.directcode.org", port: 6667, nickname: "DartBot", username: "DartBot", realname: "irc.dart debug bot");
+  var config = new IrcConfig(host: "irc.directcode.org", port: 6667, nickname: "DartBot", username: "DartBot", realname: "irc.dart debug bot");
 
   var bot = new CommandBot(config, prefix: "?");
 

@@ -1,9 +1,9 @@
 part of irc.client;
 
 /**
- * Bot (Client) Configuration
+ * IRC Client Configuration
  */
-class BotConfig {
+class IrcConfig {
   /**
    * Server Host
    */
@@ -32,12 +32,12 @@ class BotConfig {
   /**
    * Creates a new Client Configuration with default values.
    */
-  BotConfig({this.host: "irc.esper.net", this.port: 6667, this.nickname: "DartBot", this.username: "DartBot", this.realname: "Dart IRC Bot"});
+  IrcConfig({this.host: "irc.esper.net", this.port: 6667, this.nickname: "DartBot", this.username: "DartBot", this.realname: "Dart IRC Bot"});
 
   /**
    * Loads the Client Configuration from [map] using field names as keys
    */
-  BotConfig.fromMap(Map<String, Object> map) {
+  IrcConfig.fromMap(Map<String, Object> map) {
     host = map["host"];
     port = map["port"];
     nickname = map["nickname"];
@@ -48,6 +48,6 @@ class BotConfig {
   /**
    * Loads the Client Configuration from the [input] as JSON using field names as keys
    */
-  BotConfig.fromJSON(String input)
+  IrcConfig.fromJSON(String input)
       : this.fromMap(JSON.decode(input));
 }

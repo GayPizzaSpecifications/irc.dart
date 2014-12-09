@@ -13,7 +13,7 @@ part of irc.client;
  */
 class Client extends ClientBase with EventDispatcher {
   @override
-  BotConfig config;
+  IrcConfig config;
 
   @override
   List<Channel> channels = [];
@@ -73,7 +73,7 @@ class Client extends ClientBase with EventDispatcher {
    * Creates a new IRC Client using the specified configuration
    * If parser is specified, then the parser is used for the current client
    */
-  Client(BotConfig config, {IrcParser parser, IrcConnection connection})
+  Client(IrcConfig config, {IrcParser parser, IrcConnection connection})
       : this.parser = parser == null ? new RegexIrcParser() : parser,
         this.connection = connection == null ? new SocketIrcConnection() : connection,
         this.metadata = {} {
