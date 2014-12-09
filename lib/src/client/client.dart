@@ -1,4 +1,4 @@
-part of irc;
+part of irc.client;
 
 /**
  * IRC Client is the most important class in irc.dart
@@ -24,9 +24,9 @@ class Client extends ClientBase with EventDispatcher {
   Map<String, WhoisBuilder> _whoisBuilders;
 
   /**
-   * Socket used for Communication between server and client
+   * Connection System
    */
-  Socket _socket;
+  IrcConnection connection;
 
   /**
    * Flag for if the Client has sent a ReadyEvent
@@ -68,8 +68,9 @@ class Client extends ClientBase with EventDispatcher {
    * Creates a new IRC Client using the specified configuration
    * If parser is specified, then the parser is used for the current client
    */
-  Client(BotConfig config, [IrcParser parser])
+  Client(BotConfig config, {IrcParser parser, IrcConnection connection})
       : this.parser = parser == null ? new RegexIrcParser() : parser,
+        this.connection = connection == null ? new SocketIrcConnection() : connection,
         this.metadata = {} {
     this.config = config;
     _registerHandlers();
@@ -88,29 +89,19 @@ class Client extends ClientBase with EventDispatcher {
 
   @override
   void connect() {
-    Socket.connect(config.host, config.port).then((Socket sock) {
-      _socket = sock;
-
-      post(new ConnectEvent(this));
+    connection.connect(config).then((_) {
+      connection.lines().listen((line) {
+        post(new LineReceiveEvent(this, line));
+      });
       
-      sock
-          ..transform(UTF8.decoder).transform(new LineSplitter()).listen((message) {
-            post(new LineReceiveEvent(this, message));
-          })
-
-          ..handleError((err) {
-            post(new ErrorEvent(this, err: err, type: "socket"));
-          });
+      post(new ConnectEvent(this));
     });
   }
 
   @override
-  Future disconnect({String reason: "Client Disconnecting", bool force: false}) {
+  Future disconnect({String reason: "Client Disconnecting"}) {
     send("QUIT :${reason}");
-    if (force) {
-      return _socket.close();
-    }
-    return _socket.done;
+    return connection.disconnect();
   }
 
   @override
@@ -129,7 +120,7 @@ class Client extends ClientBase with EventDispatcher {
       post(new ErrorEvent(this, type: "general", message: "The length of '${line}' is greater than 510 characters"));
     }
     /* Sending the Line has Priority over the Event */
-    _socket.writeln(line);
+    connection.send(line);
     post(new LineSentEvent(this, line));
   }
 
@@ -147,12 +138,12 @@ class Client extends ClientBase with EventDispatcher {
    * Registers all the default handlers.
    */
   void _registerHandlers() {
-    
+
     register((ConnectEvent event) {
       send("NICK ${config.nickname}");
       send("USER ${config.username} ${config.username} ${config.host} :${config.realname}");
     });
-    
+
     register((LineReceiveEvent event) {
 
       /* Parse the IRC Input */
@@ -163,7 +154,7 @@ class Client extends ClientBase with EventDispatcher {
           post(new MOTDEvent(this, _motd));
           _fireReady();
           break;
-        
+
         case "422": // case no MOTD
           post(new MOTDEvent(this, 'No MOTD file present of the server.'));
           _fireReady();
@@ -227,9 +218,7 @@ class Client extends ClientBase with EventDispatcher {
           var who = input.hostmask.nickname;
 
           if (who == _nickname) {
-            _socket.close().then((_) {
-              post(new DisconnectEvent(this));
-            });
+            disconnect();
           } else {
             post(new QuitEvent(this, who));
           }
@@ -476,22 +465,22 @@ class Client extends ClientBase with EventDispatcher {
                 channel.members.remove(old);
                 channel.members.add(now);
               }
-              
+
               if (channel.voices.contains(old)) {
                 channel.voices.remove(old);
                 channel.voices.add(now);
               }
-              
+
               if (channel.ops.contains(old)) {
                 channel.ops.remove(old);
                 channel.ops.add(now);
               }
-              
+
               if (channel.halfops.contains(old)) {
                 channel.halfops.remove(old);
                 channel.halfops.add(now);
               }
-              
+
               if (channel.owners.contains(old)) {
                 channel.owners.remove(old);
                 channel.owners.add(now);
@@ -506,11 +495,11 @@ class Client extends ClientBase with EventDispatcher {
         if (event.channel != null) {
           var channel = event.channel;
           var prefixes = IrcParserSupport.parseSupportedPrefixes(_supported["PREFIX"]);
-          
+
           if (prefixes["modes"].contains(event.mode.substring(1))) {
             return;
           }
-          
+
           switch (event.mode) {
             case "+o":
               channel.ops.add(event.user);

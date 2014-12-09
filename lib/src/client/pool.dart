@@ -1,4 +1,4 @@
-part of irc;
+part of irc.client;
 
 /**
  * Control Multiple Clients
@@ -28,7 +28,7 @@ class ClientPool {
   Client operator [](int id) => clientAt(id);
 
   void connectAll() => forEach((client) => client.connect());
-  void disconnectAll([String reason = null, bool force = false]) => forEach((client) => client.disconnect(reason: reason, force: force));
+  void disconnectAll([String reason = null]) => forEach((client) => client.disconnect(reason: reason));
   void message(String target, String message) => forEach((client) => client.sendMessage(target, message));
   void register(handler) => forEach((client) => client.register(handler));
   void forEach(void action(Client client)) => clients.forEach(action);

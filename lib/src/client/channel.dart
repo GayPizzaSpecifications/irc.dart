@@ -1,5 +1,4 @@
-part of irc;
-
+part of irc.client;
 
 /**
  * An IRC Channel

@@ -6,7 +6,7 @@
  */
 library irc.bot;
 
-import 'package:irc/irc.dart';
+import 'package:irc/client.dart';
 import 'dart:async';
 import 'dart:io';
 

@@ -1,4 +1,4 @@
-import "package:irc/irc.dart";
+import "package:irc/client.dart";
 
 void main() {
   var configs = [];

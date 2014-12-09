@@ -1,4 +1,4 @@
-part of irc;
+part of irc.client;
 
 /**
  * Builder for WHOIS Server Replies

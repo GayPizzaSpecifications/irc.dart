@@ -1,4 +1,4 @@
-part of irc;
+part of irc.client;
 
 /**
  * IRC Message Colors

@@ -1,7 +1,7 @@
 /**
  * IRC for Dart
  */
-library irc;
+library irc.client;
 
 import 'dart:io';
 import 'dart:async';
@@ -19,17 +19,18 @@ export 'parser.dart';
 export 'bot.dart';
 
 /* Base Classes */
-part 'src/base.dart';
+part 'src/client/base.dart';
+part 'src/client/connection.dart';
 /* IRC Client */
-part 'src/client.dart';
+part 'src/client/client.dart';
 /* IRC Events */
-part 'src/events.dart';
+part 'src/client/events.dart';
 /* IRC Types */
-part 'src/config.dart';
+part 'src/client/config.dart';
 /* Message Formatting */
-part 'src/colors.dart';
+part 'src/client/colors.dart';
 /* WHOIS Stuff */
-part 'src/whois.dart';
+part 'src/client/whois.dart';
 /* Client Pool */
-part 'src/pool.dart';
-part 'src/channel.dart';
+part 'src/client/pool.dart';
+part 'src/client/channel.dart';

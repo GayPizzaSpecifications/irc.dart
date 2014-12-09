@@ -1,4 +1,4 @@
-part of irc;
+part of irc.client;
 
 /**
  * Base Class for a Client
@@ -147,7 +147,7 @@ abstract class ClientBase {
    * If [force] is true, then the socket is forcibly closed.
    * When it is forcibly closed, a future is returned.
    */
-  Future disconnect({String reason: "Client Disconnecting", bool force: false});
+  Future disconnect({String reason: "Client Disconnecting"});
   
   /**
    * Connects to the IRC Server
