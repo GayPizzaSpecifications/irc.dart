@@ -1,5 +1,5 @@
 analyzer.files: 
-  - lib/irc.dart
+  - lib/client.dart
   - example/log.dart
   - example/debug.dart
   - example/example.dart
