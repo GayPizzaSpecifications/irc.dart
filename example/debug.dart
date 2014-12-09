@@ -50,7 +50,7 @@ void main() {
       })
 
       ..command("opall", (CommandEvent event) {
-        event.args.forEach((it) => event.channel.op(it));
+        event.channel.allUsers.forEach((it) => event.channel.op(it));
       })
 
       ..command("nick", (CommandEvent event) {

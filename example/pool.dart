@@ -2,28 +2,22 @@ import "package:irc/irc.dart";
 
 void main() {
   var configs = [];
-  for (int i = 1; i <= 4; i++) {
+  for (int i = 1; i <= 400; i++) {
     configs.add(new BotConfig(
         nickname: "DartBot${i}",
         username: "DartBot",
-        host: "irc.esper.net",
-        port: 6667
-    ));
-    configs.add(new BotConfig(
-        nickname: "DartBot${i}",
-        username: "DartBot",
-        host: "irc.freenode.net",
+        host: "irc.directcode.org",
         port: 6667
     ));
   }
   var pool = new ClientPool();
   configs.forEach(pool.addClient);
-  pool.register((ReadyEvent event) => event.join("#directcode"));
-  pool.register((LineReceiveEvent event) {
-    print("[${pool.idOf(event.client)}] >> ${event.line}");
+  
+  pool.register((ConnectEvent event) {
+    print(event.client.nickname + " is connected.");
   });
-  pool.register((LineSentEvent event) {
-    print("[${pool.idOf(event.client)}] << ${event.line}");
-  });
+  
+  pool.register((ReadyEvent event) => event.join("#bots"));
+  
   pool.connectAll();
 }
