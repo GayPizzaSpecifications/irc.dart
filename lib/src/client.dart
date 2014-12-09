@@ -21,7 +21,7 @@ class Client extends ClientBase with EventDispatcher {
   /**
    * WHOIS Implementation Builder Storage
    */
-  Map<String, WhoisBuilder> _whois_builders;
+  Map<String, WhoisBuilder> _whoisBuilders;
 
   /**
    * Socket used for Communication between server and client
@@ -74,7 +74,7 @@ class Client extends ClientBase with EventDispatcher {
     this.config = config;
     _registerHandlers();
     _nickname = config.nickname;
-    _whois_builders = new Map<String, WhoisBuilder>();
+    _whoisBuilders = new Map<String, WhoisBuilder>();
   }
 
   @override
@@ -259,6 +259,12 @@ class Client extends ClientBase with EventDispatcher {
               case "+":
                 channel.voices.add(user.substring(1));
                 break;
+              case "%":
+                channel.halfops.add(user.substring(1));
+                break;
+              case "~":
+                channel.owners.add(user.substring(1));
+                break;
               default:
                 channel.members.add(user);
                 break;
@@ -306,7 +312,7 @@ class Client extends ClientBase with EventDispatcher {
           builder
               ..hostname = hostname
               ..realname = realname;
-          _whois_builders[nickname] = builder;
+          _whoisBuilders[nickname] = builder;
           break;
 
         case "312": // WHOIS Server Information
@@ -314,14 +320,14 @@ class Client extends ClientBase with EventDispatcher {
           var nickname = split[1];
           var message = input.message;
           var server_name = split[2];
-          var builder = _whois_builders[nickname];
+          var builder = _whoisBuilders[nickname];
           builder.serverName = server_name;
           builder.serverInfo = message;
           break;
 
         case "313": // WHOIS Operator Information
           var nickname = input.parameters[0];
-          var builder = _whois_builders[nickname];
+          var builder = _whoisBuilders[nickname];
           if (builder != null) {
             builder.isServerOperator = true;
           }
@@ -331,21 +337,21 @@ class Client extends ClientBase with EventDispatcher {
           var split = input.parameters;
           var nickname = split[1];
           var idle = int.parse(split[2]);
-          var builder = _whois_builders[nickname];
+          var builder = _whoisBuilders[nickname];
           builder.idle = true;
           builder.idleTime = idle;
           break;
 
         case "318": // End of WHOIS
           var nickname = input.parameters[1];
-          var builder = _whois_builders.remove(nickname);
+          var builder = _whoisBuilders.remove(nickname);
           post(new WhoisEvent(this, builder));
           break;
 
         case "319": // WHOIS Channel Information
           var nickname = input.parameters[1];
           var message = input.message.trim();
-          var builder = _whois_builders[nickname];
+          var builder = _whoisBuilders[nickname];
           message.split(" ").forEach((chan) {
             if (chan.startsWith("@")) {
               var c = chan.substring(1);
@@ -358,6 +364,9 @@ class Client extends ClientBase with EventDispatcher {
             } else if (chan.startsWith("~")) {
               var c = chan.substring(1);
               builder.ownerIn.add(c);
+            } else if (chan.startsWith("%")) {
+              var c = chan.substring(1);
+              builder.halfOpIn.add(c);
             } else {
               builder.channels.add(chan);
             }
@@ -366,7 +375,7 @@ class Client extends ClientBase with EventDispatcher {
 
         case "330": // WHOIS Account Information
           var split = input.parameters;
-          var builder = _whois_builders[split[1]];
+          var builder = _whoisBuilders[split[1]];
           builder.username = split[2];
           break;
 
@@ -437,6 +446,8 @@ class Client extends ClientBase with EventDispatcher {
         channel.members.remove(event.user);
         channel.voices.remove(event.user);
         channel.ops.remove(event.user);
+        channel.owners.remove(event.user);
+        channel.halfops.remove(event.user);
       });
 
       /* Handles User Tracking in Channels when a user is kicked. */
@@ -445,6 +456,8 @@ class Client extends ClientBase with EventDispatcher {
         channel.members.remove(event.user);
         channel.voices.remove(event.user);
         channel.ops.remove(event.user);
+        channel.owners.remove(event.user);
+        channel.halfops.remove(event.user);
         if (event.user == nickname) {
           channels.remove(channel);
         }
@@ -463,13 +476,25 @@ class Client extends ClientBase with EventDispatcher {
                 channel.members.remove(old);
                 channel.members.add(now);
               }
+              
               if (channel.voices.contains(old)) {
                 channel.voices.remove(old);
                 channel.voices.add(now);
               }
+              
               if (channel.ops.contains(old)) {
                 channel.ops.remove(old);
                 channel.ops.add(now);
+              }
+              
+              if (channel.halfops.contains(old)) {
+                channel.halfops.remove(old);
+                channel.halfops.add(now);
+              }
+              
+              if (channel.owners.contains(old)) {
+                channel.owners.remove(old);
+                channel.owners.add(now);
               }
             }
           }
@@ -490,30 +515,54 @@ class Client extends ClientBase with EventDispatcher {
             case "+o":
               channel.ops.add(event.user);
               channel.members.remove(event.user);
+              channel.halfops.remove(event.user);
+              channel.owners.remove(event.user);
               break;
             case "+v":
               channel.voices.add(event.user);
               channel.members.remove(event.user);
+              channel.halfops.remove(event.user);
+              channel.owners.remove(event.user);
               break;
             case "-v":
               channel.voices.remove(event.user);
               channel.members.add(event.user);
+              channel.halfops.remove(event.user);
+              channel.owners.remove(event.user);
               break;
             case "-o":
               channel.ops.remove(event.user);
               channel.members.add(event.user);
+              channel.halfops.remove(event.user);
+              channel.owners.remove(event.user);
               break;
             case "+q":
               channel.owners.add(event.user);
               channel.ops.remove(event.user);
               channel.voices.remove(event.user);
               channel.members.remove(event.user);
+              channel.halfops.remove(event.user);
               break;
             case "-q":
               channel.ops.remove(event.user);
               channel.voices.remove(event.user);
               channel.members.add(event.user);
               channel.owners.remove(event.user);
+              channel.halfops.remove(event.user);
+              break;
+            case "+h":
+              channel.ops.remove(event.user);
+              channel.voices.remove(event.user);
+              channel.members.remove(event.user);
+              channel.owners.remove(event.user);
+              channel.halfops.add(event.user);
+              break;
+            case "-h":
+              channel.ops.remove(event.user);
+              channel.voices.remove(event.user);
+              channel.members.add(event.user);
+              channel.owners.remove(event.user);
+              channel.halfops.remove(event.user);
               break;
           }
         }

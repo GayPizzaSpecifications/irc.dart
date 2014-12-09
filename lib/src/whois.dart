@@ -14,6 +14,7 @@ class WhoisBuilder {
   List<String> voiceIn = [];
   List<String> opIn = [];
   List<String> ownerIn = [];
+  List<String> halfOpIn = [];
   String serverName;
   String serverInfo;
   bool idle;

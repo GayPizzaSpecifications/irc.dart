@@ -5,7 +5,7 @@ import 'dart:convert';
 
 void main() {
 
-  var config = new BotConfig(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot");
+  var config = new BotConfig(host: "irc.directcode.org", port: 6667, nickname: "DartBot", username: "DartBot");
 
   var bot = new CommandBot(config, prefix: "?");
 
@@ -28,7 +28,7 @@ void main() {
       
       ..register((ReadyEvent event) {
         if (conf.containsKey("identityPassword")) bot.client.identify(username: conf["identityUsername"], password: conf["identityPassword"]);
-        event.join("#directcode");
+        event.join("#bots");
       })
 
       ..command("help", (CommandEvent event) {
@@ -74,33 +74,20 @@ void main() {
       ..command("raw", (CommandEvent event) {
         bot.client.send(event.args.join(" "));
       })
-
-      ..command("list-libs", (CommandEvent event) {
-        Set<String> libraries = [].toSet();
-        currentMirrorSystem().libraries.forEach((key, value) {
-          libraries.add(MirrorSystem.getName(value.qualifiedName));
-        });
-        event.reply("> Libraries: ${libraries.join(', ')}");
+      
+      ..command("spam", (CommandEvent event) {
+        for (var i = 1; i <= 20; i++) {
+          event.reply(i.toString());
+        }
       })
-
+      
       ..command("list-users", (CommandEvent event) {
         var reply = (msg) => bot.client.sendNotice(event.from, msg);
         reply("> Members: ${event.channel.members.join(", ")}");
         reply("> Ops: ${event.channel.ops.join(", ")}");
         reply("> Voices: ${event.channel.voices.join(", ")}");
-      })
-
-      ..command("library", (CommandEvent event) {
-        if (event.checkArguments(1, "> Usage: library <name>")) {
-          String libName = event.args[0];
-          try {
-            LibraryMirror mirror = currentMirrorSystem().findLibrary(MirrorSystem.getSymbol(libName));
-            event.reply("> Declarations: ${mirror.declarations.keys.join(', ')}");
-            event.reply("> Location: ${mirror.uri}");
-          } catch (e) {
-            event.reply("> No Such Library: ${libName}");
-          }
-        }
+        reply("> Owners: ${event.channel.owners.join(", ")}");
+        reply("> Half-Ops: ${event.channel.halfops.join(", ")}");
       })
 
       ..command("part", (CommandEvent event) {

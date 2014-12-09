@@ -25,6 +25,11 @@ class Channel {
    * Channel Operators
    */
   final Set<String> ops = new Set<String>();
+  
+  /**
+   * Channel Half-Ops
+   */
+  final Set<String> halfops = new Set<String>();
 
   /**
    * Channel Voices
@@ -63,7 +68,8 @@ class Channel {
         ..addAll(ops)
         ..addAll(voices)
         ..addAll(members)
-        ..addAll(owners);
+        ..addAll(owners)
+        ..addAll(halfops);
     return all;
   }
 
