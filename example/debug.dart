@@ -4,7 +4,7 @@ import 'dart:convert';
 
 void main() {
 
-  var config = new IrcConfig(host: "irc.directcode.org", port: 6667, nickname: "DartBot", username: "DartBot", realname: "irc.dart debug bot");
+  var config = new IrcConfig(host: "irc.directcode.org", port: 6667, nickname: "IRCDartBot", username: "DartBot", realname: "irc.dart debug bot");
 
   var bot = new CommandBot(config, prefix: "?");
 
@@ -82,6 +82,17 @@ void main() {
         for (var i = 1; i <= 20; i++) {
           event.reply(i.toString());
         }
+      })
+      
+      ..command("whois", (CommandEvent event) {
+        if (event.args.length != 1) {
+          event.reply("> Usage: whois <user>");
+          return;
+        }
+        var user = event.args[0];
+        event.client.whois(user).then((info) {
+          event.reply("> ${info.username}");
+        });
       })
       
       ..command("list-users", (CommandEvent event) {

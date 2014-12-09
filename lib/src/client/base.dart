@@ -142,7 +142,7 @@ abstract class ClientBase {
    */
   void join(String channel) {
     if (supported.containsKey("CHANNELLEN")) {
-      var max = int.parse(supported["CHANNELLEN"]);
+      var max = supported["CHANNELLEN"];
       if (channel.length > max) {
         throw new ArgumentError.value(channel, "length is >${max}, which is the maximum channel name length set by the server.");
       }
@@ -155,7 +155,7 @@ abstract class ClientBase {
    */
   void part(String channel) {
     if (supported.containsKey("CHANNELLEN")) {
-      var max = int.parse(supported["CHANNELLEN"]);
+      var max = supported["CHANNELLEN"];
       if (channel.length > max) {
         throw new ArgumentError.value(channel, "length is >${max}, which is the maximum channel name length set by the server.");
       }
@@ -210,7 +210,7 @@ abstract class ClientBase {
    */
   void kick(Channel channel, String user, [String reason]) {
     if (reason != null && supported.containsKey("KICKLEN")) {
-      var max = int.parse(supported["KICKLEN"]);
+      var max = supported["KICKLEN"];
       if (reason.length > max) {
         throw new ArgumentError.value(reason, "length is >${max}, which is the maximum kick comment length set by the server.");
       }

@@ -570,4 +570,13 @@ class Client extends ClientBase with EventDispatcher {
       _supported.addAll(event.supported);
     });
   }
+  
+  Future<WhoisEvent> whois(String user) {
+    var completer = new Completer();
+    register((WhoisEvent event) {
+      completer.complete(event);
+    }, filter: (WhoisEvent event) => event.nickname != user, once: true);
+    send("WHOIS ${user}");
+    return completer.future;
+  }
 }
