@@ -73,7 +73,7 @@ class MessageEvent extends Event {
   /**
    * Gets the Channel of this Event (returns null if target is a user)
    */
-  Channel get channel => client.channel(target);
+  Channel get channel => client.getChannel(target);
 
   /**
    * Replies to the Event

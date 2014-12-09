@@ -37,6 +37,11 @@ abstract class ClientBase {
   bool get connected;
   
   /**
+   * Provides information about what the server supports.
+   */
+  Map<String, String> get supported;
+  
+  /**
    * Sends the [message] to the [target] as a message.
    *
    *      client.message("ExampleUser", "Hello World");
@@ -130,17 +135,33 @@ abstract class ClientBase {
    * Gets a Channel object for the channel's [name].
    * Returns null if no such channel exists.
    */
-  Channel channel(String name);
+  Channel getChannel(String name);
   
   /**
    * Joins the specified [channel].
    */
-  void join(String channel) => send("JOIN ${channel}");
+  void join(String channel) {
+    if (supported.containsKey("CHANNELLEN")) {
+      var max = int.parse(supported["CHANNELLEN"]);
+      if (channel.length > max) {
+        throw new ArgumentError.value(channel, "length is >${max}, which is the maximum channel name length set by the server.");
+      }
+    }
+    send("JOIN ${channel}");
+  }
 
   /**
    * Parts the specified [channel].
    */
-  void part(String channel) => send("PART ${channel}");
+  void part(String channel) {
+    if (supported.containsKey("CHANNELLEN")) {
+      var max = int.parse(supported["CHANNELLEN"]);
+      if (channel.length > max) {
+        throw new ArgumentError.value(channel, "length is >${max}, which is the maximum channel name length set by the server.");
+      }
+    }
+    send("PART ${channel}");
+  }
   
   /**
    * Disconnects the Client with the specified [reason].
@@ -164,6 +185,17 @@ abstract class ClientBase {
   void post(Event event);
   
   /**
+   * Applies a Mode to a User (The Client by Default)
+   */
+  void mode(String mode, {String user: "PLEASE_INJECT_DEFAULT"}) {
+    if (user == "PLEASE_INJECT_DEFAULT") {
+      user = nickname;
+    }
+    
+    send("MODE ${user} ${mode}");
+  }
+  
+  /**
    * Sends [msg] to [target] as a CTCP message
    */
   void sendCTCP(String target, String msg) => sendMessage(target, "\u0001${msg}\u0001");
@@ -177,6 +209,15 @@ abstract class ClientBase {
    * Kicks [user] from [channel] with an optional [reason].
    */
   void kick(Channel channel, String user, [String reason]) {
+    if (reason != null && supported.containsKey("KICKLEN")) {
+      var max = int.parse(supported["KICKLEN"]);
+      if (reason.length > max) {
+        throw new ArgumentError.value(reason, "length is >${max}, which is the maximum kick comment length set by the server.");
+      }
+    }
     send("KICK ${channel.name} ${user}${reason != null ? ' :' + reason : ''}");
   }
+  
+  bool get hasNetworkName => supported.containsKey("NETWORK");
+  String get networkName => supported["NETWORK"];
 }

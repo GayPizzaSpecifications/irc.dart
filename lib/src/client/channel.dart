@@ -57,7 +57,16 @@ class Channel {
    */
   String get topic => _topic;
 
-  void set topic(String topic) => client.send("TOPIC ${name} :${topic}");
+  void set topic(String topic) {
+    if (client.supported.containsKey("TOPICLEN")) {
+      var max = int.parse(client.supported['TOPICLEN']);
+      if (topic.length > max) {
+        throw new ArgumentError.value(topic, "length is >${max}, which is the maximum topic length set by the server.");
+      }
+    }
+    
+    client.send("TOPIC ${name} :${topic}");
+  }
 
   /**
    * All Users

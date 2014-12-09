@@ -1,11 +1,10 @@
 import 'package:irc/client.dart';
 import 'dart:io';
-import 'dart:mirrors';
 import 'dart:convert';
 
 void main() {
 
-  var config = new BotConfig(host: "irc.directcode.org", port: 6667, nickname: "DartBot", username: "DartBot");
+  var config = new BotConfig(host: "irc.directcode.org", port: 6667, nickname: "DartBot", username: "DartBot", realname: "irc.dart debug bot");
 
   var bot = new CommandBot(config, prefix: "?");
 
@@ -16,6 +15,10 @@ void main() {
   if (configFile.existsSync()) {
     conf = JSON.decode(configFile.readAsStringSync());
   }
+  
+  bot.apply(BotBehaviors.joinOnInvite());
+  bot.apply(BotBehaviors.rejoinOnKick());
+  bot.apply(BotBehaviors.markAsBot());
 
   bot
       ..register((LineReceiveEvent event) {
@@ -28,7 +31,7 @@ void main() {
       
       ..register((ReadyEvent event) {
         if (conf.containsKey("identityPassword")) bot.client.identify(username: conf["identityUsername"], password: conf["identityPassword"]);
-        event.join("#bots");
+        event.join("#directcode");
       })
 
       ..command("help", (CommandEvent event) {
@@ -120,17 +123,6 @@ void main() {
 
       ..register((PartEvent event) {
         print("<${event.channel.name}> ${event.user} has left");
-      })
-
-      ..register((KickEvent event) {
-        if (event.user == event.client.nickname) {
-          event.client.join(event.channel.name);
-        }
-      })
-      
-      ..register((InviteEvent event) {
-        event.reply("Thanks for inviting me to ${event.channel}");
-        event.join();
       })
 
       ..register((ErrorEvent event) {

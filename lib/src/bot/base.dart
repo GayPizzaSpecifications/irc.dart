@@ -22,12 +22,17 @@ abstract class Bot {
   /**
    * Gets a Channel
    */
-  Channel channel(String name) => client.channel(name);
+  Channel getChannel(String name) => client.getChannel(name);
 
   /**
    * Registers a Handler
    */
   bool register(handler) => client.register(handler);
+  
+  /**
+   * Registers a Handler or Behavior
+   */
+  bool apply(handler) => register(handler);
 
   /**
    * Joins a Channel
@@ -42,5 +47,7 @@ abstract class Bot {
   /**
    * Sends a Message
    */
-  void message(String target, String message) => client.sendMessage(target, message);
+  void sendMessage(String target, String message) => client.sendMessage(target, message);
 }
+
+typedef void EventHandler<T>(T event);

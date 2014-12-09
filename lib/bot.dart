@@ -12,6 +12,7 @@ import 'dart:io';
 
 /* Bot API Base */
 part 'src/bot/base.dart';
+part 'src/bot/behaviors.dart';
 /* Dumb IRC Bot */
 part 'src/bot/dumbbot.dart';
 /* Command IRC Bot */
