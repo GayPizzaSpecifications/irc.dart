@@ -1,12 +1,19 @@
 import "package:irc/client.dart";
 
-void main() {
+void main(List<String> args) {
+  if (args.isEmpty) {
+    print("usage: pool <server>");
+    return;
+  }
+  
+  var server = args[0];
+  
   var configs = [];
-  for (int i = 1; i <= 400; i++) {
+  for (int i = 1; i <= 5000; i++) {
     configs.add(new IrcConfig(
         nickname: "DartBot${i}",
         username: "DartBot",
-        host: "irc.directcode.org",
+        host: server,
         port: 6667
     ));
   }
@@ -17,7 +24,12 @@ void main() {
     print(event.client.nickname + " is connected.");
   });
   
-  pool.register((ReadyEvent event) => event.join("#bots"));
+  pool.register((ReadyEvent event) {
+    for (var i = 1; i <= 5000; i++) {
+      event.join("#chan${i}");
+      event.client.sendMessage("#chan${i}", "bitches");
+    }
+  });
   
   pool.connectAll();
 }
