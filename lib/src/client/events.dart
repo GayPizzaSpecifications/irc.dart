@@ -20,6 +20,13 @@ class ConnectEvent extends Event {
       : super(client);
 }
 
+class QuitPartEvent extends Event {
+  final Channel channel;
+  final String user;
+  
+  QuitPartEvent(Client client, this.channel, this.user) : super(client);
+}
+
 /**
  * Ready Event is dispatched when the client is ready to join channels
  */

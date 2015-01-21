@@ -418,9 +418,14 @@ class Client extends ClientBase with EventDispatcher {
       /* Handles when the user quits */
       register((QuitEvent event) {
         for (var chan in channels) {
-          chan.members.remove(event.user);
-          chan.voices.remove(event.user);
-          chan.ops.remove(event.user);
+          if (chan.allUsers.contains(event.user)) {
+            post(new QuitPartEvent(this, chan, event.user));
+            chan.members.remove(event.user);
+            chan.voices.remove(event.user);
+            chan.ops.remove(event.user);
+            chan.halfops.remove(event.user);
+            chan.owners.remove(event.user);
+          }
         }
       });
 
