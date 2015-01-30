@@ -1,5 +1,5 @@
 name: irc
-version: 2.0.2
+version: 2.0.3
 authors:
 - Kenneth Endfinger <kaendfinger@gmail.com>
 - samrg472 <samrg472@gmail.com>
@@ -9,9 +9,9 @@ homepage: https://github.com/DirectMyFile/irc.dart/
 environment:
   sdk: '>=1.8.0'
 dependencies:
-  event_dispatcher: '>=1.0.0 <2.0.2'
+  event_dispatcher: '>=1.0.0 <2.0.3'
   quiver: '>=0.18.2 <0.22.0'
 dev_dependencies:
   hop: '>=0.31.0+1 <0.32.0'
-  yaml: '>=2.0.2 <3.0.0'
+  yaml: '>=2.0.3 <3.0.0'
   unittest: '>=0.11.0+3 <0.12.0'
