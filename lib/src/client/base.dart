@@ -77,11 +77,11 @@ abstract class ClientBase {
   List<String> _handleMessageSending(String begin, String input) {
     var all = [];
     if ((input.length + begin.length) > 454) {
-      var max_msg = 454 - (begin.length + 1);
+      var max = 454 - (begin.length + 1);
       var sb = new StringBuffer();
       for (int i = 0; i < input.length; i++) {
         sb.write(input[i]);
-        if ((i != 0 && (i % max_msg) == 0) || i == input.length - 1) {
+        if ((i != 0 && (i % max) == 0) || i == input.length - 1) {
           all.add(sb.toString());
           sb.clear();
         }

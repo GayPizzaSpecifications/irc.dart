@@ -44,6 +44,8 @@ class Client extends ClientBase with EventDispatcher {
 
   @override
   final IrcParser parser;
+  
+  final Duration sendInterval;
 
   @override
   bool connected = false;
@@ -73,7 +75,7 @@ class Client extends ClientBase with EventDispatcher {
    * Creates a new IRC Client using the specified configuration
    * If parser is specified, then the parser is used for the current client
    */
-  Client(IrcConfig config, {IrcParser parser, IrcConnection connection})
+  Client(IrcConfig config, {IrcParser parser, IrcConnection connection, this.sendInterval: const Duration(milliseconds: 100)})
       : this.parser = parser == null ? new RegexIrcParser() : parser,
         this.connection = connection == null ? new SocketIrcConnection() : connection,
         this.metadata = {} {
@@ -95,6 +97,18 @@ class Client extends ClientBase with EventDispatcher {
   @override
   void connect() {
     connection.connect(config).then((_) {
+      _timer = new Timer.periodic(sendInterval, (t) {
+        if (_queue.isEmpty) {
+          return;
+        }
+        
+        var line = _queue.removeAt(0);
+        
+        /* Sending the Line has Priority over the Event */
+        connection.send(line);
+        post(new LineSentEvent(this, line));
+      });
+      
       connection.lines().listen((line) {
         post(new LineReceiveEvent(this, line));
       });
@@ -102,6 +116,8 @@ class Client extends ClientBase with EventDispatcher {
       post(new ConnectEvent(this));
     });
   }
+  
+  List<String> _queue = [];
 
   @override
   Future disconnect({String reason: "Client Disconnecting"}) {
@@ -119,14 +135,19 @@ class Client extends ClientBase with EventDispatcher {
   }
 
   @override
-  void send(String line) {
+  void send(String line, {bool now: false}) {
     /* Max Line Length for IRC is 512. With the newlines (\r\n or \n) we can only send 510 character lines */
     if (line.length > 510) {
       post(new ErrorEvent(this, type: "general", message: "The length of '${line}' is greater than 510 characters"));
     }
-    /* Sending the Line has Priority over the Event */
-    connection.send(line);
-    post(new LineSentEvent(this, line));
+    
+    if (now) {
+      /* Sending the Line has Priority over the Event */
+      connection.send(line);
+      post(new LineSentEvent(this, line));
+    } else {
+      _queue.add(line); 
+    }
   }
 
   /**
@@ -145,8 +166,8 @@ class Client extends ClientBase with EventDispatcher {
   void _registerHandlers() {
 
     register((ConnectEvent event) {
-      send("NICK ${config.nickname}");
-      send("USER ${config.username} ${config.username} ${config.host} :${config.realname}");
+      send("NICK ${config.nickname}", now: true);
+      send("USER ${config.username} ${config.username} ${config.host} :${config.realname}", now: true);
     });
 
     register((LineReceiveEvent event) {
@@ -413,7 +434,13 @@ class Client extends ClientBase with EventDispatcher {
 
       /* Set the Connection Status */
       register((ConnectEvent event) => this.connected = true);
-      register((DisconnectEvent event) => this.connected = false);
+      register((DisconnectEvent event) {
+        this.connected = false;
+        
+        if (_timer != null && _timer.isActive) {
+          _timer.cancel();
+        }
+      });
 
       /* Handles when the user quits */
       register((QuitEvent event) {
@@ -575,6 +602,8 @@ class Client extends ClientBase with EventDispatcher {
       _supported.addAll(event.supported);
     });
   }
+  
+  Timer _timer;
   
   Future<WhoisEvent> whois(String user) {
     var completer = new Completer();

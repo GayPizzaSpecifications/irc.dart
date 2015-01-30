@@ -4,10 +4,8 @@ import 'dart:convert';
 
 void main() {
 
-  var config = new IrcConfig(host: "irc.directcode.org", port: 6667, nickname: "IRCDartBot", username: "DartBot", realname: "irc.dart debug bot");
-
+  var config = new IrcConfig(host: "irc.esper.net", port: 6667, nickname: "IRCDartBot", username: "DartBot", realname: "irc.dart debug bot");
   var bot = new CommandBot(config, prefix: "?");
-
   var configFile = new File("${Platform.environment["HOME"]}/.irc_debug.json");
 
   var conf = <String, String>{};
@@ -18,7 +16,6 @@ void main() {
   
   bot.apply(BotBehaviors.joinOnInvite());
   bot.apply(BotBehaviors.rejoinOnKick());
-  bot.apply(BotBehaviors.markAsBot());
 
   bot
       ..register((LineReceiveEvent event) {
@@ -31,7 +28,7 @@ void main() {
       
       ..register((ReadyEvent event) {
         if (conf.containsKey("identityPassword")) bot.client.identify(username: conf["identityUsername"], password: conf["identityPassword"]);
-        event.join("#directcode");
+        event.join("#bot-test");
       })
 
       ..command("help", (CommandEvent event) {
@@ -79,7 +76,7 @@ void main() {
       })
       
       ..command("spam", (CommandEvent event) {
-        for (var i = 1; i <= 20; i++) {
+        for (var i = 1; i <= 50; i++) {
           event.reply(i.toString());
         }
       })
