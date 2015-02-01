@@ -28,11 +28,21 @@ class IrcConfig {
    * Client Username
    */
   String username;
+  
+  /**
+   * Enable SSl
+   */
+  bool ssl;
+  
+  /**
+   * Allow Invalid SSL Certificates
+   */
+  bool allowInvalidCertificates;
 
   /**
    * Creates a new Client Configuration with default values.
    */
-  IrcConfig({this.host: "irc.esper.net", this.port: 6667, this.nickname: "DartBot", this.username: "DartBot", this.realname: "Dart IRC Bot"});
+  IrcConfig({this.host: "irc.esper.net", this.port: 6667, this.nickname: "DartBot", this.username: "DartBot", this.realname: "Dart IRC Bot", this.ssl: false, this.allowInvalidCertificates: false});
 
   /**
    * Loads the Client Configuration from [map] using field names as keys
