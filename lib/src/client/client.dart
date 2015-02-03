@@ -365,7 +365,13 @@ class Client extends ClientBase with EventDispatcher {
 
         case "319": // WHOIS Channel Information
           var nickname = input.parameters[1];
+          
+          if (input.message == null) {
+            break;
+          }
+          
           var message = input.message.trim();
+          
           var builder = _whoisBuilders[nickname];
           message.split(" ").forEach((chan) {
             if (chan.startsWith("@")) {

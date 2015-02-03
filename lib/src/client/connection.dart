@@ -25,7 +25,7 @@ class SocketIrcConnection extends IrcConnection {
   }
   
   @override
-  Stream<String> lines() => _socket.transform(UTF8.decoder).transform(new LineSplitter());
+  Stream<String> lines() => _socket.transform(new Utf8Decoder(allowMalformed: true)).transform(new LineSplitter());
 
   @override
   Future disconnect() => _socket.close();
