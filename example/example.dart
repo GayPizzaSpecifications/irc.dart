@@ -2,7 +2,7 @@ import 'package:irc/client.dart';
 import 'dart:io';
 
 void main() {
-  var config = new IrcConfig(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot");
+  var config = new Configuration(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot");
 
   var bot = new CommandBot(config, prefix: ".");
 

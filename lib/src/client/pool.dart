@@ -12,7 +12,7 @@ class ClientPool {
   /**
    * Adds a Client using the [config].
    */
-  int addClient(IrcConfig config, {bool connect: false}) {
+  int addClient(Configuration config, {bool connect: false}) {
     var client = new Client(config);
     clients.add(client);
     if (connect) {

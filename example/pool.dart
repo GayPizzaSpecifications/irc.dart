@@ -10,7 +10,7 @@ void main(List<String> args) {
   
   var configs = [];
   for (int i = 1; i <= 5000; i++) {
-    configs.add(new IrcConfig(
+    configs.add(new Configuration(
         nickname: "DartBot${i}",
         username: "DartBot",
         host: server,

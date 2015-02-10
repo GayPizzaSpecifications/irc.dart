@@ -4,7 +4,7 @@ import 'dart:convert';
 
 void main() {
 
-  var config = new IrcConfig(host: "irc.esper.net", port: 6697, nickname: "IRCDartBot", username: "DartBot", realname: "irc.dart debug bot", ssl: true);
+  var config = new Configuration(host: "irc.esper.net", port: 6697, nickname: "IRCDartBot", username: "DartBot", realname: "irc.dart debug bot", ssl: true);
   var bot = new CommandBot(config, prefix: "?");
   var configFile = new File("${Platform.environment["HOME"]}/.irc_debug.json");
 

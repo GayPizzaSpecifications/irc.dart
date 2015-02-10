@@ -1,7 +1,7 @@
 part of irc.client;
 
 abstract class IrcConnection {
-  Future connect(IrcConfig config);
+  Future connect(Configuration config);
   Future disconnect();
   
   void send(String line);
@@ -12,7 +12,7 @@ class SocketIrcConnection extends IrcConnection {
   Socket _socket;
   
   @override
-  Future connect(IrcConfig config) {
+  Future connect(Configuration config) {
     if (config.ssl) {
       return SecureSocket.connect(config.host, config.port, onBadCertificate: (cert) => config.allowInvalidCertificates).then((socket) {
         _socket = socket;

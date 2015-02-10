@@ -6,7 +6,7 @@ class DumbBot extends Bot {
 
   List<String> channels = [];
 
-  DumbBot(IrcConfig config) {
+  DumbBot(Configuration config) {
     _client = new Client(config);
     _registerHandlers();
   }

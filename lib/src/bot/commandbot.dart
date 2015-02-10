@@ -16,7 +16,7 @@ class CommandBot extends Bot {
 
   String prefix;
 
-  CommandBot(IrcConfig config, {this.prefix: "!"}) {
+  CommandBot(Configuration config, {this.prefix: "!"}) {
     _client = new Client(config);
     _registerHandlers();
   }
