@@ -13,15 +13,15 @@ class SocketIrcConnection extends IrcConnection {
   
   @override
   Future connect(Configuration config) {
-    if (config.ssl) {
-      return SecureSocket.connect(config.host, config.port, onBadCertificate: (cert) => config.allowInvalidCertificates).then((socket) {
-        _socket = socket;
-      });
-    } else {
-      return Socket.connect(config.host, config.port).then((socket) {
-        _socket = socket;
-      }); 
-    }
+    return Socket.connect(config.host, config.port, sourceAddress: config.bindHost).then((socket) {
+      if (config.ssl) {
+        return SecureSocket.secure(socket);
+      } else {
+        return socket;
+      }
+    }).then((socket) {
+      _socket = socket;
+    });
   }
   
   @override

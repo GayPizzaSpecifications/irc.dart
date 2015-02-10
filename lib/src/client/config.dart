@@ -28,36 +28,28 @@ class Configuration {
    * Client Username
    */
   String username;
-  
+
   /**
    * Enable SSl
    */
   bool ssl;
-  
+
   /**
    * Allow Invalid SSL Certificates
    */
   bool allowInvalidCertificates;
 
   /**
+   * The address to bind the local socket to.
+   */
+  String bindHost;
+  
+  /**
    * Creates a new Client Configuration with default values.
    */
-  Configuration({this.host: "irc.esper.net", this.port: 6667, this.nickname: "DartBot", this.username: "DartBot", this.realname: "Dart IRC Bot", this.ssl: false, this.allowInvalidCertificates: false});
-
-  /**
-   * Loads the Client Configuration from [map] using field names as keys
-   */
-  Configuration.fromMap(Map<String, Object> map) {
-    host = map["host"];
-    port = map["port"];
-    nickname = map["nickname"];
-    username = map["username"];
-    realname = map["realname"];
-  }
-
-  /**
-   * Loads the Client Configuration from the [input] as JSON using field names as keys
-   */
-  Configuration.fromJSON(String input)
-      : this.fromMap(JSON.decode(input));
+  Configuration({this.host: "irc.esper.net", this.port: 6667,
+      this.nickname: "DartBot", this.username: "DartBot",
+      this.realname: "Dart IRC Bot", this.ssl: false,
+      this.allowInvalidCertificates: false,
+      this.bindHost});
 }
