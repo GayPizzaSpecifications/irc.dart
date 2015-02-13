@@ -677,6 +677,10 @@ class Client extends ClientBase with EventDispatcher {
     send("NAMES ${channel}");
   }
   
+  void wallops(String message) {
+    send("WALLOPS ${message}");
+  }
+  
   Timer _timer;
   
   Future<WhoisEvent> whois(String user) {
