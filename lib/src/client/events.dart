@@ -323,6 +323,16 @@ class TopicEvent extends Event {
       : super(client);
 }
 
+class WhowasEvent extends Event {
+  final String nickname;
+  final String user;
+  final String host;
+  final String realname;
+  
+  WhowasEvent(Client client, this.nickname, this.user, this.host, this.realname)
+    : super(client);
+}
+
 /**
  * Nick Change Event is dispatched when a nickname changes (possibly the Client's nickname)
  */

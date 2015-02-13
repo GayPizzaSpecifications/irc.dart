@@ -673,6 +673,10 @@ class Client extends ClientBase with EventDispatcher {
     return completer.future;
   }
   
+  void refreshUserList(String channel) {
+    send("NAMES ${channel}");
+  }
+  
   Timer _timer;
   
   Future<WhoisEvent> whois(String user) {
