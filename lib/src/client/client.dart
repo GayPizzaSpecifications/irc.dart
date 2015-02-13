@@ -426,8 +426,12 @@ class Client extends ClientBase with EventDispatcher {
           post(new KickEvent(this, channel, user, by, reason));
           break;
         case "372": // MOTD Part
-          var part = input.message;
-          _motd += part + "\n";
+          var p = input.message;
+          if (_motd.isEmpty) {
+            _motd += p;
+          } else {
+            _motd += "\n" + p;
+          }
           break;
         case "005": // ISUPPORT
           var params = input.parameters;
