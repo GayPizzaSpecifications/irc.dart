@@ -1,5 +1,6 @@
 import 'package:irc/client.dart';
 import 'dart:io';
+import 'dart:convert';
 
 void main() {
   var config = new Configuration(host: "irc.esper.net", port: 6667, nickname: "DartBot", username: "DartBot");

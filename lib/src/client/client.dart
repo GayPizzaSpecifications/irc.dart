@@ -673,15 +673,25 @@ class Client extends ClientBase with EventDispatcher {
     return completer.future;
   }
   
+  void setChannelTopic(String channel, String topic) {
+    if (supported.containsKey("TOPICLEN")) {
+      var length = supported["TOPICLEN"];
+      
+      if (topic.length > length) {
+        throw new ArgumentError("Topic exceeds maximum length.");
+      }
+    }
+    
+    send("TOPIC ${channel} :${topic}");
+  }
+  
   void refreshUserList(String channel) {
     send("NAMES ${channel}");
   }
   
   void wallops(String message) {
-    send("WALLOPS ${message}");
+    send("WALLOPS :${message}");
   }
-  
-  void 
   
   Timer _timer;
   

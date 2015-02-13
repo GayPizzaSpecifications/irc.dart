@@ -65,6 +65,14 @@ abstract class ClientBase {
    * [nickname] is the nickname to change to
    */
   void changeNickname(String nickname) {
+    if (supported.containsKey("MAXNICKLEN") || supported.containsKey("NICKLEN")) {
+      var max = supported.containsKey("MAXNICKLEN") ? supported["MAXNICKLEN"] : supported["NICKLEN"];
+      
+      if (nickname.length > max) {
+        throw new ArgumentError("Nickname is too big for the server.");
+      }
+    }
+    
     send("NICK ${nickname}");
   }
 
@@ -193,6 +201,14 @@ abstract class ClientBase {
     }
     
     send("MODE ${user} ${mode}");
+  }
+  
+  void knock(String channel, [String message]) {
+    if (supported.containsKey("KNOCK") && supported["KNOCK"]) {
+      send("KNOCK ${channel}" : "KNOCK ${channel} :${message}")
+    } else {
+      throw new UnsupportedError("Knocking is not supported on this server.");
+    }
   }
   
   /**
