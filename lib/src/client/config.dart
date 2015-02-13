@@ -28,6 +28,11 @@ class Configuration {
    * Client Username
    */
   String username;
+  
+  /**
+   * Server Password
+   */
+  String password;
 
   /**
    * Enable SSl
@@ -51,5 +56,5 @@ class Configuration {
       this.nickname: "DartBot", this.username: "DartBot",
       this.realname: "Dart IRC Bot", this.ssl: false,
       this.allowInvalidCertificates: false,
-      this.bindHost});
+      this.bindHost, this.password});
 }

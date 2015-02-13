@@ -218,6 +218,12 @@ abstract class ClientBase {
     send("KICK ${channel.name} ${user}${reason != null ? ' :' + reason : ''}");
   }
   
+  void loginOperator(String name, String password) {
+    send("OPER ${name} ${password}");
+  }
+  
+  Future<bool> isUserOn(String name);
+  
   bool get hasNetworkName => supported.containsKey("NETWORK");
   String get networkName => supported["NETWORK"];
 }

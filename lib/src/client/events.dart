@@ -42,6 +42,13 @@ class ReadyEvent extends Event {
   }
 }
 
+class IsOnEvent extends Event {
+  final List<String> users;
+  
+  IsOnEvent(Client client, this.users)
+    : super(client);
+}
+
 /**
  * Line Receive Event is dispatched when a line is received from the server
  */

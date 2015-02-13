@@ -96,6 +96,7 @@ class Client extends ClientBase with EventDispatcher {
 
   @override
   void connect() {
+    _ready = false;
     connection.connect(config).then((_) {
       _timer = new Timer.periodic(sendInterval, (t) {
         if (_queue.isEmpty) {
@@ -104,7 +105,7 @@ class Client extends ClientBase with EventDispatcher {
         
         var line = _queue.removeAt(0);
         
-        /* Sending the Line has Priority over the Event */
+        /* Sending the line has priority over the event */
         connection.send(line);
         post(new LineSentEvent(this, line));
       });
@@ -138,11 +139,11 @@ class Client extends ClientBase with EventDispatcher {
   void send(String line, {bool now: false}) {
     /* Max Line Length for IRC is 512. With the newlines (\r\n or \n) we can only send 510 character lines */
     if (line.length > 510) {
-      post(new ErrorEvent(this, type: "general", message: "The length of '${line}' is greater than 510 characters"));
+      throw new ArgumentError("The length of '${line}' is greater than 510 characters");
     }
     
     if (now) {
-      /* Sending the Line has Priority over the Event */
+      /* Sending the line has priority over the event */
       connection.send(line);
       post(new LineSentEvent(this, line));
     } else {
@@ -164,8 +165,11 @@ class Client extends ClientBase with EventDispatcher {
    * Registers all the default handlers.
    */
   void _registerHandlers() {
-
     register((ConnectEvent event) {
+      if (config.password != null) {
+        send("PASS ${config.password}", now: true);
+      }
+      
       send("NICK ${config.nickname}", now: true);
       send("USER ${config.username} ${config.username} ${config.host} :${config.realname}", now: true);
     });
@@ -181,7 +185,7 @@ class Client extends ClientBase with EventDispatcher {
           _fireReady();
           break;
 
-        case "422": // case no MOTD
+        case "422": // No MOTD Found
           post(new MOTDEvent(this, 'No MOTD file present of the server.'));
           _fireReady();
           break;
@@ -307,11 +311,11 @@ class Client extends ClientBase with EventDispatcher {
             break;
           }
 
-          var channel = this.getChannel(split[0]);
+          var channel = getChannel(split[0]);
           var mode = split[1];
           var who = split[2];
 
-          if (mode == "+b" || mode == "-b") {
+          if (channel != null && (mode == "+b" || mode == "-b")) {
             channel.reloadBans();
           }
 
@@ -414,7 +418,7 @@ class Client extends ClientBase with EventDispatcher {
           channel.bans.add(new GlobHostmask(ban));
           break;
 
-        case "KICK": // A User was kicked from a Channel
+        case "KICK": // A user was kicked from a channel.
           var channel = this.getChannel(input.parameters[0]);
           var user = input.parameters[1];
           var reason = input.message;
@@ -435,6 +439,16 @@ class Client extends ClientBase with EventDispatcher {
           var user = input.hostmask.nickname;
           var channel = input.message;
           post(new InviteEvent(this, channel, user));
+          break;
+        case "303": // ISON Response
+          List<String> users;
+          if (input.message == null) {
+            users = [];
+          } else {
+            users = input.message.split(" ").map((it) => it.trim()).toList();
+          }
+        
+          post(new IsOnEvent(this, users));
           break;
       }
 
@@ -607,6 +621,19 @@ class Client extends ClientBase with EventDispatcher {
     register((ServerSupportsEvent event) {
       _supported.addAll(event.supported);
     });
+  }
+  
+  @override
+  Future<bool> isUserOn(String name) {
+    var completer = new Completer();
+    
+    register((IsOnEvent event) {
+      completer.complete(event.users.contains(name));
+    }, once: true);
+    
+    send("ISON ${name}");
+    
+    return completer.future;
   }
   
   Timer _timer;
