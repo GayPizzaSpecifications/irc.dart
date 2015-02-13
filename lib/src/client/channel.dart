@@ -67,6 +67,10 @@ class Channel {
     
     client.send("TOPIC ${name} :${topic}");
   }
+  
+  void invite(String user) {
+    client.invite(user, name);
+  }
 
   /**
    * All Users

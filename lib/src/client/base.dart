@@ -222,6 +222,12 @@ abstract class ClientBase {
     send("OPER ${name} ${password}");
   }
   
+  void invite(String user, String channel) {
+    send("INVITE ${user} ${channel}");
+  }
+  
+  Future<bool> getServerVersion([String target]);
+  
   Future<bool> isUserOn(String name);
   
   bool get hasNetworkName => supported.containsKey("NETWORK");

@@ -450,6 +450,14 @@ class Client extends ClientBase with EventDispatcher {
         
           post(new IsOnEvent(this, users));
           break;
+        case "351": // Server Version Response
+          var version = input.parameters[0];
+          var server = input.parameters[1];
+          var comments = input.message;
+          
+          post(new ServerVersionEvent(this, server, version, comments));
+          
+          break;
       }
 
       /* Set the Connection Status */
@@ -632,6 +640,19 @@ class Client extends ClientBase with EventDispatcher {
     }, once: true);
     
     send("ISON ${name}");
+    
+    return completer.future;
+  }
+  
+  @override
+  Future<ServerVersionEvent> getServerVersion([String target]) {
+    var completer = new Completer();
+    
+    register((ServerVersionEvent event) {
+      completer.complete(event);
+    }, once: true);
+    
+    send(target != null ? "VERSION ${target}" : "VERSION");
     
     return completer.future;
   }

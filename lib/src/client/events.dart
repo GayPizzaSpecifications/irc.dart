@@ -49,6 +49,15 @@ class IsOnEvent extends Event {
     : super(client);
 }
 
+class ServerVersionEvent extends Event {
+  final String version;
+  final String server;
+  final String comments;
+  
+  ServerVersionEvent(Client client, this.server, this.version, this.comments)
+    : super(client);
+}
+
 /**
  * Line Receive Event is dispatched when a line is received from the server
  */
