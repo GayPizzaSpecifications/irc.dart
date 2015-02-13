@@ -25,6 +25,7 @@ class Color {
   static final MAGENTA = "\u000313";
   static final DARK_GRAY = "\u000314";
   static final LIGHT_GRAY = "\u000315";
+  static final ITALICS = "\u001d";
 
   /**
    * Color can't be instantiated.

@@ -681,6 +681,8 @@ class Client extends ClientBase with EventDispatcher {
     send("WALLOPS ${message}");
   }
   
+  void 
+  
   Timer _timer;
   
   Future<WhoisEvent> whois(String user) {
