@@ -458,6 +458,9 @@ class Client extends ClientBase with EventDispatcher {
           post(new ServerVersionEvent(this, server, version, comments));
           
           break;
+        case "381": // We are now a Server Operator
+          post(new ServerOperatorEvent(this));
+          break;
       }
 
       /* Set the Connection Status */
@@ -653,6 +656,19 @@ class Client extends ClientBase with EventDispatcher {
     }, once: true);
     
     send(target != null ? "VERSION ${target}" : "VERSION");
+    
+    return completer.future;
+  }
+  
+  @override
+  Future<String> getChannelTopic(String channel) {
+    var completer = new Completer();
+    
+    register((TopicEvent event) {
+      completer.complete(event.topic);
+    }, filter: (TopicEvent event) => event.channel.name != channel, once: true);
+    
+    send("TOPIC ${channel}");
     
     return completer.future;
   }

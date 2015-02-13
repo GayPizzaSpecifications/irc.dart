@@ -227,6 +227,7 @@ abstract class ClientBase {
   }
   
   Future<bool> getServerVersion([String target]);
+  Future<String> getChannelTopic(String channel);
   
   Future<bool> isUserOn(String name);
   
