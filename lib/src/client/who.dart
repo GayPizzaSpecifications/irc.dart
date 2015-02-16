@@ -21,6 +21,8 @@ class WhoisBuilder {
   int idleTime;
   bool isServerOperator;
   bool away = false;
+  
+  DateTime _createTimestamp;
 
   WhoisBuilder(this.nickname);
 

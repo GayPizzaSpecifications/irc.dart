@@ -57,7 +57,7 @@ class Channel {
    */
   String get topic => _topic;
 
-  void set topic(String topic) {
+  set topic(String topic) {
     if (client.supported.containsKey("TOPICLEN")) {
       var max = client.supported['TOPICLEN'];
       if (topic.length > max) {

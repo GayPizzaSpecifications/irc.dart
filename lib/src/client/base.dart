@@ -39,7 +39,7 @@ abstract class ClientBase {
   /**
    * Provides information about what the server supports.
    */
-  Map<String, String> get supported;
+  Map<String, dynamic> get supported;
   
   /**
    * Sends the [message] to the [target] as a message.
@@ -205,7 +205,7 @@ abstract class ClientBase {
   
   void knock(String channel, [String message]) {
     if (supported.containsKey("KNOCK") && supported["KNOCK"]) {
-      send("KNOCK ${channel}" : "KNOCK ${channel} :${message}")
+      send(message != null ? "KNOCK ${channel}" : "KNOCK ${channel} :${message}");
     } else {
       throw new UnsupportedError("Knocking is not supported on this server.");
     }
@@ -242,7 +242,7 @@ abstract class ClientBase {
     send("INVITE ${user} ${channel}");
   }
   
-  Future<bool> getServerVersion([String target]);
+  Future<ServerVersionEvent> getServerVersion([String target]);
   Future<String> getChannelTopic(String channel);
   
   Future<bool> isUserOn(String name);

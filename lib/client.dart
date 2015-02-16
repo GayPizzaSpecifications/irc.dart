@@ -30,7 +30,7 @@ part 'src/client/config.dart';
 /* Message Formatting */
 part 'src/client/colors.dart';
 /* WHOIS Stuff */
-part 'src/client/whois.dart';
+part 'src/client/who.dart';
 /* Client Pool */
 part 'src/client/pool.dart';
 part 'src/client/channel.dart';

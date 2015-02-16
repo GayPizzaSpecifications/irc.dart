@@ -82,7 +82,7 @@ class Client extends ClientBase with EventDispatcher {
     this.config = config;
     _registerHandlers();
     _nickname = config.nickname;
-    _whoisBuilders = new Map<String, WhoisBuilder>();
+    _whoisBuilders = <String, WhoisBuilder>{};
   }
 
   @override
@@ -331,6 +331,7 @@ class Client extends ClientBase with EventDispatcher {
           builder
               ..hostname = hostname
               ..realname = realname;
+          builder._createTimestamp = new DateTime.now();
           _whoisBuilders[nickname] = builder;
           break;
 
@@ -648,7 +649,7 @@ class Client extends ClientBase with EventDispatcher {
     
     send("ISON ${name}");
     
-    return completer.future;
+    return completer.future.timeout(const Duration(seconds: 2), onTimeout: () => false);
   }
   
   @override
@@ -661,7 +662,7 @@ class Client extends ClientBase with EventDispatcher {
     
     send(target != null ? "VERSION ${target}" : "VERSION");
     
-    return completer.future;
+    return completer.future.timeout(const Duration(seconds: 3), onTimeout: () => throw new UnsupportedError("Server Version Information may not be supported on this server."));
   }
   
   @override
@@ -699,12 +700,24 @@ class Client extends ClientBase with EventDispatcher {
   
   Timer _timer;
   
-  Future<WhoisEvent> whois(String user) {
+  Future<WhoisEvent> whois(String user, {Duration timeout: const Duration(seconds: 2)}) {
     var completer = new Completer();
     register((WhoisEvent event) {
       completer.complete(event);
     }, filter: (WhoisEvent event) => event.nickname != user, once: true);
     send("WHOIS ${user}");
-    return completer.future;
+    return completer.future.timeout(timeout, onTimeout: () => throw new UserNotFoundException(user));
   }
+}
+
+/**
+ * An exception for when an IRC User is not found.
+ */
+class UserNotFoundException {
+  final String user;
+  
+  UserNotFoundException(this.user);
+  
+  @override
+  String toString() => "${user} was not found.";
 }
