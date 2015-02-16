@@ -123,12 +123,15 @@ abstract class ClientBase {
    * the default [password] is password.
    * the default [nickserv] is NickServ.
    */
-  void identify({String username: "PLEASE_INJECT_DEFAULT", String password: "password", String nickserv: "NickServ"}) {
+  void identify({String username: "PLEASE_INJECT_DEFAULT", String password: "password", String nickserv: "NickServ", String generateMessage(String user, String password): _nickserv}) {
     if (username == "PLEASE_INJECT_DEFAULT") {
       username = config.username;
     }
-    sendMessage(nickserv, "identify ${username} ${password}");
+    
+    sendMessage(nickserv, _nickserv(username, password));
   }
+  
+  static String _nickserv(String username, String password) => "identify ${username} ${password}";
   
   /**
    * Sends [line] to the server
