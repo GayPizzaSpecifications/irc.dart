@@ -16,10 +16,6 @@ void main() {
     print("<${event.target}><${event.from}> ${event.message}");
   });
   
-  bot.register((ReadyEvent event) {
-    event.join("#directcode");
-  });
-
   bot.command("help", (CommandEvent event) {
     event.reply("> ${Color.BLUE}Commands${Color.RESET}: ${bot.commandNames().join(', ')}");
   });
