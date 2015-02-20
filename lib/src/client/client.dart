@@ -461,6 +461,9 @@ class Client extends ClientBase with EventDispatcher {
           var message = params.join(" ");
           post(new ServerSupportsEvent(this, message));
           break;
+        case "CAP": // Capability
+          _handleCAP(input);
+          break;
         case "INVITE": // We Were Invited to a Channel
           var user = input.hostmask.nickname;
           var channel = input.message;
@@ -660,6 +663,34 @@ class Client extends ClientBase with EventDispatcher {
     });
   }
   
+  void _handleCAP(Message input) {
+    var cmd = input.parameters[1];
+    
+    switch (cmd) {
+      case "LS":
+        _supportedCap = input.message.split(" ").toSet();
+        post(new ServerCapabilitiesEvent(this, _supportedCap));
+        break;
+      case "LIST":
+        _currentCap = input.message.split(" ").toSet();
+        post(new CurrentCapabilitiesEvent(this, _currentCap));
+        break;
+      case "ACK":
+        var caps = input.message.split(" ");
+        _currentCap.addAll(caps);
+        post(new AcknowledgedCapabilitiesEvent(this, caps));
+        break;
+      case "NAK":
+        var caps = input.message.split(" ");
+        _currentCap.removeWhere((it) => caps.contains(it));
+        post(new NotAcknowledgedCapabilitiesEvent(this, caps));
+        break;
+    }
+  }
+  
+  Set<String> _supportedCap = new Set<String>();
+  Set<String> _currentCap = new Set<String>();
+  
   @override
   Future<bool> isUserOn(String name) {
     var completer = new Completer();
@@ -714,6 +745,21 @@ class Client extends ClientBase with EventDispatcher {
   void refreshUserList(String channel) {
     send("NAMES ${channel}");
   }
+  
+  void requestCapability(String name) {
+    send("CAP REQ :${name}");
+  }
+  
+  bool hasCapabilities(String name) {
+    return currentCapabilities.contians(name);
+  }
+  
+  bool hasSupportForCapability(String name) {
+    return serverCapabilities.contains(name);
+  }
+  
+  Set<String> get serverCapabilities => _supportedCaps;
+  Set<String> get currentCapabilities => _currentCap;
   
   Stream<Event> onEvent(Type type) {
     return events.where((it) => it.runtimeType == type);

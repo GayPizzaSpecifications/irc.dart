@@ -330,6 +330,34 @@ class TopicEvent extends Event {
       : super(client);
 }
 
+class ServerCapabilitiesEvent extends Event {
+  List<String> capabilities;
+  
+  ServerCapabilitiesEvent(Client client, this.capabilities)
+      : super(client);
+}
+
+class AcknowledgedCapabilitiesEvent extends Event {
+  List<String> capabilities;
+  
+  AcknowledgedCapabilitiesEvent(Client client, this.capabilities)
+      : super(client);
+}
+
+class NotAcknowledgedCapabilitiesEvent extends Event {
+  List<String> capabilities;
+  
+  NotAcknowledgedCapabilitiesEvent(Client client, this.capabilities)
+      : super(client);
+}
+
+class CurrentCapabilitiesEvent extends Event {
+  List<String> capabilities;
+
+  CurrentCapabilitiesEvent(Client client, this.capabilities)
+      : super(client);
+}
+
 class WhowasEvent extends Event {
   final String nickname;
   final String user;
