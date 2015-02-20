@@ -57,6 +57,8 @@ class Channel {
    */
   String get topic => _topic;
 
+  String get topicUser => _topicUser;
+  
   set topic(String topic) {
     if (client.supported.containsKey("TOPICLEN")) {
       var max = client.supported['TOPICLEN'];
@@ -67,6 +69,8 @@ class Channel {
     
     client.send("TOPIC ${name} :${topic}");
   }
+  
+  String _topicUser;
   
   void invite(String user) {
     client.invite(user, name);

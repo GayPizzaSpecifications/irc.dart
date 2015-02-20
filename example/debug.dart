@@ -42,6 +42,10 @@ void main() {
       ..command("ping", (CommandEvent event) {
         event.client.send("PING :cmd_${event.channel.name}");
       })
+      
+      ..register((TopicEvent event) {
+        print("Topic for ${event.channel.name} (by ${event.user}): ${event.topic}");
+      })
 
       ..register((PongEvent event) {
         if (event.message.startsWith("cmd_")) {

@@ -161,6 +161,8 @@ class Client extends ClientBase with EventDispatcher {
       post(new ReadyEvent(this));
     }
   }
+  
+  Map<String, String> _topicQueue = {};
 
   /**
    * Registers all the default handlers.
@@ -257,9 +259,27 @@ class Client extends ClientBase with EventDispatcher {
 
         case "332": // Topic
           var topic = input.message;
-          var chan = getChannel(input.parameters[1]);
+          var chan = input.parameters[1];
+          
+          _topicQueue[chan] = topic;
+          break;
+          
+        case "333": // Topic User
+          var channel = getChannel(input.parameters[1]);
+          var user = new Hostmask.parse(input.parameters[2]).nickname;
+          var topic = _topicQueue.remove(channel.name);
+          channel._topic = topic;
+          channel._topicUser = user;
+          post(new TopicEvent(this, channel, user, topic));
+          break;
+          
+        case "TOPIC": // Topic Changed
+          var topic = input.message;
+          var user = input.hostmask.nickname;
+          var chan = getChannel(input.parameters[0]);
           chan._topic = topic;
-          post(new TopicEvent(this, chan, topic));
+          chan._topicUser = user;
+          post(new TopicEvent(this, chan, user, topic, true));
           break;
 
         case "ERROR": // Server Error

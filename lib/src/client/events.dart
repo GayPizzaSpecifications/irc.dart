@@ -318,8 +318,15 @@ class TopicEvent extends Event {
    * The Topic
    */
   String topic;
+  
+  /**
+   * The User
+   */
+  String user;
+  
+  bool isChange;
 
-  TopicEvent(Client client, this.channel, this.topic)
+  TopicEvent(Client client, this.channel, this.user, this.topic, [this.isChange = false])
       : super(client);
 }
 
