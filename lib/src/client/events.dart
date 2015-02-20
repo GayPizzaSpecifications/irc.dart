@@ -331,28 +331,28 @@ class TopicEvent extends Event {
 }
 
 class ServerCapabilitiesEvent extends Event {
-  List<String> capabilities;
+  Set<String> capabilities;
   
   ServerCapabilitiesEvent(Client client, this.capabilities)
       : super(client);
 }
 
 class AcknowledgedCapabilitiesEvent extends Event {
-  List<String> capabilities;
+  Set<String> capabilities;
   
   AcknowledgedCapabilitiesEvent(Client client, this.capabilities)
       : super(client);
 }
 
 class NotAcknowledgedCapabilitiesEvent extends Event {
-  List<String> capabilities;
+  Set<String> capabilities;
   
   NotAcknowledgedCapabilitiesEvent(Client client, this.capabilities)
       : super(client);
 }
 
 class CurrentCapabilitiesEvent extends Event {
-  List<String> capabilities;
+  Set<String> capabilities;
 
   CurrentCapabilitiesEvent(Client client, this.capabilities)
       : super(client);

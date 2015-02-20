@@ -676,12 +676,12 @@ class Client extends ClientBase with EventDispatcher {
         post(new CurrentCapabilitiesEvent(this, _currentCap));
         break;
       case "ACK":
-        var caps = input.message.split(" ");
+        var caps = input.message.split(" ").toSet();
         _currentCap.addAll(caps);
         post(new AcknowledgedCapabilitiesEvent(this, caps));
         break;
       case "NAK":
-        var caps = input.message.split(" ");
+        var caps = input.message.split(" ").toSet();
         _currentCap.removeWhere((it) => caps.contains(it));
         post(new NotAcknowledgedCapabilitiesEvent(this, caps));
         break;
@@ -751,7 +751,7 @@ class Client extends ClientBase with EventDispatcher {
   }
   
   bool hasCapabilities(String name) {
-    return currentCapabilities.contians(name);
+    return currentCapabilities.contains(name);
   }
   
   bool hasSupportForCapability(String name) {
