@@ -320,14 +320,23 @@ class TopicEvent extends Event {
   String topic;
   
   /**
+   * The old Topic.
+   */
+  String oldTopic;
+  
+  /**
    * The User
    */
   String user;
   
   bool isChange;
 
-  TopicEvent(Client client, this.channel, this.user, this.topic, [this.isChange = false])
+  TopicEvent(Client client, this.channel, this.user, this.topic, this.oldTopic, [this.isChange = false])
       : super(client);
+  
+  void revert() {
+    channel.topic = oldTopic;
+  }
 }
 
 class ServerCapabilitiesEvent extends Event {

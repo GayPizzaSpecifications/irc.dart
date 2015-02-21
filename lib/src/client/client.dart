@@ -37,11 +37,6 @@ class Client extends ClientBase with EventDispatcher {
    */
   String _nickname;
 
-  /**
-   * Flag for if the Client has hit an error.
-   */
-  bool _errored = false;
-
   @override
   final IrcParser parser;
   
@@ -128,10 +123,6 @@ class Client extends ClientBase with EventDispatcher {
 
   @override
   void post(Event event) {
-    /* Handle Error Events */
-    if (event is ErrorEvent) {
-      _errored = true;
-    }
     super.post(event);
     _controller.add(event);
   }
@@ -189,7 +180,7 @@ class Client extends ClientBase with EventDispatcher {
           break;
 
         case "422": // No MOTD Found
-          post(new MOTDEvent(this, 'No MOTD file present of the server.'));
+          post(new MOTDEvent(this, 'No MOTD file present on the server.'));
           _fireReady();
           break;
 
@@ -268,18 +259,20 @@ class Client extends ClientBase with EventDispatcher {
           var channel = getChannel(input.parameters[1]);
           var user = new Hostmask.parse(input.parameters[2]).nickname;
           var topic = _topicQueue.remove(channel.name);
+          var old = channel._topic;
           channel._topic = topic;
           channel._topicUser = user;
-          post(new TopicEvent(this, channel, user, topic));
+          post(new TopicEvent(this, channel, user, topic, old));
           break;
           
         case "TOPIC": // Topic Changed
           var topic = input.message;
           var user = input.hostmask.nickname;
           var chan = getChannel(input.parameters[0]);
+          var old = chan._topic;
           chan._topic = topic;
           chan._topicUser = user;
-          post(new TopicEvent(this, chan, user, topic, true));
+          post(new TopicEvent(this, chan, user, topic, old, true));
           break;
 
         case "ERROR": // Server Error
