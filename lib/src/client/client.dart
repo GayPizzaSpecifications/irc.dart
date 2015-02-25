@@ -565,34 +565,18 @@ class Client extends ClientBase with EventDispatcher {
         _nickname = event.now;
       } else {
         for (Channel channel in channels) {
-          if (channel.allUsers.contains(event.original)) {
-            var old = event.original;
-            var now = event.now;
-            if (channel.members.contains(old)) {
-              channel.members.remove(old);
-              channel.members.add(now);
-            }
-
-            if (channel.voices.contains(old)) {
-              channel.voices.remove(old);
-              channel.voices.add(now);
-            }
-
-            if (channel.ops.contains(old)) {
-              channel.ops.remove(old);
-              channel.ops.add(now);
-            }
-
-            if (channel.halfops.contains(old)) {
-              channel.halfops.remove(old);
-              channel.halfops.add(now);
-            }
-
-            if (channel.owners.contains(old)) {
-              channel.owners.remove(old);
-              channel.owners.add(now);
+          void m(List<String> list) {
+            if (list.contains(old)) {
+              list.remove(old);
+              list.add(now);
             }
           }
+          
+          m(channel.members);
+          m(channel.ops);
+          m(channel.voices);
+          m(channel.halfops);
+          m(channel.owners);
         }
       }
     });
