@@ -413,9 +413,11 @@ class Client extends ClientBase with EventDispatcher {
               builder.voiceIn.add(c);
             } else if (chan.startsWith("~")) {
               var c = chan.substring(1);
+              builder.channels.add(c);
               builder.ownerIn.add(c);
             } else if (chan.startsWith("%")) {
               var c = chan.substring(1);
+              builder.channels.add(c);
               builder.halfOpIn.add(c);
             } else {
               if (chan.startsWith("!")) {
@@ -594,71 +596,48 @@ class Client extends ClientBase with EventDispatcher {
         }
       }
     });
-
+    
     /* Handles Channel User Tracking */
     register((ModeEvent event) {
       if (event.channel != null) {
         var channel = event.channel;
-        var prefixes =
-            IrcParserSupport.parseSupportedPrefixes(_supported["PREFIX"]);
+        var prefixes = _modePrefixes;
 
-        if (prefixes["modes"].contains(event.mode.substring(1))) {
+        var mode = event.mode.substring(1);
+        var added = event.mode.startsWith("+");
+
+        if (!prefixes.containsKey(mode)) {
           return;
         }
-
-        switch (event.mode) {
-          case "+o":
-            channel.ops.add(event.user);
-            channel.members.remove(event.user);
-            channel.halfops.remove(event.user);
-            channel.owners.remove(event.user);
-            break;
-          case "+v":
-            channel.voices.add(event.user);
-            channel.members.remove(event.user);
-            channel.halfops.remove(event.user);
-            channel.owners.remove(event.user);
-            break;
-          case "-v":
-            channel.voices.remove(event.user);
-            channel.members.add(event.user);
-            channel.halfops.remove(event.user);
-            channel.owners.remove(event.user);
-            break;
-          case "-o":
-            channel.ops.remove(event.user);
-            channel.members.add(event.user);
-            channel.halfops.remove(event.user);
-            channel.owners.remove(event.user);
-            break;
-          case "+q":
-            channel.owners.add(event.user);
-            channel.ops.remove(event.user);
-            channel.voices.remove(event.user);
-            channel.members.remove(event.user);
-            channel.halfops.remove(event.user);
-            break;
-          case "-q":
-            channel.ops.remove(event.user);
-            channel.voices.remove(event.user);
-            channel.members.add(event.user);
-            channel.owners.remove(event.user);
-            channel.halfops.remove(event.user);
-            break;
-          case "+h":
-            channel.ops.remove(event.user);
-            channel.voices.remove(event.user);
-            channel.members.remove(event.user);
-            channel.owners.remove(event.user);
-            channel.halfops.add(event.user);
-            break;
-          case "-h":
-            channel.ops.remove(event.user);
-            channel.voices.remove(event.user);
-            channel.members.add(event.user);
-            channel.owners.remove(event.user);
-            channel.halfops.remove(event.user);
-            break;
+        
+        var prefix = prefixes[mode];
+        var owner = mode == "q" && prefix == "@";
+        var op = prefix == "@";
+        var voice = prefix == "+";
+        var halfop = prefix == "%";
+        
+        void m(List<String> users) {
+          if (added) {
+            users.add(event.user);
+          } else {
+            users.remove(event.user);
+          }
+        }
+        
+        if (owner) {
+          m(channel.owners);
+        }
+        
+        if (op) {
+          m(channel.ops);
+        }
+        
+        if (voice) {
+          m(channel.voices);
+        }
+        
+        if (halfop) {
+          m(channel.halfops);
         }
       }
     });
@@ -668,6 +647,7 @@ class Client extends ClientBase with EventDispatcher {
 
     register((ServerSupportsEvent event) {
       _supported.addAll(event.supported);
+      _modePrefixes = IrcParserSupport.parseSupportedPrefixes(_supported["PREFIX"]);
     });
   }
 
@@ -696,8 +676,11 @@ class Client extends ClientBase with EventDispatcher {
     }
   }
 
+  Map<String, String> _modePrefixes = {};
   Set<String> _supportedCap = new Set<String>();
   Set<String> _currentCap = new Set<String>();
+  
+  Map<String, String> get modePrefixes => _modePrefixes;
 
   @override
   Future<bool> isUserOn(String name) {
@@ -709,8 +692,7 @@ class Client extends ClientBase with EventDispatcher {
 
     send("ISON ${name}");
 
-    return completer.future.timeout(const Duration(seconds: 2),
-        onTimeout: () => false);
+    return completer.future.timeout(const Duration(seconds: 2), onTimeout: () => false);
   }
 
   @override

@@ -34,6 +34,7 @@ void main() {
       })
       
       ..register((ReadyEvent event) {
+        print(bot.client.modePrefixes);
         if (conf.containsKey("identityPassword")) bot.client.identify(username: conf["identityUsername"], password: conf["identityPassword"]);
         event.join("#bot-test");
       })
