@@ -8,3 +8,4 @@ dartdoc-viewer/
 .settings
 .buildlog
 .c9/
+.pub/

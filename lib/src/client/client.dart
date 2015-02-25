@@ -39,7 +39,7 @@ class Client extends ClientBase with EventDispatcher {
 
   @override
   final IrcParser parser;
-  
+
   final Duration sendInterval;
 
   @override
@@ -60,7 +60,7 @@ class Client extends ClientBase with EventDispatcher {
    * Server Supports
    */
   Map<String, String> _supported = {};
-  
+
   /**
    * Server Supports
    */
@@ -72,7 +72,9 @@ class Client extends ClientBase with EventDispatcher {
    */
   Client(Configuration config, {IrcParser parser, IrcConnection connection, this.sendInterval: const Duration(milliseconds: 100)})
       : this.parser = parser == null ? new RegexIrcParser() : parser,
-        this.connection = connection == null ? new SocketIrcConnection() : connection,
+        this.connection = connection == null
+            ? new SocketIrcConnection()
+            : connection,
         this.metadata = {} {
     this.config = config;
     _registerHandlers();
@@ -87,7 +89,8 @@ class Client extends ClientBase with EventDispatcher {
   String get nickname => _nickname;
 
   @override
-  Channel getChannel(String name) => channels.firstWhere((channel) => channel.name == name, orElse: () => null);
+  Channel getChannel(String name) => channels.firstWhere(
+      (channel) => channel.name == name, orElse: () => null);
 
   @override
   void connect() {
@@ -97,22 +100,22 @@ class Client extends ClientBase with EventDispatcher {
         if (_queue.isEmpty) {
           return;
         }
-        
+
         var line = _queue.removeAt(0);
-        
+
         /* Sending the line has priority over the event */
         connection.send(line);
         post(new LineSentEvent(this, line));
       });
-      
+
       connection.lines().listen((line) {
         post(new LineReceiveEvent(this, line));
       });
-      
+
       post(new ConnectEvent(this));
     });
   }
-  
+
   List<String> _queue = [];
 
   @override
@@ -131,15 +134,16 @@ class Client extends ClientBase with EventDispatcher {
   void send(String line, {bool now: false}) {
     /* Max Line Length for IRC is 512. With the newlines (\r\n or \n) we can only send 510 character lines */
     if (line.length > 510) {
-      throw new ArgumentError("The length of '${line}' is greater than 510 characters");
+      throw new ArgumentError(
+          "The length of '${line}' is greater than 510 characters");
     }
-    
+
     if (now) {
       /* Sending the line has priority over the event */
       connection.send(line);
       post(new LineSentEvent(this, line));
     } else {
-      _queue.add(line); 
+      _queue.add(line);
     }
   }
 
@@ -152,7 +156,7 @@ class Client extends ClientBase with EventDispatcher {
       post(new ReadyEvent(this));
     }
   }
-  
+
   Map<String, String> _topicQueue = {};
 
   /**
@@ -163,7 +167,7 @@ class Client extends ClientBase with EventDispatcher {
       if (config.password != null) {
         send("PASS ${config.password}", now: true);
       }
-      
+
       send("NICK ${config.nickname}", now: true);
       send("USER ${config.username} ${config.username} ${config.host} :${config.realname}", now: true);
     });
@@ -191,7 +195,9 @@ class Client extends ClientBase with EventDispatcher {
 
         case "JOIN": // User Joined Channel
           var who = input.hostmask.nickname;
-          var chanName = input.parameters.length != 0 ? input.parameters[0] : input.message;
+          var chanName = input.parameters.length != 0
+              ? input.parameters[0]
+              : input.message;
           if (who == _nickname) {
             // We Joined a New Channel
             if (getChannel(chanName) == null) {
@@ -211,7 +217,8 @@ class Client extends ClientBase with EventDispatcher {
           var message = input.message;
 
           if (message.startsWith("\u0001")) {
-            post(new CTCPEvent(this, from, target, message.substring(1, message.length - 1)));
+            post(new CTCPEvent(
+                this, from, target, message.substring(1, message.length - 1)));
           } else {
             post(new MessageEvent(this, from, target, message));
           }
@@ -229,7 +236,9 @@ class Client extends ClientBase with EventDispatcher {
         case "PART": // User Left Channel
           var who = input.hostmask.nickname;
 
-          var chan_name = input.parameters.length != 0 ? input.parameters[0] : input.message;
+          var chan_name = input.parameters.length != 0
+              ? input.parameters[0]
+              : input.message;
 
           if (who == _nickname) {
             post(new BotPartEvent(this, getChannel(chan_name)));
@@ -251,10 +260,10 @@ class Client extends ClientBase with EventDispatcher {
         case "332": // Topic
           var topic = input.message;
           var chan = input.parameters[1];
-          
+
           _topicQueue[chan] = topic;
           break;
-          
+
         case "333": // Topic User
           var channel = getChannel(input.parameters[1]);
           var user = new Hostmask.parse(input.parameters[2]).nickname;
@@ -264,7 +273,7 @@ class Client extends ClientBase with EventDispatcher {
           channel._topicUser = user;
           post(new TopicEvent(this, channel, user, topic, old));
           break;
-          
+
         case "TOPIC": // Topic Changed
           var topic = input.message;
           var user = input.hostmask.nickname;
@@ -281,7 +290,8 @@ class Client extends ClientBase with EventDispatcher {
           break;
 
         case "353": // Channel User List
-          var users = input.message.split(" ")..removeWhere((it) => it.trim().isEmpty);
+          var users = input.message.split(" ")
+            ..removeWhere((it) => it.trim().isEmpty);
           var channel = this.getChannel(input.parameters[2]);
 
           users.forEach((user) {
@@ -343,8 +353,8 @@ class Client extends ClientBase with EventDispatcher {
           var realname = input.message;
           var builder = new WhoisBuilder(nickname);
           builder
-              ..hostname = hostname
-              ..realname = realname;
+            ..hostname = hostname
+            ..realname = realname;
           builder._createTimestamp = new DateTime.now();
           _whoisBuilders[nickname] = builder;
           break;
@@ -384,13 +394,13 @@ class Client extends ClientBase with EventDispatcher {
 
         case "319": // WHOIS Channel Information
           var nickname = input.parameters[1];
-          
+
           if (input.message == null) {
             break;
           }
-          
+
           var message = input.message.trim();
-          
+
           var builder = _whoisBuilders[nickname];
           message.split(" ").forEach((chan) {
             if (chan.startsWith("@")) {
@@ -408,6 +418,9 @@ class Client extends ClientBase with EventDispatcher {
               var c = chan.substring(1);
               builder.halfOpIn.add(c);
             } else {
+              if (chan.startsWith("!")) {
+                chan = chan.substring(1);
+              }
               builder.channels.add(chan);
             }
           });
@@ -426,7 +439,8 @@ class Client extends ClientBase with EventDispatcher {
 
         case "367": // Ban List Entry
           var channel = this.getChannel(input.parameters[1]);
-          if (channel == null) { // We Were Banned
+          if (channel == null) {
+            // We Were Banned
             break;
           }
           var ban = input.parameters[2];
@@ -469,183 +483,184 @@ class Client extends ClientBase with EventDispatcher {
           } else {
             users = input.message.split(" ").map((it) => it.trim()).toList();
           }
-        
+
           post(new IsOnEvent(this, users));
           break;
         case "351": // Server Version Response
           var version = input.parameters[0];
           var server = input.parameters[1];
           var comments = input.message;
-          
+
           post(new ServerVersionEvent(this, server, version, comments));
-          
+
           break;
         case "381": // We are now a Server Operator
           post(new ServerOperatorEvent(this));
           break;
       }
+    });
 
-      /* Set the Connection Status */
-      register((ConnectEvent event) => this.connected = true);
-      register((DisconnectEvent event) {
-        this.connected = false;
-        
-        if (_timer != null && _timer.isActive) {
-          _timer.cancel();
+    /* Set the Connection Status */
+    register((ConnectEvent event) => this.connected = true);
+    register((DisconnectEvent event) {
+      this.connected = false;
+
+      if (_timer != null && _timer.isActive) {
+        _timer.cancel();
+      }
+    });
+
+    /* Handles when the user quits */
+    register((QuitEvent event) {
+      for (var chan in channels) {
+        if (chan.allUsers.contains(event.user)) {
+          post(new QuitPartEvent(this, chan, event.user));
+          chan.members.remove(event.user);
+          chan.voices.remove(event.user);
+          chan.ops.remove(event.user);
+          chan.halfops.remove(event.user);
+          chan.owners.remove(event.user);
         }
-      });
+      }
+    });
 
-      /* Handles when the user quits */
-      register((QuitEvent event) {
-        for (var chan in channels) {
-          if (chan.allUsers.contains(event.user)) {
-            post(new QuitPartEvent(this, chan, event.user));
-            chan.members.remove(event.user);
-            chan.voices.remove(event.user);
-            chan.ops.remove(event.user);
-            chan.halfops.remove(event.user);
-            chan.owners.remove(event.user);
-          }
-        }
-      });
+    /* Handles CTCP Events so the action event can be executed */
+    register((CTCPEvent event) {
+      if (event.message.startsWith("ACTION ")) {
+        post(new ActionEvent(this, event.user, event.target, event.message.substring(7)));
+      }
+    });
 
-      /* Handles CTCP Events so the action event can be executed */
-      register((CTCPEvent event) {
-        if (event.message.startsWith("ACTION ")) {
-          post(new ActionEvent(this, event.user, event.target, event.message.substring(7)));
-        }
-      });
+    /* Handles User Tracking in Channels when a user joins. A user is a member until it is changed. */
+    register((JoinEvent event) => event.channel.members.add(event.user));
 
-      /* Handles User Tracking in Channels when a user joins. A user is a member until it is changed. */
-      register((JoinEvent event) => event.channel.members.add(event.user));
+    /* Handles User Tracking in Channels when a user leaves */
+    register((PartEvent event) {
+      var channel = event.channel;
+      channel.members.remove(event.user);
+      channel.voices.remove(event.user);
+      channel.ops.remove(event.user);
+      channel.owners.remove(event.user);
+      channel.halfops.remove(event.user);
+    });
 
-      /* Handles User Tracking in Channels when a user leaves */
-      register((PartEvent event) {
-        var channel = event.channel;
-        channel.members.remove(event.user);
-        channel.voices.remove(event.user);
-        channel.ops.remove(event.user);
-        channel.owners.remove(event.user);
-        channel.halfops.remove(event.user);
-      });
+    /* Handles User Tracking in Channels when a user is kicked. */
+    register((KickEvent event) {
+      var channel = event.channel;
+      channel.members.remove(event.user);
+      channel.voices.remove(event.user);
+      channel.ops.remove(event.user);
+      channel.owners.remove(event.user);
+      channel.halfops.remove(event.user);
+      if (event.user == nickname) {
+        channels.remove(channel);
+      }
+    });
 
-      /* Handles User Tracking in Channels when a user is kicked. */
-      register((KickEvent event) {
-        var channel = event.channel;
-        channel.members.remove(event.user);
-        channel.voices.remove(event.user);
-        channel.ops.remove(event.user);
-        channel.owners.remove(event.user);
-        channel.halfops.remove(event.user);
-        if (event.user == nickname) {
-          channels.remove(channel);
-        }
-      });
+    /* Handles Nickname Changes */
+    register((NickChangeEvent event) {
+      if (event.original == _nickname) {
+        _nickname = event.now;
+      } else {
+        for (Channel channel in channels) {
+          if (channel.allUsers.contains(event.original)) {
+            var old = event.original;
+            var now = event.now;
+            if (channel.members.contains(old)) {
+              channel.members.remove(old);
+              channel.members.add(now);
+            }
 
-      /* Handles Nickname Changes */
-      register((NickChangeEvent event) {
-        if (event.original == _nickname) {
-          _nickname = event.now;
-        } else {
-          for (Channel channel in channels) {
-            if (channel.allUsers.contains(event.original)) {
-              var old = event.original;
-              var now = event.now;
-              if (channel.members.contains(old)) {
-                channel.members.remove(old);
-                channel.members.add(now);
-              }
+            if (channel.voices.contains(old)) {
+              channel.voices.remove(old);
+              channel.voices.add(now);
+            }
 
-              if (channel.voices.contains(old)) {
-                channel.voices.remove(old);
-                channel.voices.add(now);
-              }
+            if (channel.ops.contains(old)) {
+              channel.ops.remove(old);
+              channel.ops.add(now);
+            }
 
-              if (channel.ops.contains(old)) {
-                channel.ops.remove(old);
-                channel.ops.add(now);
-              }
+            if (channel.halfops.contains(old)) {
+              channel.halfops.remove(old);
+              channel.halfops.add(now);
+            }
 
-              if (channel.halfops.contains(old)) {
-                channel.halfops.remove(old);
-                channel.halfops.add(now);
-              }
-
-              if (channel.owners.contains(old)) {
-                channel.owners.remove(old);
-                channel.owners.add(now);
-              }
+            if (channel.owners.contains(old)) {
+              channel.owners.remove(old);
+              channel.owners.add(now);
             }
           }
         }
-      });
+      }
+    });
 
-      /* Handles Channel User Tracking */
-      register((ModeEvent event) {
-        if (event.channel != null) {
-          var channel = event.channel;
-          var prefixes = IrcParserSupport.parseSupportedPrefixes(_supported["PREFIX"]);
+    /* Handles Channel User Tracking */
+    register((ModeEvent event) {
+      if (event.channel != null) {
+        var channel = event.channel;
+        var prefixes =
+            IrcParserSupport.parseSupportedPrefixes(_supported["PREFIX"]);
 
-          if (prefixes["modes"].contains(event.mode.substring(1))) {
-            return;
-          }
-
-          switch (event.mode) {
-            case "+o":
-              channel.ops.add(event.user);
-              channel.members.remove(event.user);
-              channel.halfops.remove(event.user);
-              channel.owners.remove(event.user);
-              break;
-            case "+v":
-              channel.voices.add(event.user);
-              channel.members.remove(event.user);
-              channel.halfops.remove(event.user);
-              channel.owners.remove(event.user);
-              break;
-            case "-v":
-              channel.voices.remove(event.user);
-              channel.members.add(event.user);
-              channel.halfops.remove(event.user);
-              channel.owners.remove(event.user);
-              break;
-            case "-o":
-              channel.ops.remove(event.user);
-              channel.members.add(event.user);
-              channel.halfops.remove(event.user);
-              channel.owners.remove(event.user);
-              break;
-            case "+q":
-              channel.owners.add(event.user);
-              channel.ops.remove(event.user);
-              channel.voices.remove(event.user);
-              channel.members.remove(event.user);
-              channel.halfops.remove(event.user);
-              break;
-            case "-q":
-              channel.ops.remove(event.user);
-              channel.voices.remove(event.user);
-              channel.members.add(event.user);
-              channel.owners.remove(event.user);
-              channel.halfops.remove(event.user);
-              break;
-            case "+h":
-              channel.ops.remove(event.user);
-              channel.voices.remove(event.user);
-              channel.members.remove(event.user);
-              channel.owners.remove(event.user);
-              channel.halfops.add(event.user);
-              break;
-            case "-h":
-              channel.ops.remove(event.user);
-              channel.voices.remove(event.user);
-              channel.members.add(event.user);
-              channel.owners.remove(event.user);
-              channel.halfops.remove(event.user);
-              break;
-          }
+        if (prefixes["modes"].contains(event.mode.substring(1))) {
+          return;
         }
-      });
+
+        switch (event.mode) {
+          case "+o":
+            channel.ops.add(event.user);
+            channel.members.remove(event.user);
+            channel.halfops.remove(event.user);
+            channel.owners.remove(event.user);
+            break;
+          case "+v":
+            channel.voices.add(event.user);
+            channel.members.remove(event.user);
+            channel.halfops.remove(event.user);
+            channel.owners.remove(event.user);
+            break;
+          case "-v":
+            channel.voices.remove(event.user);
+            channel.members.add(event.user);
+            channel.halfops.remove(event.user);
+            channel.owners.remove(event.user);
+            break;
+          case "-o":
+            channel.ops.remove(event.user);
+            channel.members.add(event.user);
+            channel.halfops.remove(event.user);
+            channel.owners.remove(event.user);
+            break;
+          case "+q":
+            channel.owners.add(event.user);
+            channel.ops.remove(event.user);
+            channel.voices.remove(event.user);
+            channel.members.remove(event.user);
+            channel.halfops.remove(event.user);
+            break;
+          case "-q":
+            channel.ops.remove(event.user);
+            channel.voices.remove(event.user);
+            channel.members.add(event.user);
+            channel.owners.remove(event.user);
+            channel.halfops.remove(event.user);
+            break;
+          case "+h":
+            channel.ops.remove(event.user);
+            channel.voices.remove(event.user);
+            channel.members.remove(event.user);
+            channel.owners.remove(event.user);
+            channel.halfops.add(event.user);
+            break;
+          case "-h":
+            channel.ops.remove(event.user);
+            channel.voices.remove(event.user);
+            channel.members.add(event.user);
+            channel.owners.remove(event.user);
+            channel.halfops.remove(event.user);
+            break;
+        }
+      }
     });
 
     /* When the Bot leaves a channel, we no longer retain the object. */
@@ -655,10 +670,10 @@ class Client extends ClientBase with EventDispatcher {
       _supported.addAll(event.supported);
     });
   }
-  
+
   void _handleCAP(Message input) {
     var cmd = input.parameters[1];
-    
+
     switch (cmd) {
       case "LS":
         _supportedCap = input.message.split(" ").toSet();
@@ -680,84 +695,87 @@ class Client extends ClientBase with EventDispatcher {
         break;
     }
   }
-  
+
   Set<String> _supportedCap = new Set<String>();
   Set<String> _currentCap = new Set<String>();
-  
+
   @override
   Future<bool> isUserOn(String name) {
     var completer = new Completer();
-    
+
     register((IsOnEvent event) {
       completer.complete(event.users.contains(name));
     }, once: true);
-    
+
     send("ISON ${name}");
-    
-    return completer.future.timeout(const Duration(seconds: 2), onTimeout: () => false);
+
+    return completer.future.timeout(const Duration(seconds: 2),
+        onTimeout: () => false);
   }
-  
+
   @override
   Future<ServerVersionEvent> getServerVersion([String target]) {
     var completer = new Completer();
-    
+
     register((ServerVersionEvent event) {
       completer.complete(event);
     }, once: true);
-    
+
     send(target != null ? "VERSION ${target}" : "VERSION");
-    
-    return completer.future.timeout(const Duration(seconds: 3), onTimeout: () => throw new UnsupportedError("Server Version Information may not be supported on this server."));
+
+    return completer.future.timeout(const Duration(seconds: 3),
+        onTimeout: () => throw new UnsupportedError(
+            "Server Version Information may not be supported on this server."));
   }
-  
+
   @override
   Future<String> getChannelTopic(String channel) {
     var completer = new Completer();
-    
+
     register((TopicEvent event) {
       completer.complete(event.topic);
     }, filter: (TopicEvent event) => event.channel.name != channel, once: true);
-    
+
     send("TOPIC ${channel}");
-    
+
     return completer.future;
   }
-  
+
   void setChannelTopic(String channel, String topic) {
     if (supported.containsKey("TOPICLEN")) {
       var length = supported["TOPICLEN"];
-      
+
       if (topic.length > length) {
         throw new ArgumentError("Topic exceeds maximum length.");
       }
     }
-    
+
     send("TOPIC ${channel} :${topic}");
   }
-  
+
   void refreshUserList(String channel) {
     send("NAMES ${channel}");
   }
-  
+
   void requestCapability(String name) {
     send("CAP REQ :${name}");
   }
-  
+
   bool hasCapabilities(String name) {
     return currentCapabilities.contains(name);
   }
-  
+
   bool hasSupportForCapability(String name) {
     return serverCapabilities.contains(name);
   }
-  
+
   Set<String> get serverCapabilities => _supportedCap;
   Set<String> get currentCapabilities => _currentCap;
-  
+
   Stream<Event> onEvent(Type type) {
     return events.where((it) => it.runtimeType == type);
   }
-  
+
   Stream<ConnectEvent> get onConnect => onEvent(ConnectEvent);
   Stream<DisconnectEvent> get onDisconnect => onEvent(DisconnectEvent);
   Stream<MessageEvent> get onMessage => onEvent(MessageEvent);
@@ -775,18 +793,19 @@ class Client extends ClientBase with EventDispatcher {
   Stream<LineReceiveEvent> get onLineReceive => onEvent(LineReceiveEvent);
   Stream<LineSentEvent> get onLineSent => onEvent(LineSentEvent);
   Stream<InviteEvent> get onInvite => onEvent(InviteEvent);
-  
+
   Stream<Event> get events => _controller.stream;
-  
+
   StreamController _controller = new StreamController.broadcast();
-  
+
   void wallops(String message) {
     send("WALLOPS :${message}");
   }
-  
+
   Timer _timer;
-  
-  Future<WhoisEvent> whois(String user, {Duration timeout: const Duration(seconds: 2)}) {
+
+  Future<WhoisEvent> whois(String user,
+      {Duration timeout: const Duration(seconds: 2)}) {
     var completer = new Completer();
     register((WhoisEvent event) {
       completer.complete(event);
@@ -801,9 +820,9 @@ class Client extends ClientBase with EventDispatcher {
  */
 class UserNotFoundException {
   final String user;
-  
+
   UserNotFoundException(this.user);
-  
+
   @override
   String toString() => "${user} was not found.";
 }
