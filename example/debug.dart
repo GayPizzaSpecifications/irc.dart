@@ -32,11 +32,36 @@ void main() {
       ..register((LineSentEvent event) {
         print("<< ${event.line}");
       })
+
+      ..register((ModeEvent event) {
+        if (event.channel != null && event.user != null) {
+          print("Mode (${event.mode}) given to ${event.user} in ${event.channel.name}");
+        } else if (event.channel != null) {
+          print("Mode (${event.mode}) given to ${event.channel.name}");
+        } else if (event.user != null) {
+          print("Mode (${event.mode}) was set on us.");
+        }
+      })
       
       ..register((ReadyEvent event) {
         print(bot.client.modePrefixes);
         if (conf.containsKey("identityPassword")) bot.client.identify(username: conf["identityUsername"], password: conf["identityPassword"]);
-        event.join("#bot-test");
+        event.join("#directcode");
+        event.client.listCurrentCapabilities().then((event) {
+          print("Current Capabilities: ${event.capabilities.join(", ")}");
+        });
+
+        event.client.listSupportedCapabilities().then((event) {
+          print("Supported Capabilities: ${event.capabilities.join(", ")}");
+        });
+      })
+
+      ..register((AcknowledgedCapabilitiesEvent event) {
+        print("Capabilities Acknowledged: ${event.capabilities.join(", ")}");
+      })
+
+      ..register((NotAcknowledgedCapabilitiesEvent event) {
+        print("Capabilities Not Acknowledged: ${event.capabilities.join(", ")}");
       })
 
       ..command("help", (CommandEvent event) {

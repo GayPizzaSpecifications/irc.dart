@@ -164,12 +164,70 @@ class Client extends ClientBase with EventDispatcher {
    */
   void _registerHandlers() {
     register((ConnectEvent event) {
+      if (config.enableCapabilityNegotiation) {
+        var list = config.capabilities.toSet();
+        var caps = {
+          "invite-notify": config.enableInviteNotify,
+          "account-tag": config.enableAccountTag,
+          "extended-join": config.enableExtendedJoin,
+          "multi-prefix": config.enableMultiPrefix,
+          "self-message": config.enableSelfMessage,
+          "away-notify": config.enableAwayNotify
+        };
+
+        for (var cap in caps.keys) {
+          if (caps[cap] == true) {
+            list.add(cap);
+          }
+        }
+
+        if (list.isNotEmpty) {
+          listSupportedCapabilities().then((supported) {
+            var m = supported.capabilities.map((it) => it.startsWith("~") ? it.substring(1) : it).toList();
+            var needsAck = supported.capabilities.where((it) => it.startsWith("~")).map((it) => it.substring(1)).toList();
+            for (var c in new Set<String>.from(list)) {
+              if (!m.contains(c)) {
+                list.remove(c);
+              }
+            }
+
+            requestCapability(list.join(" "), now: true);
+
+            events
+            .where((it) => it is AcknowledgedCapabilitiesEvent || it is NotAcknowledgedCapabilitiesEvent)
+            .first
+            .timeout(new Duration(seconds: 10)).then((event) {
+              if (event is AcknowledgedCapabilitiesEvent) {
+                if (event.capabilities.any((it) => needsAck.contains(it))) {
+                  send("CAP ACK :${event.capabilities.join(" ")}");
+                }
+              }
+              send("CAP END");
+            }).catchError((e) {
+              send("CAP END");
+            });
+          });
+        }
+      }
+
       if (config.password != null) {
         send("PASS ${config.password}", now: true);
       }
 
       send("NICK ${config.nickname}", now: true);
       send("USER ${config.username} ${config.username} ${config.host} :${config.realname}", now: true);
+    });
+
+    register((LineSentEvent event) {
+      var input = parser.convert(event.line);
+
+      switch (input.command) {
+        case "PRIVMSG":
+          var msg = input.message;
+          var target = input.parameters[0];
+          post(new MessageSentEvent(this, msg, target));
+          break;
+      }
     });
 
     register((LineReceiveEvent event) {
@@ -206,7 +264,12 @@ class Client extends ClientBase with EventDispatcher {
             post(new BotJoinEvent(this, getChannel(chanName)));
             getChannel(chanName).reloadBans();
           } else {
-            post(new JoinEvent(this, who, getChannel(chanName)));
+            var event = new JoinEvent(this, who, getChannel(chanName));
+            if (_currentCap.contains("extended-join")) {
+              event.username = input.parameters[1];
+              event.realname = input.message;
+            }
+            post(event);
           }
           break;
 
@@ -216,11 +279,16 @@ class Client extends ClientBase with EventDispatcher {
           var target = input.parameters[0];
           var message = input.message;
 
-          if (message.startsWith("\u0001")) {
-            post(new CTCPEvent(
-                this, from, target, message.substring(1, message.length - 1)));
+          if (from == nickname && _currentCap.contains("self-message")) {
+            post(new MessageSentEvent(this, message, target));
           } else {
-            post(new MessageEvent(this, from, target, message));
+            if (message.startsWith("\u0001")) {
+              post(new CTCPEvent(this, from, target, message.substring(1, message.length - 1)));
+            } else if (input.tags.containsKey("intent") && input.tags["intent"] == "ACTION") {
+              post(new ActionEvent(this, from, target, message));
+            } else {
+              post(new MessageEvent(this, from, target, message, intent: input.tags["intent"]));
+            }
           }
           break;
 
@@ -274,6 +342,12 @@ class Client extends ClientBase with EventDispatcher {
           post(new TopicEvent(this, channel, user, topic, old));
           break;
 
+        case "AWAY":
+          var user = input.hostmask.nickname;
+          var msg = input.message;
+          post(new AwayEvent(this, user, msg));
+          break;
+
         case "TOPIC": // Topic Changed
           var topic = input.message;
           var user = input.hostmask.nickname;
@@ -295,22 +369,28 @@ class Client extends ClientBase with EventDispatcher {
           var channel = this.getChannel(input.parameters[2]);
 
           users.forEach((user) {
-            switch (user[0]) {
-              case "@":
-                channel.ops.add(user.substring(1));
-                break;
-              case "+":
-                channel.voices.add(user.substring(1));
-                break;
-              case "%":
-                channel.halfops.add(user.substring(1));
-                break;
-              case "~":
-                channel.owners.add(user.substring(1));
-                break;
-              default:
-                channel.members.add(user);
-                break;
+            var chars = new List<String>.generate(user.length, (i) => user[i]);
+            var cs = chars.takeWhile((it) => modePrefixes.containsValue(it));
+
+            var name = chars.skip(cs.length).join();
+            for (var n in cs) {
+              switch (n) {
+                case "@":
+                  channel.ops.add(name);
+                  break;
+                case "+":
+                  channel.voices.add(name);
+                  break;
+                case "%":
+                  channel.halfops.add(name);
+                  break;
+                case "~":
+                  channel.owners.add(name);
+                  break;
+                default:
+                  channel.members.add(name);
+                  break;
+              }
             }
           });
           break;
@@ -331,19 +411,35 @@ class Client extends ClientBase with EventDispatcher {
         case "MODE": // Mode Changed
           var split = input.parameters;
 
-          if (split.length < 3) {
+          if (split.isEmpty) {
             break;
           }
 
-          var channel = getChannel(split[0]);
-          var mode = split[1];
-          var who = split[2];
+          var isChannel = split[0].startsWith("#");
 
-          if (channel != null && (mode == "+b" || mode == "-b")) {
-            channel.reloadBans();
+          if (isChannel) {
+            var channel = getChannel(split[0]);
+            var mode = IrcParserSupport.parseMode(split[1]);
+            var who = split.length == 3 ? split[2] : null;
+
+            if (mode.modes.contains("b")) {
+              channel.reloadBans();
+            }
+
+            if (who == null) {
+              if (mode.isAdded) {
+                channel.mode.modes.addAll(mode.added);
+              } else {
+                channel.mode.modes.removeWhere(mode.removed.contains);
+              }
+            }
+
+            post(new ModeEvent(this, mode, who, channel));
+          } else {
+            var who = split[0];
+            var mode = IrcParserSupport.parseMode(input.message);
+            post(new ModeEvent(this, mode, who));
           }
-
-          post(new ModeEvent(this, mode, who, channel));
           break;
 
         case "311": // Beginning of WHOIS
@@ -440,7 +536,7 @@ class Client extends ClientBase with EventDispatcher {
           break;
 
         case "367": // Ban List Entry
-          var channel = this.getChannel(input.parameters[1]);
+          var channel = getChannel(input.parameters[1]);
           if (channel == null) {
             // We Were Banned
             break;
@@ -450,7 +546,7 @@ class Client extends ClientBase with EventDispatcher {
           break;
 
         case "KICK": // A user was kicked from a channel.
-          var channel = this.getChannel(input.parameters[0]);
+          var channel = getChannel(input.parameters[0]);
           var user = input.parameters[1];
           var reason = input.message;
           var by = input.hostmask.nickname;
@@ -474,9 +570,14 @@ class Client extends ClientBase with EventDispatcher {
           _handleCAP(input);
           break;
         case "INVITE": // We Were Invited to a Channel
-          var user = input.hostmask.nickname;
-          var channel = input.message;
-          post(new InviteEvent(this, channel, user));
+          var inviter = input.hostmask.nickname;
+          var user = input.parameters[0];
+          var channel = input.parameters[1];
+          if (user == nickname) {
+            post(new InviteEvent(this, channel, inviter));
+          } else {
+            post(new UserInvitedEvent(this, getChannel(channel), user, inviter));
+          }
           break;
         case "303": // ISON Response
           List<String> users;
@@ -565,10 +666,10 @@ class Client extends ClientBase with EventDispatcher {
         _nickname = event.now;
       } else {
         for (Channel channel in channels) {
-          void m(List<String> list) {
-            if (list.contains(old)) {
-              list.remove(old);
-              list.add(now);
+          void m(Set<String> list) {
+            if (list.contains(event.original)) {
+              list.remove(event.original);
+              list.add(event.now);
             }
           }
           
@@ -587,41 +688,42 @@ class Client extends ClientBase with EventDispatcher {
         var channel = event.channel;
         var prefixes = _modePrefixes;
 
-        var mode = event.mode.substring(1);
-        var added = event.mode.startsWith("+");
+        var added = event.mode.isAdded;
 
-        if (!prefixes.containsKey(mode)) {
-          return;
-        }
-        
-        var prefix = prefixes[mode];
-        var owner = mode == "q" && prefix == "@";
-        var op = prefix == "@";
-        var voice = prefix == "+";
-        var halfop = prefix == "%";
-        
-        void m(List<String> users) {
-          if (added) {
-            users.add(event.user);
-          } else {
-            users.remove(event.user);
+        for (var mode in event.mode.modes) {
+          if (!prefixes.containsKey(mode)) {
+            return;
           }
-        }
-        
-        if (owner) {
-          m(channel.owners);
-        }
-        
-        if (op) {
-          m(channel.ops);
-        }
-        
-        if (voice) {
-          m(channel.voices);
-        }
-        
-        if (halfop) {
-          m(channel.halfops);
+
+          var prefix = prefixes[mode];
+          var owner = mode == "q" && prefix == "@";
+          var op = prefix == "@";
+          var voice = prefix == "+";
+          var halfop = prefix == "%";
+
+          void m(Set<String> users) {
+            if (added) {
+              users.add(event.user);
+            } else {
+              users.remove(event.user);
+            }
+          }
+
+          if (owner) {
+            m(channel.owners);
+          }
+
+          if (op) {
+            m(channel.ops);
+          }
+
+          if (voice) {
+            m(channel.voices);
+          }
+
+          if (halfop) {
+            m(channel.halfops);
+          }
         }
       }
     });
@@ -635,25 +737,41 @@ class Client extends ClientBase with EventDispatcher {
     });
   }
 
+  Future<CurrentCapabilitiesEvent> listCurrentCapabilities() {
+    var f = onEvent(CurrentCapabilitiesEvent).first;
+    send("CAP LS");
+    return f;
+  }
+
+  Future<ServerCapabilitiesEvent> listSupportedCapabilities() {
+    var f = onEvent(ServerCapabilitiesEvent).first;
+    send("CAP LIST");
+    return f;
+  }
+
   void _handleCAP(Message input) {
     var cmd = input.parameters[1];
 
     switch (cmd) {
       case "LS":
-        _supportedCap = input.message.split(" ").toSet();
+        _supportedCap = input.message != null ? input.message.trim().split(" ").toSet() : new Set<String>();
+        _supportedCap.removeWhere((it) => it == " " || it.trim().isEmpty);
         post(new ServerCapabilitiesEvent(this, _supportedCap));
         break;
       case "LIST":
-        _currentCap = input.message.split(" ").toSet();
+        _currentCap = input.message != null ? input.message.trim().split(" ").toSet() : new Set<String>();
+        _currentCap.removeWhere((it) => it == " " || it.trim().isEmpty);
         post(new CurrentCapabilitiesEvent(this, _currentCap));
         break;
       case "ACK":
         var caps = input.message.split(" ").toSet();
+        caps.removeWhere((it) => it == " " || it.trim().isEmpty);
         _currentCap.addAll(caps);
         post(new AcknowledgedCapabilitiesEvent(this, caps));
         break;
       case "NAK":
         var caps = input.message.split(" ").toSet();
+        caps.removeWhere((it) => it == " " || it.trim().isEmpty);
         _currentCap.removeWhere((it) => caps.contains(it));
         post(new NotAcknowledgedCapabilitiesEvent(this, caps));
         break;
@@ -723,11 +841,11 @@ class Client extends ClientBase with EventDispatcher {
     send("NAMES ${channel}");
   }
 
-  void requestCapability(String name) {
-    send("CAP REQ :${name}");
+  void requestCapability(String name, {bool now: false}) {
+    send("CAP REQ :${name}", now: now);
   }
 
-  bool hasCapabilities(String name) {
+  bool hasCapability(String name) {
     return currentCapabilities.contains(name);
   }
 
@@ -759,6 +877,7 @@ class Client extends ClientBase with EventDispatcher {
   Stream<LineReceiveEvent> get onLineReceive => onEvent(LineReceiveEvent);
   Stream<LineSentEvent> get onLineSent => onEvent(LineSentEvent);
   Stream<InviteEvent> get onInvite => onEvent(InviteEvent);
+  Stream<IsOnEvent> get onIsOn => onEvent(IsOnEvent);
 
   Stream<Event> get events => _controller.stream;
 

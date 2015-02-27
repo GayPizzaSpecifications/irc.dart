@@ -52,6 +52,8 @@ class Channel {
    */
   final List<GlobHostmask> bans = [];
 
+  final Mode mode = new Mode.empty();
+
   /**
    * Channel Topic
    */
@@ -107,32 +109,32 @@ class Channel {
   /**
    * Sets +o (Channel Operator) mode on [user]
    */
-  void op(String user) => mode("+o", user);
+  void op(String user) => setMode("+o", user);
 
   /**
    * Sets -o (Remove Channel Operator) mode on [user]
    */
-  void deop(String user) => mode("-o", user);
+  void deop(String user) => setMode("-o", user);
 
   /**
    * Sets +v (Channel Voice) mode on [user]
    */
-  void voice(String user) => mode("+v", user);
+  void voice(String user) => setMode("+v", user);
 
   /**
    * Sets -v (Remove Channel Voice) mode on [user]
    */
-  void devoice(String user) => mode("-v", user);
+  void devoice(String user) => setMode("-v", user);
 
   /**
    * Sets +b (Ban) mode on [user]
    */
-  void ban(String user) => mode("+b", user);
+  void ban(String user) => setMode("+b", user);
 
   /**
    * Sets -b (Remove Ban) mode on [user]
    */
-  void unban(String user) => mode("-b", user);
+  void unban(String user) => setMode("-b", user);
 
   /**
    * Kicks [user] from channel with optional [reason].
@@ -150,12 +152,12 @@ class Channel {
   /**
    * Sets +h (Half-Op) mode on [user]
    */
-  void hop(String user) => mode("+h", user);
+  void hop(String user) => setMode("+h", user);
   
   /**
    * Sets -h (Remove Half-Op) mode on [user]
    */
-  void dehop(String user) => mode("-h", user);
+  void dehop(String user) => setMode("-h", user);
 
   /**
    * Sends [msg] as a channel action.
@@ -167,13 +169,13 @@ class Channel {
    */
   void reloadBans() {
     bans.clear();
-    mode("+b");
+    setMode("+b");
   }
 
   /**
    * Sets the Mode on the Channel or if the user if [user] is specified.
    */
-  void mode(String mode, [String user]) {
+  void setMode(String mode, [String user]) {
     if (user == null) {
       client.send("MODE ${name} ${mode}");
     } else {

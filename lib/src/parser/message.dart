@@ -49,6 +49,9 @@ class Message {
    * The Plain Hostmask
    */
   String get plainHostmask => _hostmask;
+
+  bool get hasAccountTag => tags.containsKey("account");
+  String get accountTag => tags["account"];
 }
 
 /**
@@ -93,5 +96,42 @@ class IrcParserSupport {
     }
     
     return out;
+  }
+
+  static ModeChange parseMode(String input) {
+    ModeChange mode;
+    if (input.startsWith("+")) {
+      mode = new ModeChange(input.substring(1).split(""), []);
+    } else if (input.startsWith("-")) {
+      mode = new ModeChange([], input.substring(1).split(""));
+    } else {
+      throw new Exception("Failed to parse mode: invalid prefix for ${input}");
+    }
+    return mode;
+  }
+}
+
+class ModeChange {
+  final List<String> added;
+  final List<String> removed;
+
+  List<String> get modes => isAdded ? added : removed;
+  bool get isAdded => added.isNotEmpty;
+  bool get isRemoved => removed.isNotEmpty;
+
+  ModeChange(this.added, this.removed);
+
+  @override
+  String toString() => added.isEmpty ? "-${removed.join()}" : "+${added.join()}";
+}
+
+class Mode {
+  final List<String> modes;
+
+  Mode(this.modes);
+  Mode.empty() : modes = [];
+
+  bool has(String x) {
+    return modes.contains(x);
   }
 }

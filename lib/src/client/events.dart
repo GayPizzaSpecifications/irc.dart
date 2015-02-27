@@ -20,6 +20,14 @@ class ConnectEvent extends Event {
       : super(client);
 }
 
+class MessageSentEvent extends Event {
+  String message;
+  String target;
+
+  MessageSentEvent(Client client, this.message, this.target)
+      : super(client);
+}
+
 class QuitPartEvent extends Event {
   final Channel channel;
   final String user;
@@ -95,7 +103,12 @@ class MessageEvent extends Event {
    */
   String message;
 
-  MessageEvent(Client client, this.from, this.target, this.message)
+  /**
+   * Message Intent
+   */
+  String intent;
+
+  MessageEvent(Client client, this.from, this.target, this.message, {this.intent})
       : super(client);
 
   /**
@@ -154,7 +167,13 @@ class JoinEvent extends Event {
    */
   String user;
 
-  JoinEvent(Client client, this.user, this.channel)
+  String username;
+  String realname;
+
+  bool get isExtended => realname != null;
+  bool get isRegistered => username != "*";
+
+  JoinEvent(Client client, this.user, this.channel, {this.username, this.realname})
       : super(client);
 
   /**
@@ -281,12 +300,16 @@ class ModeEvent extends Event {
   /**
    * Mode that was changed
    */
-  String mode;
+  ModeChange mode;
 
   /**
    * User the mode was changed on
    */
   String user;
+
+  bool get isClient => user == client.nickname;
+  bool get hasChannel => channel != null;
+  bool get isChannel => hasChannel && user == null;
 
   ModeEvent(Client client, this.mode, this.user, [this.channel])
       : super(client);
@@ -358,6 +381,15 @@ class NotAcknowledgedCapabilitiesEvent extends Event {
   
   NotAcknowledgedCapabilitiesEvent(Client client, this.capabilities)
       : super(client);
+}
+
+class AwayEvent extends Event {
+  String user;
+  String message;
+  bool get isAway => message != null;
+  bool get isBack => message == null;
+
+  AwayEvent(Client client, this.user, this.message) : super(client);
 }
 
 class CurrentCapabilitiesEvent extends Event {
@@ -622,4 +654,20 @@ class InviteEvent extends Event {
    * Sends a Message to the User
    */
   void reply(String message) => client.sendMessage(user, message);
+}
+
+class UserInvitedEvent extends Event {
+  /**
+   * The Channel that this invite was issued for.
+   */
+  Channel channel;
+
+  /**
+   * The user who was invited.
+   */
+  String user;
+
+  String inviter;
+
+  UserInvitedEvent(Client client, this.channel, this.user, this.inviter) : super(client);
 }
