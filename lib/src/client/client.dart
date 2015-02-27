@@ -893,13 +893,13 @@ class Client extends ClientBase with EventDispatcher {
         post(new CurrentCapabilitiesEvent(this, _currentCap));
         break;
       case "ACK":
-        var caps = input.message.split(" ").toSet();
+        var caps = input.message != null ? input.message.trim().split(" ").toSet() : new Set<String>();
         caps.removeWhere((it) => it == " " || it.trim().isEmpty);
         _currentCap.addAll(caps);
         post(new AcknowledgedCapabilitiesEvent(this, caps));
         break;
       case "NAK":
-        var caps = input.message.split(" ").toSet();
+        var caps = input.message != null ? input.message.trim().split(" ").toSet() : new Set<String>();
         caps.removeWhere((it) => it == " " || it.trim().isEmpty);
         _currentCap.removeWhere((it) => caps.contains(it));
         post(new NotAcknowledgedCapabilitiesEvent(this, caps));
