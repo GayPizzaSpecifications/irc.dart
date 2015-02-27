@@ -9,7 +9,7 @@ void main(List<String> args) {
   var server = args[0];
   
   var configs = [];
-  for (int i = 1; i <= 5000; i++) {
+  for (int i = 1; i <= 200; i++) {
     configs.add(new Configuration(
         nickname: "DartBot${i}",
         username: "DartBot",
@@ -23,13 +23,18 @@ void main(List<String> args) {
   pool.register((ConnectEvent event) {
     print(event.client.nickname + " is connected.");
   });
+
+  pool.register((LineReceiveEvent event) {
+    print(">> " + event.line);
+  });
   
   pool.register((ReadyEvent event) {
-    for (var i = 1; i <= 5000; i++) {
+    for (var i = 1; i <= 500; i++) {
       event.join("#chan${i}");
       event.client.sendMessage("#chan${i}", "bitches");
     }
   });
   
   pool.connectAll();
+  print("Starting Connections");
 }

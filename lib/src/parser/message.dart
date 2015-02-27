@@ -84,6 +84,10 @@ class IrcParserSupport {
    * [input] should begin with '(' and contain ')'
    */
   static Map<String, String> parseSupportedPrefixes(String input) {
+    if (input == null) {
+      return {};
+    }
+
     var out = {};
     var split = input.split(")");
     var modes = split[0].substring(1).split("");
