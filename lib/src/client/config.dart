@@ -105,6 +105,11 @@ class Configuration {
   bool enableChangeHost;
 
   /**
+   * Enables Event Batching from IRCv3
+   */
+  bool enableBatch;
+
+  /**
    * The address to bind the local socket to.
    */
   String bindHost;
@@ -127,5 +132,6 @@ class Configuration {
       this.enableMultiPrefix: true, this.enableCapabilityNegotiation: true,
       this.enableMessageIntents: true, this.enableAwayNotify: true,
       this.enableServerTime: true, this.enableAccountNotify: true,
-      this.enableChangeHost: true, this.enableUserHostInNames: true});
+      this.enableChangeHost: true, this.enableUserHostInNames: true,
+      this.enableBatch: true});
 }

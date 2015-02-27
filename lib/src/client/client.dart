@@ -129,7 +129,15 @@ class Client extends ClientBase with EventDispatcher {
   void post(Event event) {
     super.post(event);
     _controller.add(event);
+
+    if (_batchId != null) {
+      event.isBatched = true;
+      event.batchId = _batchId;
+      _batchedEvents.add(event);
+    }
   }
+
+  List<Event> _batchedEvents = [];
 
   @override
   void send(String line, {bool now: false}) {
@@ -177,7 +185,8 @@ class Client extends ClientBase with EventDispatcher {
           "account-notify": config.enableAccountNotify,
           "server-time": config.enableServerTime,
           "userhost-in-names": config.enableUserHostInNames,
-          "chghost": config.enableChangeHost
+          "chghost": config.enableChangeHost,
+          "batch": config.enableBatch
         };
 
         for (var cap in caps.keys) {
@@ -238,6 +247,15 @@ class Client extends ClientBase with EventDispatcher {
     register((LineReceiveEvent event) {
       /* Parse the IRC Input */
       var input = event.message;
+
+      if (input.isBatched) {
+        _batchId = input.batchId;
+        var list = _batches[_batchId];
+
+        if (list != null) {
+          list.add(input);
+        }
+      }
 
       switch (input.command) {
         case "376": // End of MOTD
@@ -502,6 +520,35 @@ class Client extends ClientBase with EventDispatcher {
           }
           break;
 
+        case "BATCH":
+          var isEnd = input.parameters[0].startsWith("-");
+          var id = input.parameters[0].substring(1);
+          if (isEnd) {
+            var messages = [];
+            var events = [];
+
+            if (_batches.containsKey(id)) {
+              var captured = _batches[id];
+              messages = captured.where((it) => it is Message).toList();
+              events = captured.where((it) => it is Event).toList();
+
+              _batches.remove(id);
+            }
+
+            var event = new BatchEndEvent(this, id, messages, events);
+            post(event);
+          } else {
+            _batches[id] = [];
+            var bodyP = new List<String>.from(input.parameters).skip(1).toList();
+            var bodyStr = bodyP.join(" ");
+            if (input.message != null) {
+              bodyStr += " :${input.message}";
+            }
+            var body = parser.convert(bodyStr);
+            post(new BatchStartEvent(this, id, body));
+          }
+          break;
+
         case "317": // WHOIS Idle Information
           var split = input.parameters;
           var nickname = split[1];
@@ -659,6 +706,12 @@ class Client extends ClientBase with EventDispatcher {
           post(new ServerOperatorEvent(this));
           break;
       }
+
+      if (input.isBatched) {
+        _batchId = null;
+        _batches[input.batchId].addAll(_batchedEvents);
+        _batchedEvents.clear();
+      }
     });
 
     /* Set the Connection Status */
@@ -682,6 +735,24 @@ class Client extends ClientBase with EventDispatcher {
           chan.halfops.remove(event.user);
           chan.owners.remove(event.user);
         }
+      }
+    });
+
+    register((BatchStartEvent event) {
+      if (event.type == "NETSPLIT") {
+        event.waitForEnd().then((e) {
+          var hub = event.body.parameters[0];
+          var host = event.body.parameters[1];
+          var quits = e.events.where((it) => it is QuitEvent).toList();
+          post(new NetSplitEvent(this, hub, host, quits));
+        });
+      } else if (event.type == "NETJOIN") {
+        event.waitForEnd().then((e) {
+          var hub = event.body.parameters[0];
+          var host = event.body.parameters[1];
+          var joins = e.events.where((it) => it is JoinEvent).toList();
+          post(new NetJoinEvent(this, hub, host, joins));
+        });
       }
     });
 
@@ -943,9 +1014,13 @@ class Client extends ClientBase with EventDispatcher {
 
   StreamController _controller = new StreamController.broadcast();
 
+  String _batchId;
+
   void wallops(String message) {
     send("WALLOPS :${message}");
   }
+
+  Map<String, List<dynamic>> _batches = {};
 
   Timer _timer;
 
@@ -965,7 +1040,19 @@ class Client extends ClientBase with EventDispatcher {
 class Monitor {
   final Client client;
 
-  Monitor(this.client);
+  Monitor(this.client) {
+    client.register((UserOnlineEvent event) {
+      statuses[event.user] = true;
+    });
+
+    client.register((UserOfflineEvent event) {
+      statuses[event.user] = false;
+    });
+  }
+
+  Map<String, bool> _statuses = {};
+
+  Map<String, bool> get statuses => _statuses;
 
   void add(String user) {
     _checkMonitorSupported();
@@ -983,22 +1070,33 @@ class Monitor {
     _checkMonitorSupported();
     client.send("MONITOR - ${user}");
     _monitorList.remove(user);
+    _statuses.remove(user);
   }
 
   void removeAll(Iterable<String> users) {
     _checkMonitorSupported();
     client.send("MONITOR - ${users.join(" ")}");
     _monitorList.removeWhere(users.contains);
+    users.forEach(_statuses.remove);
   }
 
   void clear() {
     _checkMonitorSupported();
     client.send("MONITOR C");
     _monitorList.clear();
+    _statuses.clear();
   }
 
   bool isUserMonitored(String user) {
     return users.contains(user);
+  }
+
+  bool isUserOnline(String user) {
+    return statuses[user];
+  }
+
+  bool isUserOffline(String user) {
+    return statuses[user] == false;
   }
 
   int get limit {

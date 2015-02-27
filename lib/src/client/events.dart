@@ -9,6 +9,9 @@ abstract class Event {
    */
   Client client;
 
+  bool isBatched = false;
+  String batchId;
+
   Event(this.client);
 }
 
@@ -20,12 +23,48 @@ class ConnectEvent extends Event {
       : super(client);
 }
 
+class BatchStartEvent extends Event {
+  String id;
+  String get type => body.parameters[1];
+  Message body;
+
+  BatchStartEvent(Client client, this.id, this.body) : super(client);
+
+  Future<BatchEndEvent> waitForEnd() {
+    return client.onEvent(BatchEndEvent).where((BatchEndEvent it) => it.id == id).first;
+  }
+}
+
+class BatchEndEvent extends Event {
+  String id;
+  List<Message> messages;
+  List<Event> events;
+
+  BatchEndEvent(Client client, this.id, this.messages, this.events) : super(client);
+}
+
 class MessageSentEvent extends Event {
   String message;
   String target;
 
   MessageSentEvent(Client client, this.message, this.target)
       : super(client);
+}
+
+class NetSplitEvent extends Event {
+  String hub;
+  String host;
+  List<QuitEvent> quits;
+
+  NetSplitEvent(Client client, this.hub, this.host, this.quits) : super(client);
+}
+
+class NetJoinEvent extends Event {
+  String hub;
+  String host;
+  List<JoinEvent> joins;
+
+  NetJoinEvent(Client client, this.hub, this.host, this.joins) : super(client);
 }
 
 class QuitPartEvent extends Event {

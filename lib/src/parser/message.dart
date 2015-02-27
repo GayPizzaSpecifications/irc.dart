@@ -62,6 +62,9 @@ class Message {
     }
   }
 
+  bool get isBatched => tags.containsKey("batch");
+  String get batchId => tags["batch"];
+
   DateTime _serverTime;
 }
 

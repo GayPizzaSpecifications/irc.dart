@@ -5,11 +5,10 @@ import 'dart:convert';
 void main() {
   var config = new Configuration(
       host: "irc.esper.net",
-      port: 6697,
+      port: 6667,
       nickname: "IRCDartBot",
       username: "DartBot",
-      realname: "irc.dart debug bot",
-      ssl: true
+      realname: "irc.dart debug bot"
   );
   
   var bot = new CommandBot(config, prefix: "?");
@@ -46,7 +45,7 @@ void main() {
       ..register((ReadyEvent event) {
         print(bot.client.modePrefixes);
         if (conf.containsKey("identityPassword")) bot.client.identify(username: conf["identityUsername"], password: conf["identityPassword"]);
-        event.join("#directcode");
+        event.join("#bots");
         event.client.listCurrentCapabilities().then((event) {
           print("Current Capabilities: ${event.capabilities.join(", ")}");
         });
