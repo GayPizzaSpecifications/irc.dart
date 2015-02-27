@@ -52,6 +52,17 @@ class Message {
 
   bool get hasAccountTag => tags.containsKey("account");
   String get accountTag => tags["account"];
+
+  bool get hasServerTime => tags.containsKey("time");
+  DateTime get serverTime {
+    if (_serverTime != null) {
+      return _serverTime;
+    } else {
+      return _serverTime = DateTime.parse(tags["time"]);
+    }
+  }
+
+  DateTime _serverTime;
 }
 
 /**

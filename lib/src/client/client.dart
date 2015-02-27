@@ -59,12 +59,12 @@ class Client extends ClientBase with EventDispatcher {
   /**
    * Server Supports
    */
-  Map<String, String> _supported = {};
+  Map<String, dynamic> _supported = {};
 
   /**
    * Server Supports
    */
-  Map<String, String> get supported => _supported;
+  Map<String, dynamic> get supported => _supported;
 
   /**
    * Creates a new IRC Client using the specified configuration
@@ -80,6 +80,7 @@ class Client extends ClientBase with EventDispatcher {
     _registerHandlers();
     _nickname = config.nickname;
     _whoisBuilders = <String, WhoisBuilder>{};
+    monitor = new Monitor(this);
   }
 
   @override
@@ -172,7 +173,11 @@ class Client extends ClientBase with EventDispatcher {
           "extended-join": config.enableExtendedJoin,
           "multi-prefix": config.enableMultiPrefix,
           "self-message": config.enableSelfMessage,
-          "away-notify": config.enableAwayNotify
+          "away-notify": config.enableAwayNotify,
+          "account-notify": config.enableAccountNotify,
+          "server-time": config.enableServerTime,
+          "userhost-in-names": config.enableUserHostInNames,
+          "chghost": config.enableChangeHost
         };
 
         for (var cap in caps.keys) {
@@ -219,7 +224,7 @@ class Client extends ClientBase with EventDispatcher {
     });
 
     register((LineSentEvent event) {
-      var input = parser.convert(event.line);
+      var input = event.message;
 
       switch (input.command) {
         case "PRIVMSG":
@@ -231,9 +236,8 @@ class Client extends ClientBase with EventDispatcher {
     });
 
     register((LineReceiveEvent event) {
-
       /* Parse the IRC Input */
-      var input = parser.convert(event.line);
+      var input = event.message;
 
       switch (input.command) {
         case "376": // End of MOTD
@@ -289,6 +293,17 @@ class Client extends ClientBase with EventDispatcher {
             } else {
               post(new MessageEvent(this, from, target, message, intent: input.tags["intent"]));
             }
+          }
+          break;
+
+        case "ACCOUNT":
+          var user = input.hostmask.nickname;
+          var username = input.parameters[0];
+
+          if (username == "*") {
+            post(new UserLoggedOutEvent(this, user));
+          } else {
+            post(new UserLoggedInEvent(this, user, username));
           }
           break;
 
@@ -366,6 +381,12 @@ class Client extends ClientBase with EventDispatcher {
         case "353": // Channel User List
           var users = input.message.split(" ")
             ..removeWhere((it) => it.trim().isEmpty);
+          if (_currentCap.contains("userhost-in-names")) {
+            users = users.map((it) {
+              return new Hostmask.parse(it).nickname;
+            }).toList();
+          }
+
           var channel = this.getChannel(input.parameters[2]);
 
           users.forEach((user) {
@@ -393,6 +414,14 @@ class Client extends ClientBase with EventDispatcher {
               }
             }
           });
+          break;
+
+        case "CHGHOST":
+          var user = input.hostmask.nickname;
+          var username = input.parameters[0];
+          var host = input.parameters[1];
+
+          post(new ChangeHostEvent(this, user, username, host));
           break;
 
         case "433": // Nickname is in Use
@@ -579,6 +608,35 @@ class Client extends ClientBase with EventDispatcher {
             post(new UserInvitedEvent(this, getChannel(channel), user, inviter));
           }
           break;
+
+        case "730":
+          var users = input.message.trim().split(" ");
+          users.removeWhere((it) => it == " ");
+          for (var user in users) {
+            post(new UserOnlineEvent(this, user));
+          }
+          break;
+
+        case "731":
+          var users = input.message.trim().split(" ");
+          users.removeWhere((it) => it == " ");
+          for (var user in users) {
+            post(new UserOfflineEvent(this, user));
+          }
+          break;
+
+        case "732":
+          var users = input.message.trim().split(" ");
+          users.removeWhere((it) => it == " ");
+          _monitorList.addAll(users);
+          break;
+
+        case "733":
+          var users = new List<String>.from(_monitorList);
+          _monitorList.clear();
+          post(new MonitorListEvent(this, users));
+          break;
+
         case "303": // ISON Response
           List<String> users;
           if (input.message == null) {
@@ -860,6 +918,8 @@ class Client extends ClientBase with EventDispatcher {
     return events.where((it) => it.runtimeType == type);
   }
 
+  Monitor monitor;
+
   Stream<ConnectEvent> get onConnect => onEvent(ConnectEvent);
   Stream<DisconnectEvent> get onDisconnect => onEvent(DisconnectEvent);
   Stream<MessageEvent> get onMessage => onEvent(MessageEvent);
@@ -889,6 +949,8 @@ class Client extends ClientBase with EventDispatcher {
 
   Timer _timer;
 
+  List<String> _monitorList = [];
+
   Future<WhoisEvent> whois(String user,
       {Duration timeout: const Duration(seconds: 2)}) {
     var completer = new Completer();
@@ -897,6 +959,64 @@ class Client extends ClientBase with EventDispatcher {
     }, filter: (WhoisEvent event) => event.nickname != user, once: true);
     send("WHOIS ${user}");
     return completer.future.timeout(timeout, onTimeout: () => throw new UserNotFoundException(user));
+  }
+}
+
+class Monitor {
+  final Client client;
+
+  Monitor(this.client);
+
+  void add(String user) {
+    _checkMonitorSupported();
+    client.send("MONITOR + ${user}");
+    _monitorList.add(user);
+  }
+
+  void addAll(Iterable<String> users) {
+    _checkMonitorSupported();
+    client.send("MONITOR + ${users.join(" ")}");
+    _monitorList.addAll(users);
+  }
+
+  void remove(String user) {
+    _checkMonitorSupported();
+    client.send("MONITOR - ${user}");
+    _monitorList.remove(user);
+  }
+
+  void removeAll(Iterable<String> users) {
+    _checkMonitorSupported();
+    client.send("MONITOR - ${users.join(" ")}");
+    _monitorList.removeWhere(users.contains);
+  }
+
+  void clear() {
+    _checkMonitorSupported();
+    client.send("MONITOR C");
+    _monitorList.clear();
+  }
+
+  bool isUserMonitored(String user) {
+    return users.contains(user);
+  }
+
+  int get limit {
+    if (client._supported["MONITOR"] == true) {
+      return 9999999999;
+    } else {
+      return client._supported["MONITOR"];
+    }
+  }
+
+  Set<String> _monitorList = new Set<String>();
+
+  Set<String> get users => _monitorList;
+
+  void _checkMonitorSupported() {
+    if (!client._supported.containsKey("MONITOR")) {
+      throw new UnsupportedError("Monitor is not supported on this server.");
+    }
   }
 }
 

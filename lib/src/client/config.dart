@@ -80,9 +80,29 @@ class Configuration {
   bool enableAwayNotify;
 
   /**
+   * Enables Server Time
+   */
+  bool enableServerTime;
+
+  /**
+   * Enables Account Notify
+   */
+  bool enableAccountNotify;
+
+  /**
    * Enable Capability Negotiation
    */
   bool enableCapabilityNegotiation;
+
+  /**
+   * Enables UserHost in Names
+   */
+  bool enableUserHostInNames;
+
+  /**
+   * Enables Change Host
+   */
+  bool enableChangeHost;
 
   /**
    * The address to bind the local socket to.
@@ -105,5 +125,7 @@ class Configuration {
       this.enableInviteNotify: true, this.enableExtendedJoin: true,
       this.enableSelfMessage: true, this.enableAccountTag: true,
       this.enableMultiPrefix: true, this.enableCapabilityNegotiation: true,
-      this.enableMessageIntents: true, this.enableAwayNotify: true});
+      this.enableMessageIntents: true, this.enableAwayNotify: true,
+      this.enableServerTime: true, this.enableAccountNotify: true,
+      this.enableChangeHost: true, this.enableUserHostInNames: true});
 }

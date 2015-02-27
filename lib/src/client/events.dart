@@ -80,8 +80,44 @@ class LineReceiveEvent extends Event {
    */
   String line;
 
+  Message _message;
+
+  Message get message {
+    if (_message != null) {
+      return _message;
+    } else {
+      return _message = client.parser.convert(line);
+    }
+  }
+
   LineReceiveEvent(Client client, this.line)
       : super(client);
+}
+
+class UserOnlineEvent extends Event {
+  String user;
+
+  UserOnlineEvent(Client client, this.user) : super(client);
+}
+
+class UserOfflineEvent extends Event {
+  String user;
+
+  UserOfflineEvent(Client client, this.user) : super(client);
+}
+
+class MonitorListEvent extends Event {
+  List<String> users;
+
+  MonitorListEvent(Client client, this.users) : super(client);
+}
+
+class ChangeHostEvent extends Event {
+  String host;
+  String user;
+  String username;
+
+  ChangeHostEvent(Client client, this.user, this.username, this.host) : super(client);
 }
 
 /**
@@ -324,6 +360,16 @@ class LineSentEvent extends Event {
    */
   String line;
 
+  Message _message;
+
+  Message get message {
+    if (_message != null) {
+      return _message;
+    } else {
+      return _message = client.parser.convert(line);
+    }
+  }
+
   LineSentEvent(Client client, this.line)
       : super(client);
 }
@@ -425,6 +471,19 @@ class NickChangeEvent extends Event {
 
   NickChangeEvent(Client client, this.original, this.now)
       : super(client);
+}
+
+class UserLoggedInEvent extends Event {
+  String user;
+  String account;
+
+  UserLoggedInEvent(Client client, this.user, this.account) : super(client);
+}
+
+class UserLoggedOutEvent extends Event {
+  String user;
+
+  UserLoggedOutEvent(Client client, this.user) : super(client);
 }
 
 /**
