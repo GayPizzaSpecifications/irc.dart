@@ -45,67 +45,75 @@ class Configuration {
   bool allowInvalidCertificates;
 
   /**
-   * Enables Invite Notifier
+   * Enables the Invite Notifier IRCv3 extension
    */
   bool enableInviteNotify;
 
   /**
-   * Enables Extended Join
+   * Enables the Extended Join IRCv3 extension
    */
   bool enableExtendedJoin;
 
   /**
-   * Enables Self Message Handling
+   * Enables the Self Message IRCv3 extension
    */
   bool enableSelfMessage;
 
   /**
-   * Enables Account Tags
+   * Enables the Account Tags IRCv3 extension
    */
   bool enableAccountTag;
 
   /**
-   * Enables Multi Prefix
+   * Enables the Multi Prefix IRcv3 extension
    */
   bool enableMultiPrefix;
 
   /**
-   * Enables Message Intents
+   * Enables the Message Intents IRCv3 extension
    */
   bool enableMessageIntents;
 
   /**
-   * Enables Away Notify
+   * Enables the Away Notify IRCv3 extension
    */
   bool enableAwayNotify;
 
   /**
-   * Enables Server Time
+   * Enables the Server Time IRCv3 extension
    */
   bool enableServerTime;
 
   /**
-   * Enables Account Notify
+   * Enables the Account Notify IRCv3 extension
    */
   bool enableAccountNotify;
 
   /**
    * Enable Capability Negotiation
+   *
+   * If this is enabled, all the IRCv3 extensions that are listed in [Configuration]
+   * and are set to true are requested, if the server has it.
    */
   bool enableCapabilityNegotiation;
 
   /**
-   * Enables UserHost in Names
+   * Enables the UserHost in Names IRCv3 extension
    */
   bool enableUserHostInNames;
 
   /**
-   * Enables Change Host
+   * Enables the Change Host IRCv3 extension
    */
   bool enableChangeHost;
 
   /**
-   * Enables Event Batching from IRCv3
+   * Enables the TLS IRCv3 extension
+   */
+  bool enableTls;
+
+  /**
+   * Enables the Event Batching IRCv3 extension
    */
   bool enableBatch;
 
@@ -115,7 +123,7 @@ class Configuration {
   String bindHost;
 
   /**
-   * Capabilities to Request
+   * Extra IRCv3 Capabilities to Request
    */
   List<String> capabilities;
   

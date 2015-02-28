@@ -31,7 +31,7 @@ class BotBehaviors {
   
   static EventHandler<ReadyEvent> markAsBot({String botMode: "b"}) {
     return (ReadyEvent event) {
-      event.client.mode("+${botMode}");
+      event.client.setMode("+${botMode}");
     };
   }
 }

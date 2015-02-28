@@ -198,7 +198,7 @@ abstract class ClientBase {
   /**
    * Applies a Mode to a User (The Client by Default)
    */
-  void mode(String mode, {String user: "PLEASE_INJECT_DEFAULT"}) {
+  void setMode(String mode, {String user: "PLEASE_INJECT_DEFAULT"}) {
     if (user == "PLEASE_INJECT_DEFAULT") {
       user = nickname;
     }

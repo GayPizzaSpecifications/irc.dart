@@ -13,11 +13,12 @@ class RegexIrcParser extends IrcParser {
 
   @override
   Message convert(String line) {
+    line = line.trimLeft();
     List<String> match;
     {
       var parsed = REGEX.firstMatch(line);
-      match = new List.generate(parsed.groupCount + 1, parsed.group);
-      if (match[1] == "PING") {
+      match = new List<String>.generate(parsed.groupCount + 1, parsed.group);
+      if (!line.startsWith(":")) {
         match = [match[0], null, null, match[1], null, match[3].substring(1)];
       }
     }

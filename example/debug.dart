@@ -45,7 +45,7 @@ void main() {
       ..register((ReadyEvent event) {
         print(bot.client.modePrefixes);
         if (conf.containsKey("identityPassword")) bot.client.identify(username: conf["identityUsername"], password: conf["identityPassword"]);
-        event.join("#bots");
+        event.join("#directcode");
         event.client.listCurrentCapabilities().then((event) {
           print("Current Capabilities: ${event.capabilities.join(", ")}");
         });
