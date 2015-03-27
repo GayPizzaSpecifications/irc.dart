@@ -284,6 +284,9 @@ class Client extends ClientBase {
 
       switch (input.command) {
         case "PRIVMSG":
+          if (input.parameters.isEmpty) {
+            return;
+          }
           var msg = input.message;
           var target = input.parameters[0];
           post(new MessageSentEvent(this, msg, target));
