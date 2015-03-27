@@ -11,7 +11,12 @@ part of irc.client;
  *      var client = new Client(config);
  *      // Use Client
  */
-class Client extends ClientBase with EventDispatcher {
+class Client extends ClientBase {
+  /**
+   * Event Dispatcher
+   */
+  final EventDispatcher dispatcher = new EventDispatcher();
+
   @override
   Configuration config;
 
@@ -125,9 +130,12 @@ class Client extends ClientBase with EventDispatcher {
     return connection.disconnect();
   }
 
-  @override
+  /**
+   * Fires an event to registered listeners. Any listeners that take the
+   * specific type [event] will be called.
+   */
   void post(Event event) {
-    super.post(event);
+    dispatcher.post(event);
     _controller.add(event);
 
     if (_batchId != null) {
@@ -137,7 +145,46 @@ class Client extends ClientBase with EventDispatcher {
     }
   }
 
-  List<Event> _batchedEvents = [];
+  /**
+   * Registers a method so that it can start receiving events.
+   *
+   * A filter can be provided to determine when the [handler] will
+   * be called. If the [filter] returns true then the [handler] will
+   * not be called, otherwise it will be called. If no [filter] is
+   * provided then the [handler] will always be called upon posting an
+   * event.
+   *
+   * A [priority] can be provided which will specify in what order the handler will be called in.
+   * The higher a priority is, the quicker it will be called in the handler list when an event is posted.
+   *
+   * Returns false if [method] is already registered, otherwise true.
+   */
+  bool register(EventHandlerFunction handler, {EventFilter filter, int priority}) {
+    return filter == null ?
+      dispatcher.register(handler, priority: priority) :
+      dispatcher.register(handler, filter: filter, priority: priority);
+  }
+
+  /**
+   * Gets the next event of the specified [type].
+   */
+  Future<dynamic> pollEvent(Type type) {
+    return events.where((it) => it.runtimeType == type).first;
+  }
+
+  /**
+   * Unregisters a [handler] from receiving events. If the specific [handler]
+   * has a filter, it should be provided in order to properly unregister the
+   * listener. If the specific [handler] has a priority, it should be provided as well.
+   * Returns whether the [handler] was removed or not.
+   */
+  bool unregister(EventHandlerFunction handler, {EventFilter filter, int priority}) {
+    return filter == null ?
+      dispatcher.unregister(handler, priority: priority) :
+      dispatcher.unregister(handler, filter: filter, priority: priority);
+  }
+
+    List<Event> _batchedEvents = [];
 
   @override
   void send(String line, {bool now: false}) {
@@ -801,7 +848,7 @@ class Client extends ClientBase with EventDispatcher {
               list.add(event.now);
             }
           }
-          
+
           m(channel.members);
           m(channel.ops);
           m(channel.voices);
@@ -810,7 +857,7 @@ class Client extends ClientBase with EventDispatcher {
         }
       }
     });
-    
+
     /* Handles Channel User Tracking */
     register((ModeEvent event) {
       if (event.channel != null) {
@@ -910,16 +957,16 @@ class Client extends ClientBase with EventDispatcher {
   Map<String, String> _modePrefixes = {};
   Set<String> _supportedCap = new Set<String>();
   Set<String> _currentCap = new Set<String>();
-  
+
   Map<String, String> get modePrefixes => _modePrefixes;
 
   @override
   Future<bool> isUserOn(String name) {
     var completer = new Completer();
 
-    register((IsOnEvent event) {
+    pollEvent(IsOnEvent).then((event) {
       completer.complete(event.users.contains(name));
-    }, once: true);
+    });
 
     send("ISON ${name}");
 
@@ -930,9 +977,9 @@ class Client extends ClientBase with EventDispatcher {
   Future<ServerVersionEvent> getServerVersion([String target]) {
     var completer = new Completer();
 
-    register((ServerVersionEvent event) {
+    pollEvent(ServerVersionEvent).then((event) {
       completer.complete(event);
-    }, once: true);
+    });
 
     send(target != null ? "VERSION ${target}" : "VERSION");
 
@@ -945,9 +992,9 @@ class Client extends ClientBase with EventDispatcher {
   Future<String> getChannelTopic(String channel) {
     var completer = new Completer();
 
-    register((TopicEvent event) {
-      completer.complete(event.topic);
-    }, filter: (TopicEvent event) => event.channel.name != channel, once: true);
+    onEvent(TopicEvent).where((it) => it.channel.name == channel).first.then((e) {
+      completer.complete(e.topic);
+    });
 
     send("TOPIC ${channel}");
 
@@ -1029,9 +1076,9 @@ class Client extends ClientBase with EventDispatcher {
   Future<WhoisEvent> whois(String user,
       {Duration timeout: const Duration(seconds: 2)}) {
     var completer = new Completer();
-    register((WhoisEvent event) {
-      completer.complete(event);
-    }, filter: (WhoisEvent event) => event.nickname != user, once: true);
+    onEvent(WhoisEvent).where((it) => it.nickname == user).first.then((e) {
+      completer.complete(e);
+    });
     send("WHOIS ${user}");
     return completer.future.timeout(timeout, onTimeout: () => throw new UserNotFoundException(user));
   }
