@@ -17,6 +17,11 @@ class RegexIrcParser extends IrcParser {
     List<String> match;
     {
       var parsed = REGEX.firstMatch(line);
+
+      if (parsed == null) {
+        return null;
+      }
+
       match = new List<String>.generate(parsed.groupCount + 1, parsed.group);
       if (!line.startsWith(":")) {
         match = [match[0], null, null, match[1], null, match[3].substring(1)];
@@ -29,7 +34,7 @@ class RegexIrcParser extends IrcParser {
     var msg = match[5];
     var parameters = param_string != null ? param_string.trim().split(" ") : [];
     var tags = <String, dynamic>{};
-    
+
     if (tagStuff != null && tagStuff.trim().isNotEmpty) {
       tags = IrcParserSupport.parseTags(tagStuff);
     }

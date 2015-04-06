@@ -282,6 +282,10 @@ class Client extends ClientBase {
     register((LineSentEvent event) {
       var input = event.message;
 
+      if (input == null) {
+        return;
+      }
+
       switch (input.command) {
         case "PRIVMSG":
           if (input.parameters.isEmpty) {
@@ -297,6 +301,10 @@ class Client extends ClientBase {
     register((LineReceiveEvent event) {
       /* Parse the IRC Input */
       var input = event.message;
+
+      if (input == null) {
+        return;
+      }
 
       if (input.isBatched) {
         _batchId = input.batchId;
