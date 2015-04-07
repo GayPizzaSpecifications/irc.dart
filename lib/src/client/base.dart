@@ -9,38 +9,38 @@ abstract class ClientBase {
    * The IRC Parser to use.
    */
   IrcParser get parser;
-  
+
   /**
    * Bot Configuration
    */
   Configuration get config;
-  
+
   /**
    * The Client's Nickname
    */
   String get nickname;
-  
+
   /**
    * Gets the Channels the Client is in
    */
   Iterable<Channel> get channels;
-  
+
   /**
    * Gets the Server's MOTD
    * Not Ready until the ReadyEvent is posted
    */
   String get motd;
-  
+
   /**
    * Flag for if the Client is connected.
    */
   bool get connected;
-  
+
   /**
    * Provides information about what the server supports.
    */
   Map<String, dynamic> get supported;
-  
+
   /**
    * Sends the [message] to the [target] as a message.
    *
@@ -58,7 +58,7 @@ abstract class ClientBase {
       send(begin + msg);
     }
   }
-  
+
   /**
    * Changes the Client's Nickname
    *
@@ -67,12 +67,12 @@ abstract class ClientBase {
   void changeNickname(String nickname) {
     if (supported.containsKey("MAXNICKLEN") || supported.containsKey("NICKLEN")) {
       var max = supported.containsKey("MAXNICKLEN") ? supported["MAXNICKLEN"] : supported["NICKLEN"];
-      
+
       if (nickname.length > max) {
         throw new ArgumentError("Nickname is too big for the server.");
       }
     }
-    
+
     send("NICK ${nickname}");
   }
 
@@ -86,13 +86,11 @@ abstract class ClientBase {
     var all = [];
     if ((input.length + begin.length) > 454) {
       var max = 454 - (begin.length + 1);
-      var sb = new StringBuffer();
-      for (int i = 0; i < input.length; i++) {
-        sb.write(input[i]);
-        if ((i != 0 && (i % max) == 0) || i == input.length - 1) {
-          all.add(sb.toString());
-          sb.clear();
-        }
+      var chars = input.split("");
+      var list = chars;
+      while (list.isNotEmpty) {
+        all.add(list.take(max).join());
+        list = list.skip(max).toList();
       }
     } else {
       all = [input];
@@ -115,7 +113,7 @@ abstract class ClientBase {
       send(begin + msg);
     }
   }
-  
+
   /**
    * Identifies the user with the [nickserv].
    *
@@ -127,12 +125,12 @@ abstract class ClientBase {
     if (username == "PLEASE_INJECT_DEFAULT") {
       username = config.username;
     }
-    
+
     sendMessage(nickserv, _nickserv(username, password));
   }
-  
+
   static String _nickserv(String username, String password) => "identify ${username} ${password}";
-  
+
   /**
    * Sends [line] to the server
    *
@@ -141,13 +139,13 @@ abstract class ClientBase {
    * Will throw an error if [line] is greater than 510 characters
    */
   void send(String line);
-  
+
   /**
    * Gets a Channel object for the channel's [name].
    * Returns null if no such channel exists.
    */
   Channel getChannel(String name);
-  
+
   /**
    * Joins the specified [channel].
    */
@@ -173,20 +171,20 @@ abstract class ClientBase {
     }
     send("PART ${channel}");
   }
-  
+
   /**
    * Disconnects the Client with the specified [reason].
    * If [force] is true, then the socket is forcibly closed.
    * When it is forcibly closed, a future is returned.
    */
   Future disconnect({String reason: "Client Disconnecting"});
-  
+
   /**
    * Connects to the IRC Server
    * Any errors are sent through the [ErrorEvent].
    */
   void connect();
-  
+
   /**
    * Posts a Event to the Event Dispatching System
    * The purpose of this method was to assist in checking for Error Events.
@@ -194,7 +192,7 @@ abstract class ClientBase {
    * [event] is the event to post.
    */
   void post(Event event);
-  
+
   /**
    * Applies a Mode to a User (The Client by Default)
    */
@@ -202,10 +200,10 @@ abstract class ClientBase {
     if (user == "PLEASE_INJECT_DEFAULT") {
       user = nickname;
     }
-    
+
     send("MODE ${user} ${mode}");
   }
-  
+
   void knock(String channel, [String message]) {
     if (supported.containsKey("KNOCK") && supported["KNOCK"]) {
       send(message != null ? "KNOCK ${channel}" : "KNOCK ${channel} :${message}");
@@ -213,12 +211,12 @@ abstract class ClientBase {
       throw new UnsupportedError("Knocking is not supported on this server.");
     }
   }
-  
+
   /**
    * Sends [msg] to [target] as a CTCP message
    */
   void sendCTCP(String target, String msg) => sendMessage(target, "\u0001${msg}\u0001");
-  
+
   /**
    * Sends [msg] to [target] as an action.
    */
@@ -236,20 +234,20 @@ abstract class ClientBase {
     }
     send("KICK ${channel.name} ${user}${reason != null ? ' :' + reason : ''}");
   }
-  
+
   void loginOperator(String name, String password) {
     send("OPER ${name} ${password}");
   }
-  
+
   void invite(String user, String channel) {
     send("INVITE ${user} ${channel}");
   }
-  
+
   Future<ServerVersionEvent> getServerVersion([String target]);
   Future<String> getChannelTopic(String channel);
-  
+
   Future<bool> isUserOn(String name);
-  
+
   bool get hasNetworkName => supported.containsKey("NETWORK");
   String get networkName => supported["NETWORK"];
 }
