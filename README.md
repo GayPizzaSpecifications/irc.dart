@@ -1,4 +1,4 @@
-# Dart IRC [![Build Status](https://travis-ci.org/DirectMyFile/irc.dart.svg?branch=master)](https://travis-ci.org/DirectMyFile/irc.dart) [![Latest Version](https://img.shields.io/badge/pub-2.1.5-blue.svg)](https://pub.dartlang.org/packages/irc)
+# Dart IRC [![Build Status](https://travis-ci.org/DirectMyFile/irc.dart.svg?branch=master)](https://travis-ci.org/DirectMyFile/irc.dart) [![Latest Version](https://img.shields.io/badge/pub-2.1.6-blue.svg)](https://pub.dartlang.org/packages/irc)
 
 The Beautiful IRC Library for Dart
 
