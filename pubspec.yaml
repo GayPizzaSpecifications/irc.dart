@@ -1,9 +1,10 @@
 name: irc
-version: 2.1.5
+version: 2.1.6
 authors:
 - Kenneth Endfinger <kaendfinger@gmail.com>
 - samrg472 <samrg472@gmail.com>
 - TheMike <zeusintraining@gmail.com>
+- Logan Gorence <loganjohngorence@gmail.com>
 description: A beautiful all-purpose IRC library
 homepage: https://github.com/DirectMyFile/irc.dart/
 environment:
