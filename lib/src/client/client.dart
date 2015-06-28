@@ -1056,6 +1056,8 @@ class Client extends ClientBase {
   Stream<BotPartEvent> get onBotPart => onEvent(BotPartEvent);
   Stream<JoinEvent> get onJoin => onEvent(JoinEvent);
   Stream<PartEvent> get onPart => onEvent(PartEvent);
+  Stream<QuitEvent> get onQuit => onEvent(QuitEvent);
+  Stream<QuitPartEvent> get onQuitPart => onEvent(QuitPartEvent);
   Stream<NoticeEvent> get onNotice => onEvent(NoticeEvent);
   Stream<ActionEvent> get onAction => onEvent(ActionEvent);
   Stream<PongEvent> get onPong => onEvent(PongEvent);
