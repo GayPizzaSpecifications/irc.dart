@@ -36,7 +36,8 @@ We are looking for others to help work on better server support. See [Contacting
 
 ## Contacting Us
 
-You can find us on `irc.esper.net` at `#directcode`. Just mention you wanna help with the Dart IRC library, and we will be happy to assist you!
+You can find us on `irc.esper.net` at `#directcode`. Just mention you want help with the Dart IRC
+library, and we will be happy to assist you!
 
 ## Contributing
 
@@ -44,4 +45,4 @@ See the [Contributing Guide](https://github.com/DirectMyFile/irc.dart/blob/maste
 
 ## Notices
 
-irc.dart is a no-license project. We really don't care what you do. Use it and abuse it.
+irc.dart is licensed under the MIT license. We really don't care what you do. Use it and abuse it.
