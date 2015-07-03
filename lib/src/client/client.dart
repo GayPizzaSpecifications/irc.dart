@@ -326,8 +326,7 @@ class Client extends ClientBase {
           _fireReady();
           break;
 
-        case "PING":
-          /* Server Ping */
+        case "PING": // Server Ping
           send("PONG :${input.message}");
           break;
 
@@ -337,13 +336,14 @@ class Client extends ClientBase {
               ? input.parameters[0]
               : input.message;
           if (who == _nickname) {
-            // We Joined a New Channel
+            // We joined a new channel
             if (getChannel(chanName) == null) {
               channels.add(new Channel(this, chanName));
             }
             post(new BotJoinEvent(this, getChannel(chanName)));
             getChannel(chanName).reloadBans();
           } else {
+            // User joined one of our channels
             var event = new JoinEvent(this, who, getChannel(chanName));
             if (_currentCap.contains("extended-join")) {
               event.username = input.parameters[1];
@@ -363,10 +363,13 @@ class Client extends ClientBase {
             post(new MessageSentEvent(this, message, target));
           } else {
             if (message.startsWith("\u0001")) {
+              // CTCP
               post(new CTCPEvent(this, from, target, message.substring(1, message.length - 1)));
             } else if (input.tags.containsKey("intent") && input.tags["intent"] == "ACTION") {
+              // Action
               post(new ActionEvent(this, from, target, message));
             } else {
+              // Message
               post(new MessageEvent(this, from, target, message, intent: input.tags["intent"]));
             }
           }
@@ -383,7 +386,7 @@ class Client extends ClientBase {
           }
           break;
 
-        case "NOTICE":
+        case "NOTICE": // Notice
           var from = input.plainHostmask;
           if (input.parameters[0] != "*") from = input.hostmask.nickname;
 
@@ -406,12 +409,14 @@ class Client extends ClientBase {
           }
           break;
 
-        case "QUIT": // User Quit
+        case "QUIT": // User quit
           var who = input.hostmask.nickname;
 
           if (who == _nickname) {
+            // We quit
             disconnect();
           } else {
+            // Somebody quit
             post(new QuitEvent(this, who));
           }
           break;
@@ -433,13 +438,13 @@ class Client extends ClientBase {
           post(new TopicEvent(this, channel, user, topic, old));
           break;
 
-        case "AWAY":
+        case "AWAY": // User marked as away
           var user = input.hostmask.nickname;
           var msg = input.message;
           post(new AwayEvent(this, user, msg));
           break;
 
-        case "TOPIC": // Topic Changed
+        case "TOPIC": // Topic changed
           var topic = input.message;
           var user = input.hostmask.nickname;
           var chan = getChannel(input.parameters[0]);
@@ -449,12 +454,12 @@ class Client extends ClientBase {
           post(new TopicEvent(this, chan, user, topic, old, true));
           break;
 
-        case "ERROR": // Server Error
+        case "ERROR": // Server error
           var message = input.message;
           post(new ErrorEvent(this, message: message, type: "server"));
           break;
 
-        case "353": // Channel User List
+        case "353": // Channel user list
           var users = input.message.split(" ")
             ..removeWhere((it) => it.trim().isEmpty);
           if (_currentCap.contains("userhost-in-names")) {
@@ -492,7 +497,7 @@ class Client extends ClientBase {
           });
           break;
 
-        case "CHGHOST":
+        case "CHGHOST": // User changed hostname
           var user = input.hostmask.nickname;
           var username = input.parameters[0];
           var host = input.parameters[1];
@@ -500,16 +505,16 @@ class Client extends ClientBase {
           post(new ChangeHostEvent(this, user, username, host));
           break;
 
-        case "433": // Nickname is in Use
+        case "433": // Nickname is in use
           var original = input.parameters[0];
           post(new NickInUseEvent(this, original));
           break;
 
-        case "NICK": // Nickname Changed
+        case "NICK": // Nickname changed
           var original = input.hostmask.nickname;
           var now = input.message;
 
-          /* Posts the Nickname Change Event. No need for checking if we are the original nickname. */
+          // Posts the nickname change event. No need for checking if we are the original nickname.
           post(new NickChangeEvent(this, original, now));
           break;
 
@@ -578,7 +583,7 @@ class Client extends ClientBase {
           }
           break;
 
-        case "BATCH":
+        case "BATCH": // Allows collapsing of messages from the server
           var isEnd = input.parameters[0].startsWith("-");
           var id = input.parameters[0].substring(1);
           if (isEnd) {
@@ -686,6 +691,7 @@ class Client extends ClientBase {
           var by = input.hostmask.nickname;
           post(new KickEvent(this, channel, user, by, reason));
           break;
+
         case "372": // MOTD Part
           var p = input.message;
           if (_motd.isEmpty) {
@@ -694,6 +700,7 @@ class Client extends ClientBase {
             _motd += "\n" + p;
           }
           break;
+
         case "005": // ISUPPORT
           var params = input.parameters;
           params.removeAt(0);
@@ -703,7 +710,8 @@ class Client extends ClientBase {
         case "CAP": // Capability
           _handleCAP(input);
           break;
-        case "INVITE": // We Were Invited to a Channel
+
+        case "INVITE": // We were invited to a channel
           var inviter = input.hostmask.nickname;
           var user = input.parameters[0];
           var channel = input.parameters[1];
@@ -752,6 +760,7 @@ class Client extends ClientBase {
 
           post(new IsOnEvent(this, users));
           break;
+
         case "351": // Server Version Response
           var version = input.parameters[0];
           var server = input.parameters[1];
@@ -772,7 +781,7 @@ class Client extends ClientBase {
       }
     });
 
-    /* Set the Connection Status */
+    // Set the connection status
     register((ConnectEvent event) => this.connected = true);
     register((DisconnectEvent event) {
       this.connected = false;
@@ -782,7 +791,7 @@ class Client extends ClientBase {
       }
     });
 
-    /* Handles when the user quits */
+    // Handles when the user quits
     register((QuitEvent event) {
       for (var chan in channels) {
         if (chan.allUsers.contains(event.user)) {
@@ -814,7 +823,7 @@ class Client extends ClientBase {
       }
     });
 
-    /* Handles CTCP Events so the action event can be executed */
+    // Handles CTCP Events so the action event can be executed
     register((CTCPEvent event) {
       if (event.message.startsWith("ACTION ")) {
         post(new ActionEvent(this, event.user, event.target, event.message.substring(7)));
@@ -824,7 +833,7 @@ class Client extends ClientBase {
     /* Handles User Tracking in Channels when a user joins. A user is a member until it is changed. */
     register((JoinEvent event) => event.channel.members.add(event.user));
 
-    /* Handles User Tracking in Channels when a user leaves */
+    // Handles User Tracking in Channels when a user leaves
     register((PartEvent event) {
       var channel = event.channel;
       channel.members.remove(event.user);
@@ -834,7 +843,7 @@ class Client extends ClientBase {
       channel.halfops.remove(event.user);
     });
 
-    /* Handles User Tracking in Channels when a user is kicked. */
+    // Handles User Tracking in Channels when a user is kicked.
     register((KickEvent event) {
       var channel = event.channel;
       channel.members.remove(event.user);
@@ -847,7 +856,7 @@ class Client extends ClientBase {
       }
     });
 
-    /* Handles Nickname Changes */
+    // Handles Nickname Changes
     register((NickChangeEvent event) {
       if (event.original == _nickname) {
         _nickname = event.now;
@@ -869,7 +878,7 @@ class Client extends ClientBase {
       }
     });
 
-    /* Handles Channel User Tracking */
+    // Handles Channel User Tracking
     register((ModeEvent event) {
       if (event.channel != null) {
         var channel = event.channel;
@@ -915,7 +924,7 @@ class Client extends ClientBase {
       }
     });
 
-    /* When the Bot leaves a channel, we no longer retain the object. */
+    // When the Bot leaves a channel, we no longer retain the object.
     register((BotPartEvent event) => channels.remove(event.channel));
 
     register((ServerSupportsEvent event) {
