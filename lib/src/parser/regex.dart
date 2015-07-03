@@ -23,7 +23,7 @@ class RegexIrcParser extends IrcParser {
       }
 
       match = new List<String>.generate(parsed.groupCount + 1, parsed.group);
-      if (!line.startsWith(":")) {
+      if (!line.startsWith(":") && !line.startsWith("@")) {
         match = [match[0], null, null, match[1], null, match[3].substring(1)];
       }
     }
