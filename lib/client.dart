@@ -15,9 +15,6 @@ import 'package:event_dispatcher/event_dispatcher.dart';
 import 'parser.dart';
 export 'parser.dart';
 
-/* Exports the Bot API */
-export 'bot.dart';
-
 /* Base Classes */
 part 'src/client/base.dart';
 part 'src/client/connection.dart';
