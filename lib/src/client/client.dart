@@ -845,26 +845,33 @@ class Client extends ClientBase {
     });
 
     /* Handles User Tracking in Channels when a user joins. A user is a member until it is changed. */
-    register((JoinEvent event) => event.channel.members.add(getUser(event.user)));
+    register((JoinEvent event) {
+      if (getUser(event.user) == null) {
+        this.users.add(new User(this, event.user));
+      }
+      event.channel.members.add(getUser(event.user));
+    });
 
     // Handles User Tracking in Channels when a user leaves
     register((PartEvent event) {
       var channel = event.channel;
-      channel.members.remove(event.user);
-      channel.voices.remove(event.user);
-      channel.ops.remove(event.user);
-      channel.owners.remove(event.user);
-      channel.halfops.remove(event.user);
+      var user = getUser(event.user);
+      channel.members.remove(user);
+      channel.voices.remove(user);
+      channel.ops.remove(user);
+      channel.owners.remove(user);
+      channel.halfops.remove(user);
     });
 
     // Handles User Tracking in Channels when a user is kicked.
     register((KickEvent event) {
       var channel = event.channel;
-      channel.members.remove(event.user);
-      channel.voices.remove(event.user);
-      channel.ops.remove(event.user);
-      channel.owners.remove(event.user);
-      channel.halfops.remove(event.user);
+      var user = getUser(event.user);
+      channel.members.remove(user);
+      channel.voices.remove(user);
+      channel.ops.remove(user);
+      channel.owners.remove(user);
+      channel.halfops.remove(user);
       if (event.user == nickname) {
         channels.remove(channel);
       }
@@ -872,11 +879,13 @@ class Client extends ClientBase {
 
     // Handles Nickname Changes
     register((NickChangeEvent event) {
-      if (event.original == _nickname) {
+      getUser(event.original).nickname = event.now;
+      // TODO: I don't think we need this anymore, since we're object-based.
+      /*if (event.original == _nickname) {
         _nickname = event.now;
       } else {
         for (Channel channel in channels) {
-          void m(Set<String> list) {
+          void m(Set<User> list) {
             if (list.contains(event.original)) {
               list.remove(event.original);
               list.add(event.now);
@@ -889,7 +898,7 @@ class Client extends ClientBase {
           m(channel.halfops);
           m(channel.owners);
         }
-      }
+      }*/
     });
 
     // Handles Channel User Tracking
