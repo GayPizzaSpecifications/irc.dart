@@ -190,10 +190,12 @@ class MessageEvent extends Event {
    * Replies to the Event
    */
   void reply(String message) {
-    if (isPrivate) {
-      client.sendMessage(from.nickname, message);
-    } else {
+    if (from.isUser) {
+      client.sendMessage(from.name, message);
+    } else if (from.isChannel) {
       client.sendMessage(target.name, message);
+    } else {
+      // Ignore server replies.
     }
   }
 
@@ -220,7 +222,11 @@ class NoticeEvent extends MessageEvent {
    * Sends [message] to [target] as a notice.
    */
   @override
-  void reply(String message) => client.sendNotice(from.nickname, message);
+  void reply(String message) {
+    if (!from.isServer) {
+      client.sendNotice(from.name, message);
+    }
+  }
 }
 
 /**
@@ -634,7 +640,7 @@ class ActionEvent extends MessageEvent {
    * Sends [message] to [target] as a action.
    */
   @override
-  void reply(String message) => client.sendAction(from.nickname, message);
+  void reply(String message) => client.sendAction(from.name, message);
 }
 
 /**
