@@ -3,7 +3,7 @@ part of irc.client;
 /**
  * An IRC Channel
  */
-class Channel {
+class Channel extends Entity {
   /**
    * Client associated with the channel
    */
@@ -78,7 +78,7 @@ class Channel {
     client.invite(user, name);
   }
 
-  /**
+  /**isUser
    * All Users
    */
   Set<User> get allUsers {

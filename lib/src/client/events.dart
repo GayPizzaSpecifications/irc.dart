@@ -166,12 +166,12 @@ class MessageEvent extends Event {
   /**
    * Who sent the message
    */
-  String from;
+  Entity from;
 
   /**
    * Where the message was sent to
    */
-  String target;
+  Entity target;
 
   /**
    * The message that was received
@@ -187,25 +187,20 @@ class MessageEvent extends Event {
       : super(client);
 
   /**
-   * Gets the Channel of this Event (returns null if target is a user)
-   */
-  Channel get channel => client.getChannel(target);
-
-  /**
    * Replies to the Event
    */
   void reply(String message) {
     if (isPrivate) {
-      client.sendMessage(from, message);
+      client.sendMessage(from.nickname, message);
     } else {
-      client.sendMessage(target, message);
+      client.sendMessage(target.name, message);
     }
   }
 
   /**
    * If this event is a private message
    */
-  bool get isPrivate => target == client.nickname;
+  bool get isPrivate => target.isUser;
 }
 
 /**
@@ -218,14 +213,14 @@ class NoticeEvent extends MessageEvent {
    */
   bool get isSystem => target == "*";
 
-  NoticeEvent(Client client, String from, String target, String message)
+  NoticeEvent(Client client, Entity from, Entity target, String message)
       : super(client, from, target, message);
 
   /**
    * Sends [message] to [target] as a notice.
    */
   @override
-  void reply(String message) => client.sendNotice(from, message);
+  void reply(String message) => client.sendNotice(from.nickname, message);
 }
 
 /**
@@ -435,7 +430,7 @@ class TopicEvent extends Event {
   /**
    * The User
    */
-  String user;
+  User user;
   
   bool isChange;
 
@@ -469,7 +464,7 @@ class NotAcknowledgedCapabilitiesEvent extends Event {
 }
 
 class AwayEvent extends Event {
-  String user;
+  User user;
   String message;
   bool get isAway => message != null;
   bool get isBack => message == null;
@@ -498,6 +493,12 @@ class WhowasEvent extends Event {
  * Nick Change Event is dispatched when a nickname changes (possibly the Client's nickname)
  */
 class NickChangeEvent extends Event {
+
+  /**
+   * User object
+   */
+  User user;
+
   /**
    * Original Nickname
    */
@@ -508,19 +509,19 @@ class NickChangeEvent extends Event {
    */
   String now;
 
-  NickChangeEvent(Client client, this.original, this.now)
+  NickChangeEvent(Client client, this.user, this.original, this.now)
       : super(client);
 }
 
 class UserLoggedInEvent extends Event {
-  String user;
+  User user;
   String account;
 
   UserLoggedInEvent(Client client, this.user, this.account) : super(client);
 }
 
 class UserLoggedOutEvent extends Event {
-  String user;
+  User user;
 
   UserLoggedOutEvent(Client client, this.user) : super(client);
 }
@@ -626,14 +627,14 @@ class PongEvent extends Event {
  * An Action Event
  */
 class ActionEvent extends MessageEvent {
-  ActionEvent(Client client, String from, String target, String message)
+  ActionEvent(Client client, User from, Entity target, String message)
       : super(client, from, target, message);
 
   /**
    * Sends [message] to [target] as a action.
    */
   @override
-  void reply(String message) => client.sendAction(from, message);
+  void reply(String message) => client.sendAction(from.nickname, message);
 }
 
 /**
@@ -648,12 +649,12 @@ class KickEvent extends Event {
   /**
    * The User who was kicked
    */
-  String user;
+  User user;
 
   /**
    * The User who kicked the other user
    */
-  String by;
+  User by;
 
   /**
    * The Reason Given for [by] kicking [user]
@@ -671,12 +672,12 @@ class CTCPEvent extends Event {
   /**
    * The User who sent the message
    */
-  String user;
+  User user;
 
   /**
    * The Target of the message
    */
-  String target;
+  Entity target;
 
   /**
    * The Message sent
@@ -765,7 +766,7 @@ class UserInvitedEvent extends Event {
    */
   String user;
 
-  String inviter;
+  User inviter;
 
   UserInvitedEvent(Client client, this.channel, this.user, this.inviter) : super(client);
 }

@@ -106,6 +106,16 @@ class Client extends ClientBase {
   User getUser(String nickname) => users.firstWhere(
       (user) => user.nickname == nickname, orElse: () => null);
 
+  Entity getEntity(String entityName) {
+    if (getChannel(entityName) != null) {
+      return getChannel(entityName);
+    } else if (getUser(entityName) != null) {
+      return getUser(entityName);
+    } else {
+      return new Server(entityName);
+    }
+  }
+
   @override
   void connect() {
     _ready = false;
@@ -363,7 +373,7 @@ class Client extends ClientBase {
 
         case "PRIVMSG": // Message
           _fireReady();
-          var from = input.hostmask.nickname;
+          var from = getUser(input.hostmask.nickname);
           var target = input.parameters[0];
           var message = input.message;
 
@@ -372,13 +382,13 @@ class Client extends ClientBase {
           } else {
             if (message.startsWith("\u0001")) {
               // CTCP
-              post(new CTCPEvent(this, from, target, message.substring(1, message.length - 1)));
+              post(new CTCPEvent(this, from, getEntity(target), message.substring(1, message.length - 1)));
             } else if (input.tags.containsKey("intent") && input.tags["intent"] == "ACTION") {
               // Action
-              post(new ActionEvent(this, from, target, message));
+              post(new ActionEvent(this, from, getEntity(target), message));
             } else {
               // Message
-              post(new MessageEvent(this, from, target, message, intent: input.tags["intent"]));
+              post(new MessageEvent(this, from, getEntity(target), message, intent: input.tags["intent"]));
             }
           }
           break;
@@ -388,17 +398,17 @@ class Client extends ClientBase {
           var username = input.parameters[0];
 
           if (username == "*") {
-            post(new UserLoggedOutEvent(this, user));
+            post(new UserLoggedOutEvent(this, getUser(user)));
           } else {
-            post(new UserLoggedInEvent(this, user, username));
+            post(new UserLoggedInEvent(this, getUser(user), username));
           }
           break;
 
         case "NOTICE": // Notice
-          var from = input.plainHostmask;
-          if (input.parameters[0] != "*") from = input.hostmask.nickname;
+          var from = getEntity(input.plainHostmask);
+          if (input.parameters[0] != "*") from = getUser(input.hostmask.nickname);
 
-          var target = input.parameters[0];
+          var target = getEntity(input.parameters[0]);
           var message = input.message;
           post(new NoticeEvent(this, from, target, message));
           break;
@@ -443,13 +453,13 @@ class Client extends ClientBase {
           var old = channel._topic;
           channel._topic = topic;
           channel._topicUser = user;
-          post(new TopicEvent(this, channel, user, topic, old));
+          post(new TopicEvent(this, channel, getUser(user), topic, old));
           break;
 
         case "AWAY": // User marked as away
           var user = input.hostmask.nickname;
           var msg = input.message;
-          post(new AwayEvent(this, user, msg));
+          post(new AwayEvent(this, getUser(user), msg));
           break;
 
         case "TOPIC": // Topic changed
@@ -459,7 +469,7 @@ class Client extends ClientBase {
           var old = chan._topic;
           chan._topic = topic;
           chan._topicUser = user;
-          post(new TopicEvent(this, chan, user, topic, old, true));
+          post(new TopicEvent(this, chan, getUser(user), topic, old, true));
           break;
 
         case "ERROR": // Server error
@@ -529,7 +539,7 @@ class Client extends ClientBase {
           var now = input.message;
 
           // Posts the nickname change event. No need for checking if we are the original nickname.
-          post(new NickChangeEvent(this, original, now));
+          post(new NickChangeEvent(this, getUser(original), original, now));
           break;
 
         case "MODE": // Mode Changed
@@ -703,7 +713,7 @@ class Client extends ClientBase {
           var user = input.parameters[1];
           var reason = input.message;
           var by = input.hostmask.nickname;
-          post(new KickEvent(this, channel, user, by, reason));
+          post(new KickEvent(this, channel, getUser(user), getUser(by), reason));
           break;
 
         case "372": // MOTD Part
@@ -732,7 +742,7 @@ class Client extends ClientBase {
           if (user == nickname) {
             post(new InviteEvent(this, channel, inviter));
           } else {
-            post(new UserInvitedEvent(this, getChannel(channel), user, inviter));
+            post(new UserInvitedEvent(this, getChannel(channel), user, getUser(inviter)));
           }
           break;
 
@@ -866,7 +876,7 @@ class Client extends ClientBase {
     // Handles User Tracking in Channels when a user is kicked.
     register((KickEvent event) {
       var channel = event.channel;
-      var user = getUser(event.user);
+      var user = event.user;
       channel.members.remove(user);
       channel.voices.remove(user);
       channel.ops.remove(user);
