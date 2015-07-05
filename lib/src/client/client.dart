@@ -920,11 +920,11 @@ class Client extends ClientBase {
           var voice = prefix == "+";
           var halfop = prefix == "%";
 
-          void m(Set<String> users) {
+          void m(Set<User> users) {
             if (added) {
-              users.add(event.user);
+              users.add(getUser(event.user));
             } else {
-              users.remove(event.user);
+              users.remove(getUser(event.user));
             }
           }
 
