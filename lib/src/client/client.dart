@@ -475,6 +475,9 @@ class Client extends ClientBase {
             var cs = chars.takeWhile((it) => modePrefixes.containsValue(it));
 
             var name = chars.skip(cs.length).join();
+            if (cs.length == 0) {
+              channel.members.add(name);
+            }
             for (var n in cs) {
               switch (n) {
                 case "@":
@@ -488,9 +491,6 @@ class Client extends ClientBase {
                   break;
                 case "~":
                   channel.owners.add(name);
-                  break;
-                default:
-                  channel.members.add(name);
                   break;
               }
             }
