@@ -12,6 +12,7 @@ part of irc.client;
  *      // Use Client
  */
 class Client extends ClientBase {
+
   /**
    * Event Dispatcher
    */
@@ -22,6 +23,9 @@ class Client extends ClientBase {
 
   @override
   List<Channel> channels = [];
+
+  @override
+  List<User> users = [];
 
   /**
    * WHOIS Implementation Builder Storage
@@ -97,6 +101,10 @@ class Client extends ClientBase {
   @override
   Channel getChannel(String name) => channels.firstWhere(
       (channel) => channel.name == name, orElse: () => null);
+
+  @override
+  User getUser(String nickname) => users.firstWhere(
+      (user) => user.nickname == nickname, orElse: () => null);
 
   @override
   void connect() {
@@ -464,7 +472,7 @@ class Client extends ClientBase {
             ..removeWhere((it) => it.trim().isEmpty);
           if (_currentCap.contains("userhost-in-names")) {
             users = users.map((it) {
-              return new Hostmask.parse(it).nickname;
+              return Hostmask.parse(it).nickname;
             }).toList();
           }
 
@@ -475,22 +483,28 @@ class Client extends ClientBase {
             var cs = chars.takeWhile((it) => modePrefixes.containsValue(it));
 
             var name = chars.skip(cs.length).join();
+
+            if (getUser(name) == null) {
+              this.users.add(new User(this, name));
+            }
+
+            var userInstance = getUser(name);
             if (cs.length == 0) {
-              channel.members.add(name);
+              channel.members.add(userInstance);
             }
             for (var n in cs) {
               switch (n) {
                 case "@":
-                  channel.ops.add(name);
+                  channel.ops.add(userInstance);
                   break;
                 case "+":
-                  channel.voices.add(name);
+                  channel.voices.add(userInstance);
                   break;
                 case "%":
-                  channel.halfops.add(name);
+                  channel.halfops.add(userInstance);
                   break;
                 case "~":
-                  channel.owners.add(name);
+                  channel.owners.add(userInstance);
                   break;
               }
             }
@@ -831,7 +845,7 @@ class Client extends ClientBase {
     });
 
     /* Handles User Tracking in Channels when a user joins. A user is a member until it is changed. */
-    register((JoinEvent event) => event.channel.members.add(event.user));
+    register((JoinEvent event) => event.channel.members.add(getUser(event.user)));
 
     // Handles User Tracking in Channels when a user leaves
     register((PartEvent event) {

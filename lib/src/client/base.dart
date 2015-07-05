@@ -16,14 +16,19 @@ abstract class ClientBase {
   Configuration get config;
 
   /**
-   * The Client's Nickname
+   * The Client's nickname
    */
   String get nickname;
 
   /**
-   * Gets the Channels the Client is in
+   * Get the Channels the Client is in
    */
   Iterable<Channel> get channels;
+
+  /**
+   * Get the Users the Client's channels contain
+   */
+  Iterable<User> get users;
 
   /**
    * Gets the Server's MOTD
@@ -147,6 +152,12 @@ abstract class ClientBase {
   Channel getChannel(String name);
 
   /**
+   * Get a User object for the server.
+   * Returns null if no such user exists.
+   */
+  User getUser(String nickname);
+
+  /**
    * Joins the specified [channel].
    */
   void join(String channel) {
@@ -225,22 +236,22 @@ abstract class ClientBase {
   /**
    * Kicks [user] from [channel] with an optional [reason].
    */
-  void kick(Channel channel, String user, [String reason]) {
+  void kick(Channel channel, User user, [String reason]) {
     if (reason != null && supported.containsKey("KICKLEN")) {
       var max = supported["KICKLEN"];
       if (reason.length > max) {
         throw new ArgumentError.value(reason, "length is >${max}, which is the maximum kick comment length set by the server.");
       }
     }
-    send("KICK ${channel.name} ${user}${reason != null ? ' :' + reason : ''}");
+    send("KICK ${channel.name} ${user.nickname}${reason != null ? ' :' + reason : ''}");
   }
 
   void loginOperator(String name, String password) {
     send("OPER ${name} ${password}");
   }
 
-  void invite(String user, String channel) {
-    send("INVITE ${user} ${channel}");
+  void invite(User user, String channel) {
+    send("INVITE ${user.nickname} ${channel}");
   }
 
   Future<ServerVersionEvent> getServerVersion([String target]);

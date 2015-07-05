@@ -40,6 +40,7 @@ class Hostmask {
       this.hostname = parts[2]; 
     }
   }
+
 }
 
 /**

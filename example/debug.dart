@@ -79,16 +79,22 @@ void main() {
   });
 
   command("users", (CommandEvent event) {
-    event.notice("> Members: ${event.channel.members.join(", ")}");
-    event.notice("> Ops: ${event.channel.ops.join(", ")}");
-    event.notice("> Voices: ${event.channel.voices.join(", ")}");
-    event.notice("> Owners: ${event.channel.owners.join(", ")}");
-    event.notice("> Half-Ops: ${event.channel.halfops.join(", ")}");
-    event.notice("> All Users: ${event.channel.allUsers.join(", ")}");
+    String joinNicks(Set<User> users) {
+      return users.map((it) {
+        return it.nickname;
+      }).toList().join(", ");
+    }
+
+    event.notice("> Members: ${joinNicks(event.channel.members)}");
+    event.notice("> Ops: ${joinNicks(event.channel.ops)}");
+    event.notice("> Voices: ${joinNicks(event.channel.voices)}");
+    event.notice("> Owners: ${joinNicks(event.channel.owners)}");
+    event.notice("> Half-Ops: ${joinNicks(event.channel.halfops)}");
+    event.notice("> All Users: ${joinNicks(event.channel.allUsers)}");
   });
 
   command("act", (CommandEvent event) {
-    event.act(" is silleh.");
+    event.act("is silleh.");
   });
 }
 
