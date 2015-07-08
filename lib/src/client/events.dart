@@ -520,7 +520,15 @@ class NickChangeEvent extends Event {
 }
 
 class UserLoggedInEvent extends Event {
+
+  /**
+   * User that logged in.
+   */
   User user;
+
+  /**
+   * Account name for the user.
+   */
   String account;
 
   UserLoggedInEvent(Client client, this.user, this.account) : super(client);
@@ -772,6 +780,9 @@ class UserInvitedEvent extends Event {
    */
   String user;
 
+  /**
+   * The user who invited.
+   */
   User inviter;
 
   UserInvitedEvent(Client client, this.channel, this.user, this.inviter) : super(client);
