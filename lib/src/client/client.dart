@@ -890,25 +890,9 @@ class Client extends ClientBase {
     // Handles Nickname Changes
     register((NickChangeEvent event) {
       getUser(event.original).nickname = event.now;
-      // TODO: I don't think we need this anymore, since we're object-based.
-      /*if (event.original == _nickname) {
+      if (event.original == _nickname) {
         _nickname = event.now;
-      } else {
-        for (Channel channel in channels) {
-          void m(Set<User> list) {
-            if (list.contains(event.original)) {
-              list.remove(event.original);
-              list.add(event.now);
-            }
-          }
-
-          m(channel.members);
-          m(channel.ops);
-          m(channel.voices);
-          m(channel.halfops);
-          m(channel.owners);
-        }
-      }*/
+      }
     });
 
     // Handles Channel User Tracking
