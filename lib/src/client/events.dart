@@ -272,15 +272,15 @@ class NickInUseEvent extends Event {
 }
 
 /**
- * Bot Join Event is dispatched when the Client joins a Channel
+ * Fired when the Client joins a Channel.
  */
-class BotJoinEvent extends Event {
+class ClientJoinEvent extends Event {
   /**
    * Channel we joined
    */
   Channel channel;
 
-  BotJoinEvent(Client client, this.channel)
+  ClientJoinEvent(Client client, this.channel)
       : super(client);
 }
 
@@ -308,15 +308,15 @@ class PartEvent extends Event {
 }
 
 /**
- * Bot Part Event is dispatched when the Client parts a channel
+ * Fired when the Client parts a channel
  */
-class BotPartEvent extends Event {
+class ClientPartEvent extends Event {
   /**
    * Channel we left
    */
   Channel channel;
 
-  BotPartEvent(Client client, this.channel)
+  ClientPartEvent(Client client, this.channel)
       : super(client);
 }
 

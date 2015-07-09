@@ -358,7 +358,7 @@ class Client extends ClientBase {
             if (getChannel(chanName) == null) {
               channels.add(new Channel(this, chanName));
             }
-            post(new BotJoinEvent(this, getChannel(chanName)));
+            post(new ClientJoinEvent(this, getChannel(chanName)));
             getChannel(chanName).reloadBans();
           } else {
             // User joined one of our channels
@@ -421,7 +421,7 @@ class Client extends ClientBase {
               : input.message;
 
           if (who == _nickname) {
-            post(new BotPartEvent(this, getChannel(chan_name)));
+            post(new ClientPartEvent(this, getChannel(chan_name)));
           } else {
             post(new PartEvent(this, who, getChannel(chan_name)));
           }
@@ -942,7 +942,7 @@ class Client extends ClientBase {
     });
 
     // When the Bot leaves a channel, we no longer retain the object.
-    register((BotPartEvent event) => channels.remove(event.channel));
+    register((ClientPartEvent event) => channels.remove(event.channel));
 
     register((ServerSupportsEvent event) {
       _supported.addAll(event.supported);
@@ -1078,8 +1078,8 @@ class Client extends ClientBase {
   Stream<ConnectEvent> get onConnect => onEvent(ConnectEvent);
   Stream<DisconnectEvent> get onDisconnect => onEvent(DisconnectEvent);
   Stream<MessageEvent> get onMessage => onEvent(MessageEvent);
-  Stream<BotJoinEvent> get onBotJoin => onEvent(BotJoinEvent);
-  Stream<BotPartEvent> get onBotPart => onEvent(BotPartEvent);
+  Stream<ClientJoinEvent> get onBotJoin => onEvent(ClientJoinEvent);
+  Stream<ClientPartEvent> get onBotPart => onEvent(ClientPartEvent);
   Stream<JoinEvent> get onJoin => onEvent(JoinEvent);
   Stream<PartEvent> get onPart => onEvent(PartEvent);
   Stream<QuitEvent> get onQuit => onEvent(QuitEvent);
