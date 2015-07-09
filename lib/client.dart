@@ -30,5 +30,8 @@ part 'src/client/colors.dart';
 part 'src/client/who.dart';
 /* Client Pool */
 part 'src/client/pool.dart';
+part 'src/client/entity.dart';
 part 'src/client/channel.dart';
+part 'src/client/user.dart';
+part 'src/client/server.dart';
 

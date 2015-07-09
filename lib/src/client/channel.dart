@@ -3,7 +3,7 @@ part of irc.client;
 /**
  * An IRC Channel
  */
-class Channel {
+class Channel extends Entity {
   /**
    * Client associated with the channel
    */
@@ -23,28 +23,31 @@ class Channel {
   /**
    * Channel Operators
    */
-  final Set<String> ops = new Set<String>();
+  final Set<User> ops = new Set<User>();
   
   /**
    * Channel Half-Ops
    */
-  final Set<String> halfops = new Set<String>();
+  final Set<User> halfops = new Set<User>();
 
   /**
    * Channel Voices
    */
-  final Set<String> voices = new Set<String>();
+  final Set<User> voices = new Set<User>();
 
   /**
    * Channel Members
    */
-  final Set<String> members = new Set<String>();
+  final Set<User> members = new Set<User>();
   
   /**
    * Channel Owners (Not Supported on all Servers)
    */
-  final Set<String> owners = new Set<String>();
+  final Set<User> owners = new Set<User>();
 
+  /**
+   * Channel topic
+   */
   String _topic;
 
   /**
@@ -52,15 +55,24 @@ class Channel {
    */
   final List<GlobHostmask> bans = [];
 
+  /**
+   * Modes set on the Channel.
+   */
   final Mode mode = new Mode.empty();
 
   /**
-   * Channel Topic
+   * Channel topic
    */
   String get topic => _topic;
 
+  /**
+   * User who changed the topic last.
+   */
   String get topicUser => _topicUser;
-  
+
+  /**
+   * Change the topic for the Channel.
+   */
   set topic(String topic) {
     if (client.supported.containsKey("TOPICLEN")) {
       var max = client.supported['TOPICLEN'];
@@ -71,18 +83,24 @@ class Channel {
     
     client.send("TOPIC ${name} :${topic}");
   }
-  
+
+  /**
+   * User who changed the topic last.
+   */
   String _topicUser;
-  
-  void invite(String user) {
+
+  /**
+   * Invite a user to the Channel.
+   */
+  void invite(User user) {
     client.invite(user, name);
   }
 
   /**
-   * All Users
+   * Get all users for the Channel.
    */
-  Set<String> get allUsers {
-    var all = new Set<String>()
+  Set<User> get allUsers {
+    var all = new Set<User>()
         ..addAll(ops)
         ..addAll(voices)
         ..addAll(members)
@@ -109,42 +127,42 @@ class Channel {
   /**
    * Sets +o (Channel Operator) mode on [user]
    */
-  void op(String user) => setMode("+o", user);
+  void op(User user) => setMode("+o", user);
 
   /**
    * Sets -o (Remove Channel Operator) mode on [user]
    */
-  void deop(String user) => setMode("-o", user);
+  void deop(User user) => setMode("-o", user);
 
   /**
    * Sets +v (Channel Voice) mode on [user]
    */
-  void voice(String user) => setMode("+v", user);
+  void voice(User user) => setMode("+v", user);
 
   /**
    * Sets -v (Remove Channel Voice) mode on [user]
    */
-  void devoice(String user) => setMode("-v", user);
+  void devoice(User user) => setMode("-v", user);
 
   /**
    * Sets +b (Ban) mode on [user]
    */
-  void ban(String user) => setMode("+b", user);
+  void ban(User user) => setMode("+b", user);
 
   /**
    * Sets -b (Remove Ban) mode on [user]
    */
-  void unban(String user) => setMode("-b", user);
+  void unban(User user) => setMode("-b", user);
 
   /**
    * Kicks [user] from channel with optional [reason].
    */
-  void kick(String user, [String reason]) => client.kick(this, user, reason);
+  void kick(User user, [String reason]) => client.kick(this, user, reason);
 
   /**
    * Sets +b on [user] then kicks [user] with the specified [reason]
    */
-  void kickban(String user, [String reason]) {
+  void kickban(User user, [String reason]) {
     ban(user);
     kick(user, reason);
   }
@@ -152,12 +170,12 @@ class Channel {
   /**
    * Sets +h (Half-Op) mode on [user]
    */
-  void hop(String user) => setMode("+h", user);
+  void hop(User user) => setMode("+h", user);
   
   /**
    * Sets -h (Remove Half-Op) mode on [user]
    */
-  void dehop(String user) => setMode("-h", user);
+  void dehop(User user) => setMode("-h", user);
 
   /**
    * Sends [msg] as a channel action.
@@ -175,7 +193,7 @@ class Channel {
   /**
    * Sets the Mode on the Channel or if the user if [user] is specified.
    */
-  void setMode(String mode, [String user]) {
+  void setMode(String mode, [User user]) {
     if (user == null) {
       client.send("MODE ${name} ${mode}");
     } else {
