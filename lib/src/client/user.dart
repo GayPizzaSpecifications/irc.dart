@@ -31,5 +31,4 @@ class User extends Entity {
   final String realname;
 
   User(this.client, this.nickname, {this.username, this.realname});
-
 }

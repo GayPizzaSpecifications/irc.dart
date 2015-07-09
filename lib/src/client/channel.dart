@@ -45,6 +45,9 @@ class Channel extends Entity {
    */
   final Set<User> owners = new Set<User>();
 
+  /**
+   * Channel topic
+   */
   String _topic;
 
   /**
@@ -52,15 +55,24 @@ class Channel extends Entity {
    */
   final List<GlobHostmask> bans = [];
 
+  /**
+   * Modes set on the Channel.
+   */
   final Mode mode = new Mode.empty();
 
   /**
-   * Channel Topic
+   * Channel topic
    */
   String get topic => _topic;
 
+  /**
+   * User who changed the topic last.
+   */
   String get topicUser => _topicUser;
-  
+
+  /**
+   * Change the topic for the Channel.
+   */
   set topic(String topic) {
     if (client.supported.containsKey("TOPICLEN")) {
       var max = client.supported['TOPICLEN'];
@@ -71,15 +83,21 @@ class Channel extends Entity {
     
     client.send("TOPIC ${name} :${topic}");
   }
-  
+
+  /**
+   * User who changed the topic last.
+   */
   String _topicUser;
-  
+
+  /**
+   * Invite a user to the Channel.
+   */
   void invite(User user) {
     client.invite(user, name);
   }
 
-  /**isUser
-   * All Users
+  /**
+   * Get all users for the Channel.
    */
   Set<User> get allUsers {
     var all = new Set<User>()
