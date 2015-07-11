@@ -85,16 +85,29 @@ void main() {
       }).toList().join(", ");
     }
 
-    event.notice("> Members: ${joinNicks(event.channel.members)}");
-    event.notice("> Ops: ${joinNicks(event.channel.ops)}");
-    event.notice("> Voices: ${joinNicks(event.channel.voices)}");
-    event.notice("> Owners: ${joinNicks(event.channel.owners)}");
-    event.notice("> Half-Ops: ${joinNicks(event.channel.halfops)}");
-    event.notice("> All Users: ${joinNicks(event.channel.allUsers)}");
+    if (event.target.isChannel) {
+      Channel target = event.target;
+      event.notice("> Members: ${joinNicks(target.members)}");
+      event.notice("> Ops: ${joinNicks(target.ops)}");
+      event.notice("> Voices: ${joinNicks(target.voices)}");
+      event.notice("> Owners: ${joinNicks(target.owners)}");
+      event.notice("> Half-Ops: ${joinNicks(target.halfops)}");
+      event.notice("> All Users: ${joinNicks(target.allUsers)}");
+    }
   });
 
   command("act", (CommandEvent event) {
     event.act("is silleh.");
+  });
+
+  command("away", (CommandEvent event) {
+    print(event.args.length);
+    if (event.args.length == 1) {
+      User user = client.getUser(event.args[0]);
+      user.isAway().then((away) {
+        event.reply("$away");
+      });
+    }
   });
 }
 
@@ -133,9 +146,9 @@ class CommandEvent extends MessageEvent {
   CommandEvent(MessageEvent event, this.command, this.args)
   : super(event.client, event.from, event.target, event.message);
 
-  void notice(String message, {bool user: true}) => client.sendNotice(user ? from : target, message);
+  void notice(String message, {bool user: true}) => client.sendNotice(user ? from : target.name, message);
 
-  void act(String message) => channel.sendAction(message);
+  void act(String message) => client.sendAction(target.name, message);
 
   String argument(int index) => args[index];
 }

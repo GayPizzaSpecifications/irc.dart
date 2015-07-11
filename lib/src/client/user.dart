@@ -10,25 +10,95 @@ class User extends Entity {
   final Client client;
 
   /**
-   * Get the user's name.
+   * Get the user's nickname.
    */
-  @override
-  String get name => nickname;
+  String _nickname;
 
   /**
    * Get the user's nickname.
    */
-  String nickname;
+  String get nickname => _nickname;
+
+  /**
+   * Get the user's name.
+   */
+  @override
+  String get name => _nickname;
 
   /**
    * Get the user's username.
    */
-  final String username;
+  String _username;
+
+  /**
+   * Get the user's username.
+   */
+  String get username => _username;
 
   /**
    * Get the user's realname.
    */
-  final String realname;
+  String _realname;
 
-  User(this.client, this.nickname, {this.username, this.realname});
+  /**
+   * Get the user's realname.
+   */
+  String get realname => _realname;
+
+  /**
+   * The user is a Server Operator.
+   */
+  bool _isServerOperator;
+
+  /**
+   * The user is a Server Operator.
+   */
+  bool get isServerOperator => _isServerOperator;
+
+  /**
+   * User's hostname.
+   */
+  String _hostname;
+
+  /**
+   * User's hostname.
+   */
+  String get hostname => _hostname;
+
+  /**
+   * User's Server name.
+   */
+  String _serverName;
+
+  /**
+   * User's Server name.
+   */
+  String get serverName => _serverName;
+
+  /**
+   * User's Server info.
+   */
+  String _serverInfo;
+
+  /**
+   * User's Server info.
+   */
+  String get serverInfo => _serverInfo;
+
+  /**
+   * Check if the user is away.
+   */
+  Future<bool> isAway() {
+    var completer = new Completer();
+
+    client.pollEvent(WhoisEvent).then((event) {
+      completer.complete(event.away);
+    });
+
+    client.whois(nickname);
+
+    return completer.future.timeout(const Duration(seconds: 2), onTimeout: () => false);
+  }
+
+  User(this.client, this._nickname);
 }

@@ -11,7 +11,7 @@ abstract class ClientBase {
   IrcParser get parser;
 
   /**
-   * Bot Configuration
+   * Client Configuration
    */
   Configuration get config;
 

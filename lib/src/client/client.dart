@@ -1,9 +1,9 @@
 part of irc.client;
 
 /**
- * IRC Client is the most important class in irc.dart
+ * IRC Client is the primary class in irc.dart.
  *
- *      var config = new BotConfig(
+ *      var config = new Configuration(
  *        nickname: "DartBot",
  *        host: "irc.esper.net",
  *        port: 6667
@@ -625,9 +625,8 @@ class Client extends ClientBase {
           var hostname = split[3];
           var realname = input.message;
           var builder = new WhoisBuilder(nickname);
-          builder
-            ..hostname = hostname
-            ..realname = realname;
+          builder.hostname = hostname;
+          builder.realname = realname;
           builder._createTimestamp = new DateTime.now();
           _whoisBuilders[nickname] = builder;
           break;
@@ -640,6 +639,15 @@ class Client extends ClientBase {
           var builder = _whoisBuilders[nickname];
           builder.serverName = server_name;
           builder.serverInfo = message;
+          break;
+
+        case "301": // WHOIS Away Information
+          var split = input.parameters;
+          var nickname = split[1];
+          var message = input.message;
+          var builder = _whoisBuilders[nickname];
+          builder.away = true;
+          builder.awayMessage = message;
           break;
 
         case "313": // WHOIS Operator information
@@ -991,6 +999,19 @@ class Client extends ClientBase {
       _supported.addAll(event.supported);
       _modePrefixes = IrcParserSupport.parseSupportedPrefixes(_supported["PREFIX"]);
     });
+
+    register((WhoisEvent event) {
+      User user = getUser(event.nickname);
+      if (user == null) {
+        user = users.add(new User(this, event.nickname));
+        user = getUser(user);
+      }
+      user._realname = event.realname;
+      user._hostname = event.hostname;
+      user._serverName = event.serverName;
+      user._serverInfo = event.serverInfo;
+      user._isServerOperator = event.isServerOperator;
+    });
   }
 
   /**
@@ -1157,8 +1178,8 @@ class Client extends ClientBase {
   Stream<ConnectEvent> get onConnect => onEvent(ConnectEvent);
   Stream<DisconnectEvent> get onDisconnect => onEvent(DisconnectEvent);
   Stream<MessageEvent> get onMessage => onEvent(MessageEvent);
-  Stream<ClientJoinEvent> get onBotJoin => onEvent(ClientJoinEvent);
-  Stream<ClientPartEvent> get onBotPart => onEvent(ClientPartEvent);
+  Stream<ClientJoinEvent> get onClientJoin => onEvent(ClientJoinEvent);
+  Stream<ClientPartEvent> get onClientPart => onEvent(ClientPartEvent);
   Stream<JoinEvent> get onJoin => onEvent(JoinEvent);
   Stream<PartEvent> get onPart => onEvent(PartEvent);
   Stream<QuitEvent> get onQuit => onEvent(QuitEvent);
