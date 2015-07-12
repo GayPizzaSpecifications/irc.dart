@@ -190,9 +190,9 @@ class MessageEvent extends Event {
    * Replies to the Event
    */
   void reply(String message) {
-    if (from.isUser) {
+    if (target.isUser) {
       client.sendMessage(from.name, message);
-    } else if (from.isChannel) {
+    } else if (target.isChannel) {
       client.sendMessage(target.name, message);
     } else {
       // Ignore server replies.
