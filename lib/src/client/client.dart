@@ -940,7 +940,7 @@ class Client extends ClientBase {
 
     // Handles Nickname Changes
     register((NickChangeEvent event) {
-      getUser(event.original).nickname = event.now;
+      getUser(event.original)._nickname = event.now;
       if (event.original == _nickname) {
         _nickname = event.now;
       }
