@@ -9,3 +9,4 @@ dartdoc-viewer/
 .buildlog
 .c9/
 .pub/
+.packages

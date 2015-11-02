@@ -24,5 +24,4 @@ abstract class Entity {
    * Is Server
    */
   bool get isServer => this is Server;
-
 }

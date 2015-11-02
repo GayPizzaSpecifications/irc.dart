@@ -1075,15 +1075,25 @@ class Client extends ClientBase {
    */
   @override
   Future<bool> isUserOn(String name) {
-    var completer = new Completer();
+    var completer = new Completer.sync();
 
-    pollEvent(IsOnEvent).then((event) {
-      completer.complete(event.users.contains(name));
-    });
+    var handler = (WhoisEvent event) {
+      if (event.nickname == nickname) {
+        if (!completer.isCompleted) {
+          completer.complete(event.away);
+        }
+      }
+    };
 
+    register(handler);
     send("ISON ${name}");
 
-    return completer.future.timeout(const Duration(seconds: 2), onTimeout: () => false);
+    return completer.future.timeout(const Duration(seconds: 5), onTimeout: () => false).then((value) {
+      new Future(() {
+        unregister(handler);
+      });
+      return value;
+    });
   }
 
   /**

@@ -203,6 +203,8 @@ class MessageEvent extends Event {
    * If this event is a private message
    */
   bool get isPrivate => target.isUser;
+
+  Channel get channel => target;
 }
 
 /**
@@ -572,6 +574,11 @@ class WhoisEvent extends Event {
    * If the user is away
    */
   bool get away => builder.away;
+
+  /**
+   * If the user is away
+   */
+  bool get isAway => away;
 
   /**
    * If the user is away, then this is the message that was set

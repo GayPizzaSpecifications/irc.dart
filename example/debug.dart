@@ -15,15 +15,18 @@ void main() {
     username: "DartBot",
     realname: "DartBotDebug"
   );
+
   var client = new Client(config);
   client.connect();
 
   client.onLineSent.listen((event) {
-    print(">> ${event.line}");
-  });
-  client.onLineReceive.listen((event) {
     print("<< ${event.line}");
   });
+
+  client.onLineReceive.listen((event) {
+    print(">> ${event.line}");
+  });
+
   client.onMode.listen((event) {
     if (event.channel != null && event.user != null) {
       print("Mode (${event.mode}) given to ${event.user} in ${event.channel.name}");
@@ -33,9 +36,11 @@ void main() {
       print("Mode (${event.mode}) was set on us.");
     }
   });
+
   client.onReady.listen((event) {
     event.join("#directcode");
   });
+
   client.register(handleAsCommand);
 
   command("notice-me", (CommandEvent event) {
@@ -100,13 +105,15 @@ void main() {
     event.act("is silleh.");
   });
 
-  command("away", (CommandEvent event) {
-    print(event.args.length);
+  command("away", (CommandEvent event) async {
     if (event.args.length == 1) {
       User user = client.getUser(event.args[0]);
-      user.isAway().then((away) {
-        event.reply("$away");
-      });
+      var isAway = await user.isAway();
+      if (isAway) {
+        event.reply("${user.name} is away.");
+      } else {
+        event.reply("${user.name} is not away.");
+      }
     }
   });
 }
@@ -144,7 +151,7 @@ class CommandEvent extends MessageEvent {
   List<String> args;
 
   CommandEvent(MessageEvent event, this.command, this.args)
-  : super(event.client, event.from, event.target, event.message);
+    : super(event.client, event.from, event.target, event.message);
 
   void notice(String message, {bool user: true}) => client.sendNotice(user ? from : target.name, message);
 

@@ -89,15 +89,25 @@ class User extends Entity {
    * Check if the user is away.
    */
   Future<bool> isAway() {
-    var completer = new Completer();
+    var completer = new Completer.sync();
 
-    client.pollEvent(WhoisEvent).then((event) {
-      completer.complete(event.away);
-    });
+    var handler = (WhoisEvent event) {
+      if (event.nickname == nickname) {
+        if (!completer.isCompleted) {
+          completer.complete(event.away);
+        }
+      }
+    };
 
+    client.register(handler);
     client.whois(nickname);
 
-    return completer.future.timeout(const Duration(seconds: 2), onTimeout: () => false);
+    return completer.future.timeout(const Duration(seconds: 5), onTimeout: () => false).then((value) {
+      new Future(() {
+        client.unregister(handler);
+      });
+      return value;
+    });
   }
 
   User(this.client, this._nickname);
