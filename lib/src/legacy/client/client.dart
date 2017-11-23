@@ -12,7 +12,6 @@ part of irc.client;
  *      // Use Client
  */
 class Client extends ClientBase {
-
   /**
    * Event Dispatcher.
    */
@@ -98,14 +97,15 @@ class Client extends ClientBase {
    * Creates a new IRC Client using the specified configuration
    * If parser is specified, then the parser is used for the current client
    */
-  Client(Configuration config, {
-    IrcParser parser,
-    IrcConnection connection,
-    this.sendInterval: const Duration(milliseconds: 2)
-  })
+  Client(Configuration config,
+      {IrcParser parser,
+      IrcConnection connection,
+      this.sendInterval: const Duration(milliseconds: 2)})
       : this.parser = parser == null ? new RegexIrcParser() : parser,
         this.connection = connection == null
-            ? new SocketIrcConnection()
+            ? (config.websocket
+                ? new WebSocketIrcConnection()
+                : new SocketIrcConnection())
             : connection,
         this.metadata = {} {
     this.config = config;
@@ -131,8 +131,8 @@ class Client extends ClientBase {
    * Get a User.
    */
   @override
-  Channel getChannel(String name) => channels.firstWhere(
-      (channel) => channel.name == name, orElse: () => null);
+  Channel getChannel(String name) => channels
+      .firstWhere((channel) => channel.name == name, orElse: () => null);
 
   bool isChannelName(String input) {
     var prefixes = supported["CHANTYPES"].toString();
@@ -149,16 +149,25 @@ class Client extends ClientBase {
    * Get a User.
    */
   @override
-  User getUser(String nickname) => users.firstWhere(
-      (user) => user.nickname == nickname, orElse: () => null);
+  User getUser(String nickname, {bool create: false}) {
+    var user = users.firstWhere((user) => user.nickname == nickname,
+        orElse: () => null);
+
+    if (create && user == null) {
+      user = new User(this, nickname);
+    }
+
+    return user;
+  }
 
   /**
    * Get an Entity for the Server.
    */
-  Entity getEntity(String entityName) {
+  Entity getEntity(String entityName,
+      {bool weAreServer: false, bool createUser: false}) {
     if (getChannel(entityName) != null) {
       return getChannel(entityName);
-    } else if (getUser(entityName) != null) {
+    } else if (getUser(entityName, create: createUser) != null) {
       return getUser(entityName);
     } else {
       return new Server(entityName);
@@ -245,10 +254,11 @@ class Client extends ClientBase {
    *
    * Returns false if [method] is already registered, otherwise true.
    */
-  bool register(EventHandlerFunction handler, {EventFilter filter, int priority}) {
-    return filter == null ?
-      dispatcher.register(handler, priority: priority) :
-      dispatcher.register(handler, filter: filter, priority: priority);
+  bool register(EventHandlerFunction handler,
+      {EventFilter filter, int priority}) {
+    return filter == null
+        ? dispatcher.register(handler, priority: priority)
+        : dispatcher.register(handler, filter: filter, priority: priority);
   }
 
   /**
@@ -264,13 +274,14 @@ class Client extends ClientBase {
    * listener. If the specific [handler] has a priority, it should be provided as well.
    * Returns whether the [handler] was removed or not.
    */
-  bool unregister(EventHandlerFunction handler, {EventFilter filter, int priority}) {
-    return filter == null ?
-      dispatcher.unregister(handler, priority: priority) :
-      dispatcher.unregister(handler, filter: filter, priority: priority);
+  bool unregister(EventHandlerFunction handler,
+      {EventFilter filter, int priority}) {
+    return filter == null
+        ? dispatcher.unregister(handler, priority: priority)
+        : dispatcher.unregister(handler, filter: filter, priority: priority);
   }
 
-    List<Event> _batchedEvents = [];
+  List<Event> _batchedEvents = [];
 
   /**
    * Send a raw line on the socket.
@@ -333,14 +344,13 @@ class Client extends ClientBase {
 
         if (list.isNotEmpty) {
           listSupportedCapabilities().then((supported) {
-            var m = supported
-              .capabilities
-              .map((it) => it.startsWith("~") ? it.substring(1) : it)
-              .toList();
-            var needsAck = supported
-              .capabilities
-              .where((it) => it.startsWith("~")).map((it) => it.substring(1))
-              .toList();
+            var m = supported.capabilities
+                .map((it) => it.startsWith("~") ? it.substring(1) : it)
+                .toList();
+            var needsAck = supported.capabilities
+                .where((it) => it.startsWith("~"))
+                .map((it) => it.substring(1))
+                .toList();
 
             for (var c in new Set<String>.from(list)) {
               if (!m.contains(c)) {
@@ -351,10 +361,12 @@ class Client extends ClientBase {
             requestCapability(list.join(" "), now: true);
 
             events
-            .where((it) => it is AcknowledgedCapabilitiesEvent ||
-              it is NotAcknowledgedCapabilitiesEvent)
-            .first
-            .timeout(const Duration(seconds: 10)).then((event) {
+                .where((it) =>
+                    it is AcknowledgedCapabilitiesEvent ||
+                    it is NotAcknowledgedCapabilitiesEvent)
+                .first
+                .timeout(const Duration(seconds: 10))
+                .then((event) {
               if (event is AcknowledgedCapabilitiesEvent) {
                 if (event.capabilities.any((it) => needsAck.contains(it))) {
                   send("CAP ACK :${event.capabilities.join(" ")}");
@@ -373,7 +385,10 @@ class Client extends ClientBase {
       }
 
       send("NICK ${config.nickname}", now: true);
-      send("USER ${config.username} ${config.username} ${config.host} :${config.realname}", now: true);
+      send(
+          "USER ${config.username} ${config.username} ${config.host} :${config
+          .realname}",
+          now: true);
     });
 
     register((LineSentEvent event) {
@@ -395,502 +410,7 @@ class Client extends ClientBase {
       }
     });
 
-    register((LineReceiveEvent event) {
-      // Parse the IRC Input
-      var input = event.message;
-
-      if (input == null) {
-        return;
-      }
-
-      if (input.isBatched) {
-        _batchId = input.batchId;
-        var list = _batches[_batchId];
-
-        if (list != null) {
-          list.add(input);
-        }
-      }
-
-      switch (input.command) {
-        case "376": // End of MOTD
-          post(new MOTDEvent(this, _motd));
-          _fireReady();
-          break;
-
-        case "422": // No MOTD Found
-          post(new MOTDEvent(this, 'No MOTD file present on the server.'));
-          _fireReady();
-          break;
-
-        case "PING": // Server Ping
-          send("PONG :${input.message}");
-          break;
-
-        case "JOIN": // User Joined Channel
-          var who = input.hostmask.nickname;
-          var chanName = input.parameters.length != 0
-              ? input.parameters[0]
-              : input.message;
-          if (who == _nickname) {
-            // We joined a new channel
-            if (getChannel(chanName) == null) {
-              channels.add(new Channel(this, chanName));
-            }
-            post(new ClientJoinEvent(this, getChannel(chanName)));
-            getChannel(chanName).reloadBans();
-          } else {
-            // User joined one of our channels
-            var event = new JoinEvent(this, who, getChannel(chanName));
-            if (_currentCap.contains("extended-join")) {
-              event.username = input.parameters[1];
-              event.realname = input.message;
-            }
-            post(event);
-          }
-          break;
-
-        case "PRIVMSG": // Message
-          _fireReady();
-          var from = getUser(input.hostmask.nickname);
-          var target = input.parameters[0];
-          var message = input.message;
-
-          if (from == nickname && _currentCap.contains("self-message")) {
-            post(new MessageSentEvent(this, message, target));
-          } else {
-            if (message.startsWith("\u0001")) {
-              // CTCP
-              post(new CTCPEvent(this, from, getEntity(target), message.substring(1, message.length - 1)));
-            } else if (input.tags.containsKey("intent") && input.tags["intent"] == "ACTION") {
-              // Action
-              post(new ActionEvent(this, from, getEntity(target), message));
-            } else {
-              // Message
-              post(new MessageEvent(this, from, getEntity(target), message, intent: input.tags["intent"]));
-            }
-          }
-          break;
-
-        case "ACCOUNT": // IRCv3.1 account-notify extension
-          var user = input.hostmask.nickname;
-          var username = input.parameters[0];
-
-          if (username == "*") {
-            post(new UserLoggedOutEvent(this, getUser(user)));
-          } else {
-            post(new UserLoggedInEvent(this, getUser(user), username));
-          }
-          break;
-
-        case "NOTICE": // Notice
-          var from = getEntity(input.plainHostmask);
-          if (input.parameters[0] != "*") from = getUser(input.hostmask.nickname);
-
-          var target = getEntity(input.parameters[0]);
-          var message = input.message;
-          post(new NoticeEvent(this, from, target, message));
-          break;
-
-        case "PART": // User left Channel
-          var who = input.hostmask.nickname;
-
-          var chan_name = input.parameters.length != 0
-              ? input.parameters[0]
-              : input.message;
-
-          if (who == _nickname) {
-            post(new ClientPartEvent(this, getChannel(chan_name)));
-          } else {
-            post(new PartEvent(this, who, getChannel(chan_name)));
-          }
-          break;
-
-        case "QUIT": // User quit
-          var who = input.hostmask.nickname;
-
-          if (who == _nickname) {
-            // We quit
-            post(new DisconnectEvent(this));
-            flush();
-            connection.disconnect();
-          } else {
-            // Somebody quit
-            post(new QuitEvent(this, who));
-          }
-          break;
-
-        case "332": // Topic
-          var topic = input.message;
-          var chan = input.parameters[1];
-
-          _topicQueue[chan] = topic;
-          break;
-
-        case "333": // Topic User
-          var channel = getChannel(input.parameters[1]);
-          var user = new Hostmask.parse(input.parameters[2]).nickname;
-          var topic = _topicQueue.remove(channel.name);
-          var old = channel._topic;
-          channel._topic = topic;
-          channel._topicUser = user;
-          post(new TopicEvent(this, channel, getUser(user), topic, old));
-          break;
-
-        case "AWAY": // User marked as away
-          var user = input.hostmask.nickname;
-          var msg = input.message;
-          post(new AwayEvent(this, getUser(user), msg));
-          break;
-
-        case "TOPIC": // Topic changed
-          var topic = input.message;
-          var user = input.hostmask.nickname;
-          var chan = getChannel(input.parameters[0]);
-          var old = chan._topic;
-          chan._topic = topic;
-          chan._topicUser = user;
-          post(new TopicEvent(this, chan, getUser(user), topic, old, true));
-          break;
-
-        case "ERROR": // Server error
-          var message = input.message;
-          post(new ErrorEvent(this, message: message, type: "server"));
-          break;
-
-        case "353": // Channel user list
-          var users = input.message.split(" ")
-            ..removeWhere((it) => it.trim().isEmpty);
-          if (_currentCap.contains("userhost-in-names")) {
-            users = users.map((it) {
-              return new Hostmask.parse(it).nickname;
-            }).toList();
-          }
-
-          var channel = this.getChannel(input.parameters[2]);
-
-          users.forEach((user) {
-            var chars = new List<String>.generate(user.length, (i) => user[i]);
-            var cs = chars.takeWhile((it) => modePrefixes.containsValue(it));
-
-            var name = chars.skip(cs.length).join();
-
-            if (getUser(name) == null) {
-              this.users.add(new User(this, name));
-            }
-
-            var userInstance = getUser(name);
-            if (cs.length == 0) {
-              channel.members.add(userInstance);
-            }
-            for (var n in cs) {
-              switch (n) {
-                case "@":
-                  channel.ops.add(userInstance);
-                  break;
-                case "+":
-                  channel.voices.add(userInstance);
-                  break;
-                case "%":
-                  channel.halfops.add(userInstance);
-                  break;
-                case "~":
-                  channel.owners.add(userInstance);
-                  break;
-              }
-            }
-          });
-          break;
-
-        case "CHGHOST": // User changed hostname
-          var user = input.hostmask.nickname;
-          var username = input.parameters[0];
-          var host = input.parameters[1];
-
-          post(new ChangeHostEvent(this, user, username, host));
-          break;
-
-        case "433": // Nickname is in use
-          var original = input.parameters[0];
-          post(new NickInUseEvent(this, original));
-          break;
-
-        case "NICK": // Nickname changed
-          var original = input.hostmask.nickname;
-          var now = input.message;
-
-          // Posts the nickname change event. No need for checking if we are the original nickname.
-          post(new NickChangeEvent(this, getUser(original), original, now));
-          break;
-
-        case "MODE": // Mode Changed
-          var split = input.parameters;
-
-          if (split.isEmpty) {
-            break;
-          }
-
-          if (isChannelName(split[0])) {
-            var channel = getChannel(split[0]);
-            var mode = IrcParserSupport.parseMode(split[1]);
-            var who = split.length == 3 ? split[2] : null;
-
-            if (mode.modes.contains("b")) {
-              channel.reloadBans();
-            }
-
-            if (who == null) {
-              if (mode.isAdded) {
-                channel.mode.modes.addAll(mode.added);
-              } else {
-                channel.mode.modes.removeWhere(mode.removed.contains);
-              }
-            }
-
-            post(new ModeEvent(this, mode, who, channel));
-          } else {
-            var who = split[0];
-            var mode = IrcParserSupport.parseMode(input.message);
-            post(new ModeEvent(this, mode, who));
-          }
-          break;
-
-        case "311": // Beginning of WHOIS
-          var split = input.parameters;
-          var nickname = split[1];
-          var hostname = split[3];
-          var realname = input.message;
-          var builder = new WhoisBuilder(nickname);
-          builder.hostname = hostname;
-          builder.realname = realname;
-          builder._createTimestamp = new DateTime.now();
-          _whoisBuilders[nickname] = builder;
-          break;
-
-        case "312": // WHOIS Server information
-          var split = input.parameters;
-          var nickname = split[1];
-          var message = input.message;
-          var server_name = split[2];
-          var builder = _whoisBuilders[nickname];
-          builder.serverName = server_name;
-          builder.serverInfo = message;
-          break;
-
-        case "301": // WHOIS Away Information
-          var split = input.parameters;
-          var nickname = split[1];
-          var message = input.message;
-          var builder = _whoisBuilders[nickname];
-          builder.away = true;
-          builder.awayMessage = message;
-          break;
-
-        case "313": // WHOIS Operator information
-          var nickname = input.parameters[0];
-          var builder = _whoisBuilders[nickname];
-          if (builder != null) {
-            builder.isServerOperator = true;
-          }
-          break;
-
-        case "BATCH": // Allows collapsing of messages from the server
-          var isEnd = input.parameters[0].startsWith("-");
-          var id = input.parameters[0].substring(1);
-          if (isEnd) {
-            var messages = [];
-            var events = [];
-
-            if (_batches.containsKey(id)) {
-              var captured = _batches[id];
-              messages = captured.where((it) => it is Message).toList();
-              events = captured.where((it) => it is Event).toList();
-
-              _batches.remove(id);
-            }
-
-            var event = new BatchEndEvent(this, id, messages, events);
-            post(event);
-          } else {
-            _batches[id] = [];
-            var bodyP = new List<String>.from(input.parameters).skip(1).toList();
-            var bodyStr = bodyP.join(" ");
-            if (input.message != null) {
-              bodyStr += " :${input.message}";
-            }
-            var body = parser.convert(bodyStr);
-            post(new BatchStartEvent(this, id, body));
-          }
-          break;
-
-        case "317": // WHOIS idle information
-          var split = input.parameters;
-          var nickname = split[1];
-          var idle = int.parse(split[2]);
-          var builder = _whoisBuilders[nickname];
-          builder.idle = true;
-          builder.idleTime = idle;
-          break;
-
-        case "318": // End of WHOIS
-          var nickname = input.parameters[1];
-          var builder = _whoisBuilders.remove(nickname);
-          post(new WhoisEvent(this, builder));
-          break;
-
-        case "319": // WHOIS Channel information
-          var nickname = input.parameters[1];
-
-          if (input.message == null) {
-            break;
-          }
-
-          var message = input.message.trim();
-
-          var builder = _whoisBuilders[nickname];
-          message.split(" ").forEach((chan) {
-            if (chan.startsWith("@")) {
-              var c = chan.substring(1);
-              builder.channels.add(c);
-              builder.opIn.add(c);
-            } else if (chan.startsWith("+")) {
-              var c = chan.substring(1);
-              builder.channels.add(c);
-              builder.voiceIn.add(c);
-            } else if (chan.startsWith("~")) {
-              var c = chan.substring(1);
-              builder.channels.add(c);
-              builder.ownerIn.add(c);
-            } else if (chan.startsWith("%")) {
-              var c = chan.substring(1);
-              builder.channels.add(c);
-              builder.halfOpIn.add(c);
-            } else {
-              if (chan.startsWith("!")) {
-                chan = chan.substring(1);
-              }
-              builder.channels.add(chan);
-            }
-          });
-          break;
-
-        case "330": // WHOIS account information
-          var split = input.parameters;
-          var builder = _whoisBuilders[split[1]];
-          builder.username = split[2];
-          break;
-
-        case "PONG": // PONG from Server
-          var message = input.message;
-          post(new PongEvent(this, message));
-          break;
-
-        case "367": // Ban list entry
-          var channel = getChannel(input.parameters[1]);
-          if (channel == null) {
-            // We Were Banned
-            break;
-          }
-          var ban = input.parameters[2];
-          channel.bans.add(new GlobHostmask(ban));
-          break;
-
-        case "KICK": // User kicked from channel
-          var channel = getChannel(input.parameters[0]);
-          var user = input.parameters[1];
-          var reason = input.message;
-          var by = input.hostmask.nickname;
-          post(new KickEvent(this, channel, getUser(user), getUser(by), reason));
-          break;
-
-        case "372": // MOTD part
-          var p = input.message;
-          if (_motd.isEmpty) {
-            _motd += p;
-          } else {
-            _motd += "\n" + p;
-          }
-          break;
-
-        case "005": // ISUPPORT
-          var params = input.parameters;
-          params.removeAt(0);
-          var message = params.join(" ");
-          post(new ServerSupportsEvent(this, message));
-          break;
-        case "CAP": // Capability
-          _handleCAP(input);
-          break;
-
-        case "INVITE": // We were invited to a channel
-          var inviter = input.hostmask.nickname;
-          var user = input.parameters[0];
-          var channel = input.parameters[1];
-          if (user == nickname) {
-            post(new InviteEvent(this, channel, inviter));
-          } else {
-            post(new UserInvitedEvent(this, getChannel(channel), user, getUser(inviter)));
-          }
-          break;
-
-        case "730": // User online notification for IRCv3.2 monitor extension
-          var users = input.message.trim().split(" ");
-          users.removeWhere((it) => it == " ");
-          for (var user in users) {
-            post(new UserOnlineEvent(this, user));
-          }
-          break;
-
-        case "731": // User offline notification for IRCv3.2 monitor extension
-          var users = input.message.trim().split(" ");
-          users.removeWhere((it) => it == " ");
-          for (var user in users) {
-            post(new UserOfflineEvent(this, user));
-          }
-          break;
-
-        case "732": // Monitor list for IRCv3.2 monitor extension
-          var users = input.message.trim().split(" ");
-          users.removeWhere((it) => it == " ");
-          _monitorList.addAll(users);
-          break;
-
-        case "733": // End of monitor list for IRCv3.2 monitor extension
-          var users = new List<String>.from(_monitorList);
-          _monitorList.clear();
-          post(new MonitorListEvent(this, users));
-          break;
-
-        case "303": // ISON Response
-          List<String> users;
-          if (input.message == null) {
-            users = [];
-          } else {
-            users = input.message.split(" ").map((it) => it.trim()).toList();
-          }
-
-          post(new IsOnEvent(this, users));
-          break;
-
-        case "351": // Server version response
-          var version = input.parameters[1];
-          var server = input.parameters[2];
-          var comments = input.message;
-
-          post(new ServerVersionEvent(this, server, version, comments));
-
-          break;
-        case "381": // Client is now an server operator
-          post(new ServerOperatorEvent(this));
-          break;
-      }
-
-      if (input.isBatched) {
-        _batchId = null;
-        _batches[input.batchId].addAll(_batchedEvents);
-        _batchedEvents.clear();
-      }
-    });
+    register(processLineForEvents);
 
     // Set the connection status
     register((ConnectEvent event) => this.connected = true);
@@ -918,14 +438,16 @@ class Client extends ClientBase {
     });
 
     register((BatchStartEvent event) {
-      if (event.type == "NETSPLIT") { // Servers lost connection and netsplit
+      if (event.type == "NETSPLIT") {
+        // Servers lost connection and netsplit
         event.waitForEnd().then((e) {
           var hub = event.body.parameters[0];
           var host = event.body.parameters[1];
           var quits = e.events.where((it) => it is QuitEvent).toList();
           post(new NetSplitEvent(this, hub, host, quits));
         });
-      } else if (event.type == "NETJOIN") { // Netsplit servers converged
+      } else if (event.type == "NETJOIN") {
+        // Netsplit servers converged
         event.waitForEnd().then((e) {
           var hub = event.body.parameters[0];
           var host = event.body.parameters[1];
@@ -938,7 +460,8 @@ class Client extends ClientBase {
     // Handles CTCP Events so the action event can be executed
     register((CTCPEvent event) {
       if (event.message.startsWith("ACTION ")) {
-        post(new ActionEvent(this, event.user, event.target, event.message.substring(7)));
+        post(new ActionEvent(
+            this, event.user, event.target, event.message.substring(7)));
       }
     });
 
@@ -1034,7 +557,8 @@ class Client extends ClientBase {
 
     register((ServerSupportsEvent event) {
       _supported.addAll(event.supported);
-      _modePrefixes = IrcParserSupport.parseSupportedPrefixes(_supported["PREFIX"]);
+      _modePrefixes =
+          IrcParserSupport.parseSupportedPrefixes(_supported["PREFIX"]);
     });
 
     register((WhoisEvent event) {
@@ -1077,23 +601,31 @@ class Client extends ClientBase {
 
     switch (cmd) {
       case "LS": // All capabilities
-        _supportedCap = input.message != null ? input.message.trim().split(" ").toSet() : new Set<String>();
+        _supportedCap = input.message != null
+            ? input.message.trim().split(" ").toSet()
+            : new Set<String>();
         _supportedCap.removeWhere((it) => it == " " || it.trim().isEmpty);
         post(new ServerCapabilitiesEvent(this, _supportedCap));
         break;
       case "LIST": // Current capabilities
-        _currentCap = input.message != null ? input.message.trim().split(" ").toSet() : new Set<String>();
+        _currentCap = input.message != null
+            ? input.message.trim().split(" ").toSet()
+            : new Set<String>();
         _currentCap.removeWhere((it) => it == " " || it.trim().isEmpty);
         post(new CurrentCapabilitiesEvent(this, _currentCap));
         break;
       case "ACK": // Acknowledged capabilities
-        var caps = input.message != null ? input.message.trim().split(" ").toSet() : new Set<String>();
+        var caps = input.message != null
+            ? input.message.trim().split(" ").toSet()
+            : new Set<String>();
         caps.removeWhere((it) => it == " " || it.trim().isEmpty);
         _currentCap.addAll(caps);
         post(new AcknowledgedCapabilitiesEvent(this, caps));
         break;
       case "NAK": // Not acknowledged capabilities
-        var caps = input.message != null ? input.message.trim().split(" ").toSet() : new Set<String>();
+        var caps = input.message != null
+            ? input.message.trim().split(" ").toSet()
+            : new Set<String>();
         caps.removeWhere((it) => it == " " || it.trim().isEmpty);
         _currentCap.removeWhere((it) => caps.contains(it));
         post(new NotAcknowledgedCapabilitiesEvent(this, caps));
@@ -1111,7 +643,8 @@ class Client extends ClientBase {
    * Get the state of a user
    */
   @override
-  Future<bool> isUserOn(String name, {Duration timeout: const Duration(seconds: 5)}) {
+  Future<bool> isUserOn(String name,
+      {Duration timeout: const Duration(seconds: 5)}) {
     var completer = new Completer.sync();
 
     var handler = (WhoisEvent event) {
@@ -1125,7 +658,9 @@ class Client extends ClientBase {
     register(handler);
     send("ISON ${name}");
 
-    return completer.future.timeout(timeout, onTimeout: () => false).then((value) {
+    return completer.future
+        .timeout(timeout, onTimeout: () => false)
+        .then((value) {
       new Future(() {
         unregister(handler);
       });
@@ -1158,7 +693,10 @@ class Client extends ClientBase {
   Future<String> getChannelTopic(String channel) {
     var completer = new Completer();
 
-    onEvent(TopicEvent).where((it) => it.channel.name == channel).first.then((e) {
+    onEvent(TopicEvent)
+        .where((it) => it.channel.name == channel)
+        .first
+        .then((e) {
       completer.complete(e.topic);
     });
 
@@ -1211,6 +749,7 @@ class Client extends ClientBase {
   }
 
   Set<String> get serverCapabilities => _supportedCap;
+
   Set<String> get currentCapabilities => _currentCap;
 
   /**
@@ -1223,24 +762,43 @@ class Client extends ClientBase {
   Monitor monitor;
 
   Stream<ConnectEvent> get onConnect => onEvent(ConnectEvent);
+
   Stream<DisconnectEvent> get onDisconnect => onEvent(DisconnectEvent);
+
   Stream<MessageEvent> get onMessage => onEvent(MessageEvent);
+
   Stream<ClientJoinEvent> get onClientJoin => onEvent(ClientJoinEvent);
+
   Stream<ClientPartEvent> get onClientPart => onEvent(ClientPartEvent);
+
   Stream<JoinEvent> get onJoin => onEvent(JoinEvent);
+
   Stream<PartEvent> get onPart => onEvent(PartEvent);
+
   Stream<QuitEvent> get onQuit => onEvent(QuitEvent);
+
   Stream<QuitPartEvent> get onQuitPart => onEvent(QuitPartEvent);
+
   Stream<NoticeEvent> get onNotice => onEvent(NoticeEvent);
+
   Stream<ActionEvent> get onAction => onEvent(ActionEvent);
+
   Stream<PongEvent> get onPong => onEvent(PongEvent);
+
   Stream<TopicEvent> get onTopic => onEvent(TopicEvent);
+
   Stream<ModeEvent> get onMode => onEvent(ModeEvent);
+
   Stream<WhoisEvent> get onWhois => onEvent(WhoisEvent);
+
   Stream<ReadyEvent> get onReady => onEvent(ReadyEvent);
+
   Stream<LineReceiveEvent> get onLineReceive => onEvent(LineReceiveEvent);
+
   Stream<LineSentEvent> get onLineSent => onEvent(LineSentEvent);
+
   Stream<InviteEvent> get onInvite => onEvent(InviteEvent);
+
   Stream<IsOnEvent> get onIsOn => onEvent(IsOnEvent);
 
   Stream<Event> get events => _controller.stream;
@@ -1272,9 +830,511 @@ class Client extends ClientBase {
       completer.complete(e);
     });
     send("WHOIS ${user}");
-    return completer.future.timeout(
-      timeout, onTimeout: () => throw new UserNotFoundException(user)
-    );
+    return completer.future.timeout(timeout,
+        onTimeout: () => throw new UserNotFoundException(user));
+  }
+
+  void processLineForEvents(LineReceiveEvent event) {
+    // Parse the IRC Input
+    var input = event.message;
+
+    if (input == null) {
+      return;
+    }
+
+    if (input.isBatched) {
+      _batchId = input.batchId;
+      var list = _batches[_batchId];
+
+      if (list != null) {
+        list.add(input);
+      }
+    }
+
+    switch (input.command) {
+      case "376": // End of MOTD
+        post(new MOTDEvent(this, _motd));
+        _fireReady();
+        break;
+
+      case "422": // No MOTD Found
+        post(new MOTDEvent(this, 'No MOTD file present on the server.'));
+        _fireReady();
+        break;
+
+      case "PING": // Server Ping
+        send("PONG :${input.message}");
+        break;
+
+      case "JOIN": // User Joined Channel
+        var who = input.hostmask.nickname;
+        var chanName =
+            input.parameters.length != 0 ? input.parameters[0] : input.message;
+        if (who == _nickname) {
+          // We joined a new channel
+          if (getChannel(chanName) == null) {
+            channels.add(new Channel(this, chanName));
+          }
+          post(new ClientJoinEvent(this, getChannel(chanName)));
+          getChannel(chanName).reloadBans();
+        } else {
+          // User joined one of our channels
+          var event = new JoinEvent(this, who, getChannel(chanName));
+          if (_currentCap.contains("extended-join")) {
+            event.username = input.parameters[1];
+            event.realname = input.message;
+          }
+          post(event);
+        }
+        break;
+
+      case "PRIVMSG": // Message
+        _fireReady();
+        var from = getUser(input.hostmask.nickname);
+        var target = input.parameters[0];
+        var message = input.message;
+
+        if (from.name == nickname && _currentCap.contains("self-message")) {
+          post(new MessageSentEvent(this, message, target));
+        } else {
+          if (message.startsWith("\u0001")) {
+            // CTCP
+            post(new CTCPEvent(this, from, getEntity(target),
+                message.substring(1, message.length - 1)));
+          } else if (input.tags.containsKey("intent") &&
+              input.tags["intent"] == "ACTION") {
+            // Action
+            post(new ActionEvent(this, from, getEntity(target), message));
+          } else {
+            // Message
+            post(new MessageEvent(this, from, getEntity(target), message,
+                intent: input.tags["intent"]));
+          }
+        }
+        break;
+
+      case "ACCOUNT": // IRCv3.1 account-notify extension
+        var user = input.hostmask.nickname;
+        var username = input.parameters[0];
+
+        if (username == "*") {
+          post(new UserLoggedOutEvent(this, getUser(user)));
+        } else {
+          post(new UserLoggedInEvent(this, getUser(user), username));
+        }
+        break;
+
+      case "NOTICE": // Notice
+        Entity from;
+        if (input.hostmask.nickname == null) {
+          from = new Server(input.plainHostmask);
+        } else {
+          from = getEntity(input.hostmask.nickname, createUser: true);
+        }
+
+        var target = getEntity(input.parameters[0]);
+        var message = input.message;
+        post(new NoticeEvent(this, from, target, message));
+        break;
+
+      case "PART": // User left Channel
+        var who = input.hostmask.nickname;
+
+        var chan_name =
+            input.parameters.length != 0 ? input.parameters[0] : input.message;
+
+        if (who == _nickname) {
+          post(new ClientPartEvent(this, getChannel(chan_name)));
+        } else {
+          post(new PartEvent(this, who, getChannel(chan_name)));
+        }
+        break;
+
+      case "QUIT": // User quit
+        var who = input.hostmask.nickname;
+
+        if (who == _nickname) {
+          // We quit
+          post(new DisconnectEvent(this));
+          flush();
+          connection.disconnect();
+        } else {
+          // Somebody quit
+          post(new QuitEvent(this, who));
+        }
+        break;
+
+      case "332": // Topic
+        var topic = input.message;
+        var chan = input.parameters[1];
+
+        _topicQueue[chan] = topic;
+        break;
+
+      case "333": // Topic User
+        var channel = getChannel(input.parameters[1]);
+        var user = new Hostmask.parse(input.parameters[2]).nickname;
+        var topic = _topicQueue.remove(channel.name);
+        var old = channel._topic;
+        channel._topic = topic;
+        channel._topicUser = user;
+        post(new TopicEvent(this, channel, getUser(user), topic, old));
+        break;
+
+      case "AWAY": // User marked as away
+        var user = input.hostmask.nickname;
+        var msg = input.message;
+        post(new AwayEvent(this, getUser(user), msg));
+        break;
+
+      case "TOPIC": // Topic changed
+        var topic = input.message;
+        var user = input.hostmask.nickname;
+        var chan = getChannel(input.parameters[0]);
+        var old = chan._topic;
+        chan._topic = topic;
+        chan._topicUser = user;
+        post(new TopicEvent(this, chan, getUser(user), topic, old, true));
+        break;
+
+      case "ERROR": // Server error
+        var message = input.message;
+        post(new ErrorEvent(this, message: message, type: "server"));
+        break;
+
+      case "353": // Channel user list
+        var users = input.message.split(" ")
+          ..removeWhere((it) => it.trim().isEmpty);
+        if (_currentCap.contains("userhost-in-names")) {
+          users = users.map((it) {
+            return new Hostmask.parse(it).nickname;
+          }).toList();
+        }
+
+        var channel = this.getChannel(input.parameters[2]);
+
+        users.forEach((user) {
+          var chars = new List<String>.generate(user.length, (i) => user[i]);
+          var cs = chars.takeWhile((it) => modePrefixes.containsValue(it));
+
+          var name = chars.skip(cs.length).join();
+
+          if (getUser(name) == null) {
+            this.users.add(new User(this, name));
+          }
+
+          var userInstance = getUser(name);
+          if (cs.length == 0) {
+            channel.members.add(userInstance);
+          }
+          for (var n in cs) {
+            switch (n) {
+              case "@":
+                channel.ops.add(userInstance);
+                break;
+              case "+":
+                channel.voices.add(userInstance);
+                break;
+              case "%":
+                channel.halfops.add(userInstance);
+                break;
+              case "~":
+                channel.owners.add(userInstance);
+                break;
+            }
+          }
+        });
+        break;
+
+      case "CHGHOST": // User changed hostname
+        var user = input.hostmask.nickname;
+        var username = input.parameters[0];
+        var host = input.parameters[1];
+
+        post(new ChangeHostEvent(this, user, username, host));
+        break;
+
+      case "433": // Nickname is in use
+        var original = input.parameters[0];
+        post(new NickInUseEvent(this, original));
+        break;
+
+      case "NICK": // Nickname changed
+        var original = input.hostmask.nickname;
+        var now = input.message;
+
+        // Posts the nickname change event. No need for checking if we are the original nickname.
+        post(new NickChangeEvent(this, getUser(original), original, now));
+        break;
+
+      case "MODE": // Mode Changed
+        var split = input.parameters;
+
+        if (split.isEmpty) {
+          break;
+        }
+
+        if (isChannelName(split[0])) {
+          var channel = getChannel(split[0]);
+          var mode = IrcParserSupport.parseMode(split[1]);
+          var who = split.length == 3 ? split[2] : null;
+
+          if (mode.modes.contains("b")) {
+            channel.reloadBans();
+          }
+
+          if (who == null) {
+            if (mode.isAdded) {
+              channel.mode.modes.addAll(mode.added);
+            } else {
+              channel.mode.modes.removeWhere(mode.removed.contains);
+            }
+          }
+
+          post(new ModeEvent(this, mode, who, channel));
+        } else {
+          var who = split[0];
+          var mode = IrcParserSupport.parseMode(input.message);
+          post(new ModeEvent(this, mode, who));
+        }
+        break;
+
+      case "311": // Beginning of WHOIS
+        var split = input.parameters;
+        var nickname = split[1];
+        var hostname = split[3];
+        var realname = input.message;
+        var builder = new WhoisBuilder(nickname);
+        builder.hostname = hostname;
+        builder.realname = realname;
+        builder._createTimestamp = new DateTime.now();
+        _whoisBuilders[nickname] = builder;
+        break;
+
+      case "312": // WHOIS Server information
+        var split = input.parameters;
+        var nickname = split[1];
+        var message = input.message;
+        var server_name = split[2];
+        var builder = _whoisBuilders[nickname];
+        builder.serverName = server_name;
+        builder.serverInfo = message;
+        break;
+
+      case "301": // WHOIS Away Information
+        var split = input.parameters;
+        var nickname = split[1];
+        var message = input.message;
+        var builder = _whoisBuilders[nickname];
+        builder.away = true;
+        builder.awayMessage = message;
+        break;
+
+      case "313": // WHOIS Operator information
+        var nickname = input.parameters[0];
+        var builder = _whoisBuilders[nickname];
+        if (builder != null) {
+          builder.isServerOperator = true;
+        }
+        break;
+
+      case "BATCH": // Allows collapsing of messages from the server
+        var isEnd = input.parameters[0].startsWith("-");
+        var id = input.parameters[0].substring(1);
+        if (isEnd) {
+          var messages = [];
+          var events = [];
+
+          if (_batches.containsKey(id)) {
+            var captured = _batches[id];
+            messages = captured.where((it) => it is Message).toList();
+            events = captured.where((it) => it is Event).toList();
+
+            _batches.remove(id);
+          }
+
+          var event = new BatchEndEvent(this, id, messages, events);
+          post(event);
+        } else {
+          _batches[id] = [];
+          var bodyP = new List<String>.from(input.parameters).skip(1).toList();
+          var bodyStr = bodyP.join(" ");
+          if (input.message != null) {
+            bodyStr += " :${input.message}";
+          }
+          var body = parser.convert(bodyStr);
+          post(new BatchStartEvent(this, id, body));
+        }
+        break;
+
+      case "317": // WHOIS idle information
+        var split = input.parameters;
+        var nickname = split[1];
+        var idle = int.parse(split[2]);
+        var builder = _whoisBuilders[nickname];
+        builder.idle = true;
+        builder.idleTime = idle;
+        break;
+
+      case "318": // End of WHOIS
+        var nickname = input.parameters[1];
+        var builder = _whoisBuilders.remove(nickname);
+        post(new WhoisEvent(this, builder));
+        break;
+
+      case "319": // WHOIS Channel information
+        var nickname = input.parameters[1];
+
+        if (input.message == null) {
+          break;
+        }
+
+        var message = input.message.trim();
+
+        var builder = _whoisBuilders[nickname];
+        message.split(" ").forEach((chan) {
+          if (chan.startsWith("@")) {
+            var c = chan.substring(1);
+            builder.channels.add(c);
+            builder.opIn.add(c);
+          } else if (chan.startsWith("+")) {
+            var c = chan.substring(1);
+            builder.channels.add(c);
+            builder.voiceIn.add(c);
+          } else if (chan.startsWith("~")) {
+            var c = chan.substring(1);
+            builder.channels.add(c);
+            builder.ownerIn.add(c);
+          } else if (chan.startsWith("%")) {
+            var c = chan.substring(1);
+            builder.channels.add(c);
+            builder.halfOpIn.add(c);
+          } else {
+            if (chan.startsWith("!")) {
+              chan = chan.substring(1);
+            }
+            builder.channels.add(chan);
+          }
+        });
+        break;
+
+      case "330": // WHOIS account information
+        var split = input.parameters;
+        var builder = _whoisBuilders[split[1]];
+        builder.username = split[2];
+        break;
+
+      case "PONG": // PONG from Server
+        var message = input.message;
+        post(new PongEvent(this, message));
+        break;
+
+      case "367": // Ban list entry
+        var channel = getChannel(input.parameters[1]);
+        if (channel == null) {
+          // We Were Banned
+          break;
+        }
+        var ban = input.parameters[2];
+        channel.bans.add(new GlobHostmask(ban));
+        break;
+
+      case "KICK": // User kicked from channel
+        var channel = getChannel(input.parameters[0]);
+        var user = input.parameters[1];
+        var reason = input.message;
+        var by = input.hostmask.nickname;
+        post(new KickEvent(this, channel, getUser(user), getUser(by), reason));
+        break;
+
+      case "372": // MOTD part
+        var p = input.message;
+        if (_motd.isEmpty) {
+          _motd += p;
+        } else {
+          _motd += "\n" + p;
+        }
+        break;
+
+      case "005": // ISUPPORT
+        var params = input.parameters;
+        params.removeAt(0);
+        var message = params.join(" ");
+        post(new ServerSupportsEvent(this, message));
+        break;
+      case "CAP": // Capability
+        _handleCAP(input);
+        break;
+
+      case "INVITE": // We were invited to a channel
+        var inviter = input.hostmask.nickname;
+        var user = input.parameters[0];
+        var channel = input.parameters[1];
+        if (user == nickname) {
+          post(new InviteEvent(this, channel, inviter));
+        } else {
+          post(new UserInvitedEvent(
+              this, getChannel(channel), user, getUser(inviter)));
+        }
+        break;
+
+      case "730": // User online notification for IRCv3.2 monitor extension
+        var users = input.message.trim().split(" ");
+        users.removeWhere((it) => it == " ");
+        for (var user in users) {
+          post(new UserOnlineEvent(this, user));
+        }
+        break;
+
+      case "731": // User offline notification for IRCv3.2 monitor extension
+        var users = input.message.trim().split(" ");
+        users.removeWhere((it) => it == " ");
+        for (var user in users) {
+          post(new UserOfflineEvent(this, user));
+        }
+        break;
+
+      case "732": // Monitor list for IRCv3.2 monitor extension
+        var users = input.message.trim().split(" ");
+        users.removeWhere((it) => it == " ");
+        _monitorList.addAll(users);
+        break;
+
+      case "733": // End of monitor list for IRCv3.2 monitor extension
+        var users = new List<String>.from(_monitorList);
+        _monitorList.clear();
+        post(new MonitorListEvent(this, users));
+        break;
+
+      case "303": // ISON Response
+        List<String> users;
+        if (input.message == null) {
+          users = [];
+        } else {
+          users = input.message.split(" ").map((it) => it.trim()).toList();
+        }
+
+        post(new IsOnEvent(this, users));
+        break;
+
+      case "351": // Server version response
+        var version = input.parameters[1];
+        var server = input.parameters[2];
+        var comments = input.message;
+
+        post(new ServerVersionEvent(this, server, version, comments));
+
+        break;
+      case "381": // Client is now an server operator
+        post(new ServerOperatorEvent(this));
+        break;
+    }
+
+    if (input.isBatched) {
+      _batchId = null;
+      _batches[input.batchId].addAll(_batchedEvents);
+      _batchedEvents.clear();
+    }
   }
 }
 

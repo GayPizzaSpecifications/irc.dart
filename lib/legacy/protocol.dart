@@ -3,4 +3,4 @@
  */
 library irc.protocol;
 
-part 'src/protocol/replies.dart';
+part "../src/legacy/protocol/replies.dart";

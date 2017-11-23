@@ -74,3 +74,36 @@ class SocketIrcConnection extends IrcConnection {
     }
   }
 }
+
+class WebSocketIrcConnection extends IrcConnection {
+  WebSocket _socket;
+
+  @override
+  Future connect(Configuration config) async {
+    var uri = new Uri(
+      scheme: config.ssl ? "wss" : "ws",
+      port: config.port,
+      host: config.host,
+      path: config.websocketPath
+    );
+
+    _socket = await WebSocket.connect(uri.toString());
+  }
+
+  @override
+  Future disconnect() async {
+    await _socket.close(WebSocketStatus.NORMAL_CLOSURE, "IRC disconnect.");
+  }
+
+  @override
+  Stream<String> lines() {
+    return _socket.where((e) => e is String).map((String line) {
+      return line.substring(0, line.length - 2);
+    });
+  }
+
+  @override
+  void send(String line) {
+    _socket.add("${line}\r\n");
+  }
+}

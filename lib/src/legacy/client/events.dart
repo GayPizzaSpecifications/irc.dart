@@ -204,7 +204,7 @@ class MessageEvent extends Event {
    */
   bool get isPrivate => target.isUser;
 
-  Channel get channel => target;
+  Channel get channel => target.isChannel ? target as Channel : null;
 }
 
 /**
@@ -215,10 +215,14 @@ class NoticeEvent extends MessageEvent {
   /**
    * Returns whether the notice is from the system or not.
    */
-  bool get isSystem => target == "*";
+  bool get isSystem => from != null && from.isServer;
+
+  bool get isServer => isSystem;
 
   NoticeEvent(Client client, Entity from, Entity target, String message)
       : super(client, from, target, message);
+
+  bool get isChannel => target.isChannel;
 
   /**
    * Sends [message] to [target] as a notice.

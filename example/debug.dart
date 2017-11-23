@@ -1,6 +1,6 @@
 import "dart:async";
 
-import "package:irc/client.dart";
+import "package:irc/legacy/client.dart";
 
 typedef CommandHandler(CommandEvent event);
 
@@ -9,7 +9,7 @@ Map<String, StreamController<CommandEvent>> commands = {};
 
 void main() {
   var config = new Configuration(
-    host: "irc.freenode.net",
+    host: "irc.fork.run",
     port: 6667,
     nickname: "DartBotDebug",
     username: "DartBotDebug",
@@ -43,7 +43,7 @@ void main() {
   });
 
   client.onReady.listen((event) {
-    event.join("#directcode");
+    event.join("#spinlock");
 
     if (client.monitor.isSupported) {
       client.monitor.add("kaendfinger");

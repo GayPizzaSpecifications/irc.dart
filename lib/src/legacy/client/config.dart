@@ -40,6 +40,16 @@ class Configuration {
   bool ssl;
 
   /**
+   * Enable WebSocket connection support.
+   */
+  bool websocket;
+
+  /**
+   * The path of the websocket.
+   */
+  String websocketPath = "/";
+
+  /**
    * Allow Invalid SSL Certificates
    */
   bool allowInvalidCertificates;
@@ -146,5 +156,6 @@ class Configuration {
       this.enableMessageIntents: true, this.enableAwayNotify: true,
       this.enableServerTime: true, this.enableAccountNotify: true,
       this.enableChangeHost: true, this.enableUserHostInNames: true,
-      this.enableBatch: true, this.enableMessageSplitting: true});
+      this.enableBatch: true, this.enableMessageSplitting: true,
+      this.websocket: false, this.websocketPath: "/"});
 }

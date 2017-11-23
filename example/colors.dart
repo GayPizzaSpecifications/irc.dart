@@ -1,4 +1,4 @@
-import "package:irc/client.dart";
+import "package:irc/legacy/client.dart";
 
 main() {
   print("Colors: ${Color.allColors().keys.join(", ")}");

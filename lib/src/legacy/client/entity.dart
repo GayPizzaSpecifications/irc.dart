@@ -4,7 +4,6 @@ part of irc.client;
  * An abstract class that represents something that sends/receives messages.
  */
 abstract class Entity {
-
   /**
    * Name of the entity.
    */
