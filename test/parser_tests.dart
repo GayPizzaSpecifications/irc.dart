@@ -1,7 +1,7 @@
 library parser_tests;
 
-import 'package:irc/parser.dart';
-import 'package:unittest/unittest.dart';
+import "package:irc/parser.dart";
+import "package:test/test.dart";
 
 typedef dynamic InputChecker<T>(T value);
 

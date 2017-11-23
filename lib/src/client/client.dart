@@ -98,7 +98,11 @@ class Client extends ClientBase {
    * Creates a new IRC Client using the specified configuration
    * If parser is specified, then the parser is used for the current client
    */
-  Client(Configuration config, {IrcParser parser, IrcConnection connection, this.sendInterval: const Duration(milliseconds: 100)})
+  Client(Configuration config, {
+    IrcParser parser,
+    IrcConnection connection,
+    this.sendInterval: const Duration(milliseconds: 2)
+  })
       : this.parser = parser == null ? new RegexIrcParser() : parser,
         this.connection = connection == null
             ? new SocketIrcConnection()
@@ -130,6 +134,17 @@ class Client extends ClientBase {
   Channel getChannel(String name) => channels.firstWhere(
       (channel) => channel.name == name, orElse: () => null);
 
+  bool isChannelName(String input) {
+    var prefixes = supported["CHANTYPES"].toString();
+    if (prefixes == null) {
+      prefixes = "#";
+    }
+
+    return prefixes.split("").any((x) {
+      return input.startsWith(x);
+    });
+  }
+
   /**
    * Get a User.
    */
@@ -158,15 +173,7 @@ class Client extends ClientBase {
     _ready = false;
     connection.connect(config).then((_) {
       _timer = new Timer.periodic(sendInterval, (t) {
-        if (_queue.isEmpty) {
-          return;
-        }
-
-        var line = _queue.removeAt(0);
-
-        /* Sending the line has priority over the event */
-        connection.send(line);
-        post(new LineSentEvent(this, line));
+        flush(all: false);
       });
 
       connection.lines().listen((line) {
@@ -185,7 +192,28 @@ class Client extends ClientBase {
   @override
   Future disconnect({String reason: "Client Disconnecting"}) {
     send("QUIT :${reason}");
+    post(new DisconnectEvent(this));
+    flush();
     return connection.disconnect();
+  }
+
+  /**
+   * Flushes the line queue.
+   * If [all] is true, then all lines are sent,
+   * otherwise only one line is sent.
+   */
+  void flush({bool all: true}) {
+    if (_queue.isEmpty) {
+      return;
+    }
+
+    do {
+      var line = _queue.removeAt(0);
+
+      /* Sending the line has priority over the event */
+      connection.send(line);
+      post(new LineSentEvent(this, line));
+    } while (all && _queue.isNotEmpty);
   }
 
   /**
@@ -305,8 +333,15 @@ class Client extends ClientBase {
 
         if (list.isNotEmpty) {
           listSupportedCapabilities().then((supported) {
-            var m = supported.capabilities.map((it) => it.startsWith("~") ? it.substring(1) : it).toList();
-            var needsAck = supported.capabilities.where((it) => it.startsWith("~")).map((it) => it.substring(1)).toList();
+            var m = supported
+              .capabilities
+              .map((it) => it.startsWith("~") ? it.substring(1) : it)
+              .toList();
+            var needsAck = supported
+              .capabilities
+              .where((it) => it.startsWith("~")).map((it) => it.substring(1))
+              .toList();
+
             for (var c in new Set<String>.from(list)) {
               if (!m.contains(c)) {
                 list.remove(c);
@@ -316,9 +351,10 @@ class Client extends ClientBase {
             requestCapability(list.join(" "), now: true);
 
             events
-            .where((it) => it is AcknowledgedCapabilitiesEvent || it is NotAcknowledgedCapabilitiesEvent)
+            .where((it) => it is AcknowledgedCapabilitiesEvent ||
+              it is NotAcknowledgedCapabilitiesEvent)
             .first
-            .timeout(new Duration(seconds: 10)).then((event) {
+            .timeout(const Duration(seconds: 10)).then((event) {
               if (event is AcknowledgedCapabilitiesEvent) {
                 if (event.capabilities.any((it) => needsAck.contains(it))) {
                   send("CAP ACK :${event.capabilities.join(" ")}");
@@ -475,7 +511,9 @@ class Client extends ClientBase {
 
           if (who == _nickname) {
             // We quit
-            disconnect();
+            post(new DisconnectEvent(this));
+            flush();
+            connection.disconnect();
           } else {
             // Somebody quit
             post(new QuitEvent(this, who));
@@ -525,7 +563,7 @@ class Client extends ClientBase {
             ..removeWhere((it) => it.trim().isEmpty);
           if (_currentCap.contains("userhost-in-names")) {
             users = users.map((it) {
-              return Hostmask.parse(it).nickname;
+              return new Hostmask.parse(it).nickname;
             }).toList();
           }
 
@@ -592,9 +630,7 @@ class Client extends ClientBase {
             break;
           }
 
-          var isChannel = split[0].startsWith("#");
-
-          if (isChannel) {
+          if (isChannelName(split[0])) {
             var channel = getChannel(split[0]);
             var mode = IrcParserSupport.parseMode(split[1]);
             var who = split.length == 3 ? split[2] : null;
@@ -837,8 +873,8 @@ class Client extends ClientBase {
           break;
 
         case "351": // Server version response
-          var version = input.parameters[0];
-          var server = input.parameters[1];
+          var version = input.parameters[1];
+          var server = input.parameters[2];
           var comments = input.message;
 
           post(new ServerVersionEvent(this, server, version, comments));
@@ -858,6 +894,7 @@ class Client extends ClientBase {
 
     // Set the connection status
     register((ConnectEvent event) => this.connected = true);
+
     register((DisconnectEvent event) {
       this.connected = false;
 
@@ -1003,8 +1040,8 @@ class Client extends ClientBase {
     register((WhoisEvent event) {
       User user = getUser(event.nickname);
       if (user == null) {
-        user = users.add(new User(this, event.nickname));
-        user = getUser(user);
+        user = new User(this, event.nickname);
+        users.add(user);
       }
       user._realname = event.realname;
       user._hostname = event.hostname;
@@ -1074,7 +1111,7 @@ class Client extends ClientBase {
    * Get the state of a user
    */
   @override
-  Future<bool> isUserOn(String name) {
+  Future<bool> isUserOn(String name, {Duration timeout: const Duration(seconds: 5)}) {
     var completer = new Completer.sync();
 
     var handler = (WhoisEvent event) {
@@ -1088,7 +1125,7 @@ class Client extends ClientBase {
     register(handler);
     send("ISON ${name}");
 
-    return completer.future.timeout(const Duration(seconds: 5), onTimeout: () => false).then((value) {
+    return completer.future.timeout(timeout, onTimeout: () => false).then((value) {
       new Future(() {
         unregister(handler);
       });
@@ -1229,13 +1266,15 @@ class Client extends ClientBase {
    * Run a WHOIS query against a user.
    */
   Future<WhoisEvent> whois(String user,
-      {Duration timeout: const Duration(seconds: 2)}) {
+      {Duration timeout: const Duration(seconds: 5)}) {
     var completer = new Completer();
     onEvent(WhoisEvent).where((it) => it.nickname == user).first.then((e) {
       completer.complete(e);
     });
     send("WHOIS ${user}");
-    return completer.future.timeout(timeout, onTimeout: () => throw new UserNotFoundException(user));
+    return completer.future.timeout(
+      timeout, onTimeout: () => throw new UserNotFoundException(user)
+    );
   }
 }
 
@@ -1261,6 +1300,8 @@ class Monitor {
   Map<String, bool> _statuses = {};
 
   Map<String, bool> get statuses => _statuses;
+
+  bool get isSupported => client._supported.containsKey("MONITOR");
 
   /**
    * Add a monitor for a user.

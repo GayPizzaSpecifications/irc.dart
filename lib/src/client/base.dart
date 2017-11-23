@@ -88,7 +88,16 @@ abstract class ClientBase {
    * [input] is the message
    */
   List<String> _handleMessageSending(String begin, String input) {
-    var all = [];
+    if (config.enableMessageSplitting && input.contains("\n")) {
+      var combined = new List<String>();
+      for (String part in input.split("\n")) {
+        combined.addAll(_handleMessageSending(begin, part));
+      }
+      return combined;
+    }
+
+    var all = <String>[];
+
     if ((input.length + begin.length) > 454) {
       var max = 454 - (begin.length + 1);
       var chars = input.split("");
@@ -126,15 +135,21 @@ abstract class ClientBase {
    * the default [password] is password.
    * the default [nickserv] is NickServ.
    */
-  void identify({String username: "PLEASE_INJECT_DEFAULT", String password: "password", String nickserv: "NickServ", String generateMessage(String user, String password): _nickserv}) {
+  void identify({
+    String username: "PLEASE_INJECT_DEFAULT",
+    String password: "password",
+    String nickserv: "NickServ",
+    String generateMessage(String user, String password): _nickserv
+  }) {
     if (username == "PLEASE_INJECT_DEFAULT") {
       username = config.username;
     }
 
-    sendMessage(nickserv, _nickserv(username, password));
+    sendMessage(nickserv, generateMessage(username, password));
   }
 
-  static String _nickserv(String username, String password) => "identify ${username} ${password}";
+  static String _nickserv(String username, String password) =>
+    "identify ${username} ${password}";
 
   /**
    * Sends [line] to the server
@@ -164,7 +179,10 @@ abstract class ClientBase {
     if (supported.containsKey("CHANNELLEN")) {
       var max = supported["CHANNELLEN"];
       if (channel.length > max) {
-        throw new ArgumentError.value(channel, "length is >${max}, which is the maximum channel name length set by the server.");
+        throw new ArgumentError.value(
+          channel,
+          "length is >${max}, which is the maximum channel name length set by the server."
+        );
       }
     }
     send("JOIN ${channel}");
@@ -177,7 +195,10 @@ abstract class ClientBase {
     if (supported.containsKey("CHANNELLEN")) {
       var max = supported["CHANNELLEN"];
       if (channel.length > max) {
-        throw new ArgumentError.value(channel, "length is >${max}, which is the maximum channel name length set by the server.");
+        throw new ArgumentError.value(
+          channel,
+          "length is >${max}, which is the maximum channel name length set by the server."
+        );
       }
     }
     send("PART ${channel}");
@@ -207,8 +228,8 @@ abstract class ClientBase {
   /**
    * Applies a Mode to a User (The Client by Default)
    */
-  void setMode(String mode, {String user: "PLEASE_INJECT_DEFAULT"}) {
-    if (user == "PLEASE_INJECT_DEFAULT") {
+  void setMode(String mode, {String user: "____DART_PLEASE_INJECT_DEFAULT____"}) {
+    if (user == "____DART_PLEASE_INJECT_DEFAULT____") {
       user = nickname;
     }
 
@@ -240,7 +261,10 @@ abstract class ClientBase {
     if (reason != null && supported.containsKey("KICKLEN")) {
       var max = supported["KICKLEN"];
       if (reason.length > max) {
-        throw new ArgumentError.value(reason, "length is >${max}, which is the maximum kick comment length set by the server.");
+        throw new ArgumentError.value(
+          reason,
+          "length is > ${max}, which is the maximum kick comment length set by the server."
+        );
       }
     }
     send("KICK ${channel.name} ${user.nickname}${reason != null ? ' :' + reason : ''}");

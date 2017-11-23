@@ -102,7 +102,10 @@ class User extends Entity {
     client.register(handler);
     client.whois(nickname);
 
-    return completer.future.timeout(const Duration(seconds: 5), onTimeout: () => false).then((value) {
+    return completer
+      .future
+      .timeout(const Duration(seconds: 5), onTimeout: () => false)
+      .then((value) {
       new Future(() {
         client.unregister(handler);
       });

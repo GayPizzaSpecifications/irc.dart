@@ -1,18 +1,16 @@
 name: irc
-version: 3.0.1
+version: 3.1.0
 authors:
 - Kenneth Endfinger <kaendfinger@gmail.com>
 - samrg472 <samrg472@gmail.com>
 - TheMike <zeusintraining@gmail.com>
 - Logan Gorence <loganjohngorence@gmail.com>
-description: A beautiful all-purpose IRC library
-homepage: https://github.com/DirectMyFile/irc.dart/
+description: A beautiful all-purpose IRC library.
+homepage: https://github.com/SpinlockLabs/irc.dart/
 environment:
-  sdk: '>=1.9.0-dev'
+  sdk: '>=1.9.0'
 dependencies:
-  event_dispatcher: '>=1.0.0 <2.1.5'
-  quiver: '>=0.18.2 <0.23.0'
+  event_dispatcher: "^1.2.2"
+  quiver: "^0.26.2"
 dev_dependencies:
-  hop: '>=0.31.0+1 <0.32.0'
-  yaml: '>=2.1.0 <3.0.0'
-  unittest: '>=0.11.0+3 <0.12.0'
+  test: "^0.12.28"

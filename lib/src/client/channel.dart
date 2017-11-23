@@ -77,7 +77,10 @@ class Channel extends Entity {
     if (client.supported.containsKey("TOPICLEN")) {
       var max = client.supported['TOPICLEN'];
       if (topic.length > max) {
-        throw new ArgumentError.value(topic, "length is >${max}, which is the maximum topic length set by the server.");
+        throw new ArgumentError.value(
+          topic,
+          "length is >${max}, which is the maximum topic length set by the server."
+        );
       }
     }
     
@@ -204,5 +207,8 @@ class Channel extends Entity {
   /**
    * Compares [object] to this. Only true if channels names are equal.
    */
-  bool operator ==(Object object) => object is Channel && identical(client, object.client) && this.name == object.name;
+  bool operator ==(Object object) =>
+    object is Channel &&
+    identical(client, object.client) &&
+    this.name == object.name;
 }

@@ -21,27 +21,32 @@ class WhoisBuilder {
   int idleTime;
   bool isServerOperator;
   bool away = false;
-  
+
   DateTime _createTimestamp;
+
+  DateTime get created => _createTimestamp;
 
   WhoisBuilder(this.nickname);
 
   @override
   String toString() {
-    var instance = reflect(this);
-    var sb = new StringBuffer("WHOIS(");
-    var fields = instance.type.declarations.values.where((f) => f is VariableMirror && !f.isPrivate);
-    var names = fields.map((f) => MirrorSystem.getName(f.simpleName));
-    for (String field in names) {
-      var last = names.last == field;
-      var obj = instance.getField(MirrorSystem.getSymbol(field)).reflectee;
-      sb
-          ..write(field)
-          ..write(": ")
-          ..write("${obj}");
-      if (!last) sb.write(", ");
-    }
-    sb.write(")");
-    return sb.toString();
+    return [
+      "Nickname: ${nickname}",
+      "Username: ${username}",
+      "Realname: ${realname}",
+      "Hostname: ${hostname}",
+      "Away Message: ${awayMessage}",
+      "Away: ${away}",
+      "Channels: ${channels.join(',')}",
+      "Voice In: ${voiceIn.join(',')}",
+      "Op In: ${opIn.join(',')}",
+      "Owner In: ${ownerIn.join(',')}",
+      "Half Op In: ${halfOpIn.join(',')}",
+      "Server Name: ${serverName}",
+      "Server Info: ${serverInfo}",
+      "Idle: ${idle}",
+      "Idle Time: ${idleTime}",
+      "Is Server Operator: ${isServerOperator}"
+    ].where((line) => !line.endsWith("null")).join("\n");
   }
 }

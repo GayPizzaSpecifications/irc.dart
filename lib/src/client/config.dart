@@ -126,6 +126,11 @@ class Configuration {
    * Extra IRCv3 Capabilities to Request
    */
   List<String> capabilities;
+
+  /**
+   * Enables Message Splitting
+   */
+  bool enableMessageSplitting;
   
   /**
    * Creates a new Client Configuration with default values.
@@ -141,5 +146,5 @@ class Configuration {
       this.enableMessageIntents: true, this.enableAwayNotify: true,
       this.enableServerTime: true, this.enableAccountNotify: true,
       this.enableChangeHost: true, this.enableUserHostInNames: true,
-      this.enableBatch: true});
+      this.enableBatch: true, this.enableMessageSplitting: true});
 }
