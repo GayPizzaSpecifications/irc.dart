@@ -1,4 +1,4 @@
-import "package:irc/legacy/parser.dart";
+import "package:irc/parser.dart";
 
 import "dart:io";
 

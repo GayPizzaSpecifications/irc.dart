@@ -27,7 +27,7 @@ import "dart:convert" show Converter;
 
 import "package:quiver/pattern.dart";
 
-part "../src/legacy/parser/base.dart";
-part "../src/legacy/parser/message.dart";
-part "../src/legacy/parser/regex.dart";
-part "../src/legacy/parser/hostmask.dart";
+part "src/parser/base.dart";
+part "src/parser/message.dart";
+part "src/parser/regex.dart";
+part "src/parser/hostmask.dart";

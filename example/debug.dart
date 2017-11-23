@@ -1,6 +1,6 @@
 import "dart:async";
 
-import "package:irc/legacy/client.dart";
+import "package:irc/client.dart";
 
 typedef CommandHandler(CommandEvent event);
 

@@ -1,7 +1,7 @@
 library irc.test.faker;
 
 import "dart:async";
-import "package:irc/legacy/client.dart";
+import "package:irc/client.dart";
 
 typedef void CommandHandler(Message message);
 

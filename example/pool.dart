@@ -1,4 +1,4 @@
-import "package:irc/legacy/client.dart";
+import "package:irc/client.dart";
 
 void main(List<String> args) {
   if (args.isEmpty) {

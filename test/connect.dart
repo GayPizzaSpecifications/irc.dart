@@ -1,6 +1,6 @@
 library irc.test.connect;
 
-import "package:irc/legacy/client.dart";
+import "package:irc/client.dart";
 import "faker.dart";
 
 Environment env = createEnvironment();
