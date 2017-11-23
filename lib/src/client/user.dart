@@ -15,6 +15,11 @@ class User extends Entity {
   String _nickname;
 
   /**
+   * A flag for WHOIS which determines if it is secure.
+   */
+  bool secure = false;
+
+  /**
    * Get the user's nickname.
    */
   String get nickname => _nickname;
@@ -48,7 +53,7 @@ class User extends Entity {
   /**
    * The user is a Server Operator.
    */
-  bool _isServerOperator;
+  bool _isServerOperator = false;
 
   /**
    * The user is a Server Operator.

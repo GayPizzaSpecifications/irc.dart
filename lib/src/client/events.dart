@@ -31,7 +31,10 @@ class BatchStartEvent extends Event {
   BatchStartEvent(Client client, this.id, this.body) : super(client);
 
   Future<BatchEndEvent> waitForEnd() {
-    return client.onEvent(BatchEndEvent).where((BatchEndEvent it) => it.id == id).first;
+    return client
+      .onEvent(BatchEndEvent)
+      .where((BatchEndEvent it) => it.id == id)
+      .first;
   }
 }
 
@@ -558,9 +561,12 @@ class WhoisEvent extends Event {
   /**
    * The Channels the user is a member in
    */
-  List<String> get member_in {
+  List<String> get memberChannels {
     var list = <String>[];
-    list.addAll(builder.channels.where((i) => !operatorChannels.contains(i) && !voicedChannels.contains(i)));
+    list.addAll(builder.channels
+      .where((i) => !operatorChannels.contains(i) && !voicedChannels.contains(i) &&
+      !ownerChannels.contains(i) && !halfOpChannels.contains(i)
+    ));
     return list;
   }
 
@@ -573,6 +579,9 @@ class WhoisEvent extends Event {
    * The Channels the user is a voice in
    */
   List<String> get voicedChannels => builder.voiceIn;
+
+  List<String> get ownerChannels => builder.ownerIn;
+  List<String> get halfOpChannels => builder.halfOpIn;
 
   /**
    * If the user is away
@@ -598,6 +607,8 @@ class WhoisEvent extends Event {
    * The name of the server this user is on
    */
   String get serverName => builder.serverName;
+
+  bool get secure => builder.secure;
 
   /**
    * The Server Information (message) for the server this user is on

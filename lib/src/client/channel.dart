@@ -205,10 +205,52 @@ class Channel extends Entity {
   }
 
   /**
+   * Checks whether a user is inside this channel.
+   */
+  bool hasUser(User user) {
+    return
+      ops.contains(user) ||
+        halfops.contains(user) ||
+        voices.contains(user) ||
+        members.contains(user) ||
+        owners.contains(user);
+  }
+
+  bool _userListHas(String name, Set<User> users) {
+    return users.any((user) => user.name == name);
+  }
+
+  bool hasUserWithName(String name) {
+    return _userListHas(name, ops) ||
+      _userListHas(name, halfops) ||
+      _userListHas(name, voices) ||
+      _userListHas(name, members) ||
+      _userListHas(name, owners);
+  }
+
+  void _dropFromUserList(String nickname) {
+    ops.removeWhere((user) => user.name == nickname);
+    halfops.removeWhere((user) => user.name == nickname);
+    voices.removeWhere((user) => user.name == nickname);
+    members.removeWhere((user) => user.name == nickname);
+    owners.removeWhere((user) => user.name == nickname);
+  }
+
+  /**
    * Compares [object] to this. Only true if channels names are equal.
    */
   bool operator ==(Object object) =>
     object is Channel &&
     identical(client, object.client) &&
     this.name == object.name;
+
+  Future<Mode> getMode() async {
+    client.send("MODE ${name}", now: true);
+    await new Future.delayed(const Duration(seconds: 2));
+    return mode;
+  }
+
+  void reloadTopic() {
+    client.send("TOPIC ${name}");
+  }
 }

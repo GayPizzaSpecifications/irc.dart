@@ -17,12 +17,15 @@ class WhoisBuilder {
   List<String> halfOpIn = [];
   String serverName;
   String serverInfo;
-  bool idle;
+  bool idle = false;
   int idleTime;
-  bool isServerOperator;
+  bool isServerOperator = false;
   bool away = false;
 
   DateTime _createTimestamp;
+
+  bool secure = false;
+  String secureConnectionInfo;
 
   DateTime get created => _createTimestamp;
 

@@ -23,12 +23,12 @@ abstract class ClientBase {
   /**
    * Get the Channels the Client is in
    */
-  Iterable<Channel> get channels;
+  Map<String, Channel> get channels;
 
   /**
    * Get the Users the Client's channels contain
    */
-  Iterable<User> get users;
+  Map<String, User> get users;
 
   /**
    * Gets the Server's MOTD
@@ -129,6 +129,35 @@ abstract class ClientBase {
   }
 
   /**
+   * Sends a line prefixed by [prefix], with a section of [parts] joined by [joinBy].
+   * When the line would be too long, it will generate a new line.
+   */
+  void sendAutoSplit(String prefix, List<String> parts, [String joinBy = " "]) {
+    var line = "${prefix}";
+    var empty = true;
+    while (parts.isNotEmpty) {
+      var current = line;
+      var candidate = parts.removeAt(0);
+      if (empty) {
+        current += candidate;
+      } else {
+        current += "${joinBy}${candidate}";
+      }
+
+      if (current.length > 510) {
+        send(line);
+        line = "${prefix}${candidate}";
+      } else {
+        line = current;
+      }
+    }
+
+    if (!empty) {
+      send(line);
+    }
+  }
+
+  /**
    * Identifies the user with the [nickserv].
    *
    * the default [username] is your configured username.
@@ -136,12 +165,12 @@ abstract class ClientBase {
    * the default [nickserv] is NickServ.
    */
   void identify({
-    String username: "PLEASE_INJECT_DEFAULT",
+    String username: "____DART_PLEASE_INJECT_DEFAULT____",
     String password: "password",
     String nickserv: "NickServ",
     String generateMessage(String user, String password): _nickserv
   }) {
-    if (username == "PLEASE_INJECT_DEFAULT") {
+    if (username == "____DART_PLEASE_INJECT_DEFAULT____") {
       username = config.username;
     }
 

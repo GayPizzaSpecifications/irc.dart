@@ -84,7 +84,7 @@ class IrcParserSupport {
     for (var part in parts) {
       if (part.contains("=")) {
         var keyValue = part.split("=");
-        out[keyValue[0]] = keyValue[1];
+        out[keyValue[0]] = keyValue.skip(1).join("=");
       } else {
         out[part] = true;
       }
@@ -140,7 +140,10 @@ class ModeChange {
   ModeChange(this.added, this.removed);
 
   @override
-  String toString() => added.isEmpty ? "-${removed.join()}" : "+${added.join()}";
+  String toString() =>
+    added.isEmpty ?
+    "-${removed.join()}" :
+    "+${added.join()}";
 }
 
 class Mode {

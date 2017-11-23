@@ -27,13 +27,13 @@ class Client extends ClientBase {
    * List of Channels.
    */
   @override
-  List<Channel> channels = [];
+  Map<String, Channel> channels = {};
 
   /**
    * List of Users.
    */
   @override
-  List<User> users = [];
+  Map<String, User> users = {};
 
   /**
    * WHOIS Implementation Builder Storage.
@@ -131,8 +131,7 @@ class Client extends ClientBase {
    * Get a User.
    */
   @override
-  Channel getChannel(String name) => channels
-      .firstWhere((channel) => channel.name == name, orElse: () => null);
+  Channel getChannel(String name) => channels[name];
 
   bool isChannelName(String input) {
     var prefixes = supported["CHANTYPES"].toString();
@@ -150,11 +149,11 @@ class Client extends ClientBase {
    */
   @override
   User getUser(String nickname, {bool create: false}) {
-    var user = users.firstWhere((user) => user.nickname == nickname,
-        orElse: () => null);
+    var user = users[nickname];
 
     if (create && user == null) {
       user = new User(this, nickname);
+      users[user.name] = user;
     }
 
     return user;
@@ -254,7 +253,7 @@ class Client extends ClientBase {
    *
    * Returns false if [method] is already registered, otherwise true.
    */
-  bool register(EventHandlerFunction handler,
+  bool register<T extends Event>(EventHandlerFunction<T> handler,
       {EventFilter filter, int priority}) {
     return filter == null
         ? dispatcher.register(handler, priority: priority)
@@ -264,7 +263,7 @@ class Client extends ClientBase {
   /**
    * Gets the next event of the specified [type].
    */
-  Future<dynamic> pollEvent(Type type) {
+  Future<T> pollEvent<T extends Event>(Type type) {
     return events.where((it) => it.runtimeType == type).first;
   }
 
@@ -274,7 +273,7 @@ class Client extends ClientBase {
    * listener. If the specific [handler] has a priority, it should be provided as well.
    * Returns whether the [handler] was removed or not.
    */
-  bool unregister(EventHandlerFunction handler,
+  bool unregister<T extends Event>(EventHandlerFunction<T> handler,
       {EventFilter filter, int priority}) {
     return filter == null
         ? dispatcher.unregister(handler, priority: priority)
@@ -288,7 +287,8 @@ class Client extends ClientBase {
    */
   @override
   void send(String line, {bool now: false}) {
-    /* Max Line Length for IRC is 512. With the newlines (\r\n or \n) we can only send 510 character lines */
+    /* Max Line Length for IRC is 512.
+      With the newlines (\r\n or \n) we can only send 510 character lines */
     if (line.length > 510) {
       throw new ArgumentError(
           "The length of '${line}' is greater than 510 characters");
@@ -386,8 +386,8 @@ class Client extends ClientBase {
 
       send("NICK ${config.nickname}", now: true);
       send(
-          "USER ${config.username} ${config.username} ${config.host} :${config
-          .realname}",
+          "USER ${config.username} "
+            "${config.username} ${config.host} :${config.realname}",
           now: true);
     });
 
@@ -423,18 +423,18 @@ class Client extends ClientBase {
       }
     });
 
-    // Handles user quit
+    // Handles user quit.
     register((QuitEvent event) {
-      for (var chan in channels) {
-        if (chan.allUsers.contains(event.user)) {
+      for (var chan in channels.values) {
+        if (chan.hasUserWithName(event.user)) {
           post(new QuitPartEvent(this, chan, event.user));
-          chan.members.remove(event.user);
-          chan.voices.remove(event.user);
-          chan.ops.remove(event.user);
-          chan.halfops.remove(event.user);
-          chan.owners.remove(event.user);
+          chan._dropFromUserList(event.user);
         }
       }
+    });
+
+    register((ChangeHostEvent event) {
+      getUser(event.user, create: true)._hostname = event.host;
     });
 
     register((BatchStartEvent event) {
@@ -467,40 +467,26 @@ class Client extends ClientBase {
 
     /* Handles User Tracking in Channels when a user joins. A user is a member until it is changed. */
     register((JoinEvent event) {
-      if (getUser(event.user) == null) {
-        this.users.add(new User(this, event.user));
-      }
-      event.channel.members.add(getUser(event.user));
+      event.channel.members.add(getUser(event.user, create: true));
     });
 
     // Handles User Tracking in Channels when a user leaves
     register((PartEvent event) {
       var channel = event.channel;
-      var user = getUser(event.user);
-      channel.members.remove(user);
-      channel.voices.remove(user);
-      channel.ops.remove(user);
-      channel.owners.remove(user);
-      channel.halfops.remove(user);
+      channel._dropFromUserList(event.user);
     });
 
     // Handles User Tracking in Channels when a user is kicked.
     register((KickEvent event) {
       var channel = event.channel;
-      var user = event.user;
-      channel.members.remove(user);
-      channel.voices.remove(user);
-      channel.ops.remove(user);
-      channel.owners.remove(user);
-      channel.halfops.remove(user);
+      channel._dropFromUserList(event.user.name);
       if (event.user == nickname) {
-        channels.remove(channel);
+        channels.remove(channel.name);
       }
     });
 
     // Handles Nickname Changes
     register((NickChangeEvent event) {
-      getUser(event.original)._nickname = event.now;
       if (event.original == _nickname) {
         _nickname = event.now;
       }
@@ -525,35 +511,35 @@ class Client extends ClientBase {
           var voice = prefix == "+";
           var halfop = prefix == "%";
 
-          void m(Set<User> users) {
+          void changeUserMode(Set<User> users) {
             if (added) {
-              users.add(getUser(event.user));
+              users.add(getUser(event.user, create: true));
             } else {
               users.remove(getUser(event.user));
             }
           }
 
           if (owner) {
-            m(channel.owners);
+            changeUserMode(channel.owners);
           }
 
           if (op) {
-            m(channel.ops);
+            changeUserMode(channel.ops);
           }
 
           if (voice) {
-            m(channel.voices);
+            changeUserMode(channel.voices);
           }
 
           if (halfop) {
-            m(channel.halfops);
+            changeUserMode(channel.halfops);
           }
         }
       }
     });
 
     // When the Client leaves a channel, we no longer retain the object.
-    register((ClientPartEvent event) => channels.remove(event.channel));
+    register((ClientPartEvent event) => channels.remove(event.channel.name));
 
     register((ServerSupportsEvent event) {
       _supported.addAll(event.supported);
@@ -562,16 +548,14 @@ class Client extends ClientBase {
     });
 
     register((WhoisEvent event) {
-      User user = getUser(event.nickname);
-      if (user == null) {
-        user = new User(this, event.nickname);
-        users.add(user);
-      }
+      User user = getUser(event.nickname, create: true);
       user._realname = event.realname;
       user._hostname = event.hostname;
       user._serverName = event.serverName;
       user._serverInfo = event.serverInfo;
       user._isServerOperator = event.isServerOperator;
+      user._username = event.username;
+      user.secure = event.secure;
     });
   }
 
@@ -690,19 +674,14 @@ class Client extends ClientBase {
    * Get a Channel's topic.
    */
   @override
-  Future<String> getChannelTopic(String channel) {
-    var completer = new Completer();
-
-    onEvent(TopicEvent)
-        .where((it) => it.channel.name == channel)
-        .first
-        .then((e) {
-      completer.complete(e.topic);
-    });
-
+  Future<String> getChannelTopic(String channel) async {
     send("TOPIC ${channel}");
 
-    return completer.future;
+    return (await onEvent(TopicEvent)
+      .where((TopicEvent it) => it.channel.name == channel)
+      .first.timeout(const Duration(seconds: 2), onTimeout: () {
+        return null;
+    }).then((e) => e is TopicEvent ? (e as TopicEvent).topic : null));
   }
 
   /**
@@ -866,23 +845,38 @@ class Client extends ClientBase {
         send("PONG :${input.message}");
         break;
 
+      case "324":
+        var channel = getChannel(input.parameters[1]);
+        if (channel != null) {
+          channel.mode.modes.addAll(
+            input.parameters[2].replaceFirst("+", "").split("")
+          );
+        }
+        break;
+
       case "JOIN": // User Joined Channel
         var who = input.hostmask.nickname;
         var chanName =
             input.parameters.length != 0 ? input.parameters[0] : input.message;
         if (who == _nickname) {
           // We joined a new channel
-          if (getChannel(chanName) == null) {
-            channels.add(new Channel(this, chanName));
+          var channel = getChannel(chanName);
+          if (channel == null) {
+            channel = channels[chanName] = new Channel(this, chanName);
           }
-          post(new ClientJoinEvent(this, getChannel(chanName)));
-          getChannel(chanName).reloadBans();
+          post(new ClientJoinEvent(this, channel));
+          channel.reloadBans();
+          channel.reloadTopic();
         } else {
           // User joined one of our channels
           var event = new JoinEvent(this, who, getChannel(chanName));
+          var userObject = getUser(event.user, create: true);
+          userObject._hostname = input.hostmask.hostname;
           if (_currentCap.contains("extended-join")) {
             event.username = input.parameters[1];
             event.realname = input.message;
+            userObject._username = input.parameters[1];
+            userObject._realname = input.message;
           }
           post(event);
         }
@@ -890,7 +884,9 @@ class Client extends ClientBase {
 
       case "PRIVMSG": // Message
         _fireReady();
-        var from = getUser(input.hostmask.nickname);
+        var from = getUser(input.hostmask.nickname, create: true);
+        from._hostname = input.hostmask.hostname;
+
         var target = input.parameters[0];
         var message = input.message;
 
@@ -940,13 +936,13 @@ class Client extends ClientBase {
       case "PART": // User left Channel
         var who = input.hostmask.nickname;
 
-        var chan_name =
+        var nameOfChannel =
             input.parameters.length != 0 ? input.parameters[0] : input.message;
 
         if (who == _nickname) {
-          post(new ClientPartEvent(this, getChannel(chan_name)));
+          post(new ClientPartEvent(this, getChannel(nameOfChannel)));
         } else {
-          post(new PartEvent(this, who, getChannel(chan_name)));
+          post(new PartEvent(this, who, getChannel(nameOfChannel)));
         }
         break;
 
@@ -962,6 +958,11 @@ class Client extends ClientBase {
           // Somebody quit
           post(new QuitEvent(this, who));
         }
+        break;
+
+      case "331":
+        var chan = input.parameters[1];
+        post(new TopicEvent(this, getChannel(chan), null, "", null));
         break;
 
       case "332": // Topic
@@ -1013,21 +1014,18 @@ class Client extends ClientBase {
 
         var channel = this.getChannel(input.parameters[2]);
 
-        users.forEach((user) {
+        for (var user in users) {
           var chars = new List<String>.generate(user.length, (i) => user[i]);
-          var cs = chars.takeWhile((it) => modePrefixes.containsValue(it));
+          var prefixes = chars.takeWhile((it) => modePrefixes.containsValue(it));
 
-          var name = chars.skip(cs.length).join();
+          var name = chars.skip(prefixes.length).join();
 
-          if (getUser(name) == null) {
-            this.users.add(new User(this, name));
-          }
-
-          var userInstance = getUser(name);
-          if (cs.length == 0) {
+          var userInstance = getUser(name, create: true);
+          if (prefixes.length == 0) {
             channel.members.add(userInstance);
           }
-          for (var n in cs) {
+
+          for (var n in prefixes) {
             switch (n) {
               case "@":
                 channel.ops.add(userInstance);
@@ -1043,7 +1041,7 @@ class Client extends ClientBase {
                 break;
             }
           }
-        });
+        }
         break;
 
       case "CHGHOST": // User changed hostname
@@ -1063,8 +1061,20 @@ class Client extends ClientBase {
         var original = input.hostmask.nickname;
         var now = input.message;
 
-        // Posts the nickname change event. No need for checking if we are the original nickname.
-        post(new NickChangeEvent(this, getUser(original), original, now));
+        var user = users[now] = users[original];
+        users.remove(original);
+        user._nickname = now;
+
+        // Posts the nickname change event.
+        // No need for checking if we are the original nickname.
+        post(
+          new NickChangeEvent(
+            this,
+            user,
+            original,
+            now
+          )
+        );
         break;
 
       case "MODE": // Mode Changed
@@ -1115,9 +1125,9 @@ class Client extends ClientBase {
         var split = input.parameters;
         var nickname = split[1];
         var message = input.message;
-        var server_name = split[2];
+        var serverName = split[2];
         var builder = _whoisBuilders[nickname];
-        builder.serverName = server_name;
+        builder.serverName = serverName;
         builder.serverInfo = message;
         break;
 
@@ -1131,7 +1141,7 @@ class Client extends ClientBase {
         break;
 
       case "313": // WHOIS Operator information
-        var nickname = input.parameters[0];
+        var nickname = input.parameters[1];
         var builder = _whoisBuilders[nickname];
         if (builder != null) {
           builder.isServerOperator = true;
@@ -1222,6 +1232,12 @@ class Client extends ClientBase {
         var split = input.parameters;
         var builder = _whoisBuilders[split[1]];
         builder.username = split[2];
+        break;
+
+      case "671":
+        var builder = _whoisBuilders[input.parameters[1]];
+        builder.secure = true;
+        builder.secureConnectionInfo = input.message;
         break;
 
       case "PONG": // PONG from Server
@@ -1368,6 +1384,7 @@ class Monitor {
    */
   void add(String user) {
     _checkMonitorSupported();
+
     client.send("MONITOR + ${user}");
     _monitorList.add(user);
   }
@@ -1377,7 +1394,7 @@ class Monitor {
    */
   void addAll(Iterable<String> users) {
     _checkMonitorSupported();
-    client.send("MONITOR + ${users.join(" ")}");
+    client.sendAutoSplit("MONITOR + ", users.toList());
     _monitorList.addAll(users);
   }
 
@@ -1396,7 +1413,7 @@ class Monitor {
    */
   void removeAll(Iterable<String> users) {
     _checkMonitorSupported();
-    client.send("MONITOR - ${users.join(" ")}");
+    client.sendAutoSplit("MONITOR - ", users.toList());
     _monitorList.removeWhere(users.contains);
     users.forEach(_statuses.remove);
   }
