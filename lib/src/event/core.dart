@@ -141,7 +141,9 @@ class EventDispatcher {
     }
 
     handlers.add(h);
-    handlers.sort((_EventHandler a, _EventHandler b) => b.priority.compareTo(a.priority));
+    handlers.sort(
+        (_EventHandler a, _EventHandler b) => b.priority.compareTo(a.priority)
+    );
     return true;
   }
 
@@ -153,13 +155,17 @@ class EventDispatcher {
     var registered = false;
 
     for (var method in mirror.type.instanceMembers.values) {
-      var subscribes = method.metadata.where((it) => it.type.reflectedType == Subscribe).toList();
+      var subscribes = method.metadata
+        .where((it) => it.type.reflectedType == Subscribe)
+        .toList();
       if (subscribes.isEmpty) {
         continue;
       }
 
       if (subscribes.length > 1) {
-        throw new Exception("${MirrorSystem.getName(mirror.type.qualifiedName)} has multiple subscribe annotations.");
+        throw new Exception(
+          "${MirrorSystem.getName(mirror.type.qualifiedName)}"
+          " has multiple subscribe annotations.");
       }
 
       var m = subscribes.first;
@@ -167,7 +173,10 @@ class EventDispatcher {
       var params = method.parameters;
 
       if (params.length != 1) {
-        throw new Exception("${MirrorSystem.getName(mirror.type.qualifiedName)} does not specify a valid event parameter type.");
+        throw new Exception(
+          "${MirrorSystem.getName(mirror.type.qualifiedName)} does not"
+            " specify a valid event parameter type."
+        );
       }
 
       var p = params.first;
@@ -176,6 +185,17 @@ class EventDispatcher {
         mirror.invoke(method.simpleName, [event]);
       };
       var filter = sub.filter;
+
+      if (filter == null) {
+        filter = (e) {
+          if (sub.when != null) {
+            return !sub.when(e);
+          } else {
+            return false;
+          }
+        };
+      }
+
       var priority = sub.priority != null ? sub.priority : defaultPriority;
 
       if (!_handlers.containsKey(name)) {
@@ -183,10 +203,18 @@ class EventDispatcher {
       }
 
       var handlers = _handlers[name];
-      var h = new _EventHandler(handler, filter, priority, object, sub.always);
+      var h = new _EventHandler(
+        handler,
+        filter,
+        priority,
+        object,
+        sub.always
+      );
 
       handlers.add(h);
-      handlers.sort((_EventHandler a, _EventHandler b) => b.priority.compareTo(a.priority));
+      handlers.sort(
+          (_EventHandler a, _EventHandler b) => b.priority.compareTo(a.priority)
+      );
       registered = true;
     }
 

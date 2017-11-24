@@ -5,14 +5,16 @@ part of irc.event;
  *
  * See [EventDispatcher.registerHandlers].
  */
-class Subscribe {
+class Subscribe<T> {
   final int priority;
-  final EventFilter filter;
+  final EventFilter<T> filter;
+  final EventFilter<T> when;
   final bool always;
 
   const Subscribe({
     this.priority,
-    this.filter: EventDispatcher._defaultFilter,
+    this.filter,
+    this.when,
     this.always: false
   });
 }

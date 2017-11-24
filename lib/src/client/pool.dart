@@ -30,6 +30,6 @@ class ClientPool {
   void connectAll() => forEach((client) => client.connect());
   void disconnectAll([String reason = null]) => forEach((client) => client.disconnect(reason: reason));
   void sendMessage(String target, String message) => forEach((client) => client.sendMessage(target, message));
-  void register(void handler(dynamic event)) => forEach((client) => client.register(handler));
+  void register(handler(dynamic event)) => forEach((client) => client.register(handler));
   void forEach(void action(Client client)) => clients.forEach(action);
 }
