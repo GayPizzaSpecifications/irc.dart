@@ -118,9 +118,9 @@ class Configuration {
   bool enableChangeHost;
 
   /**
-   * Enables the TLS IRCv3 extension
+   * Enables the STARTTLS IRCv3 extension
    */
-  bool enableTls;
+  bool enableStartTls;
 
   /**
    * Enables the Event Batching IRCv3 extension
@@ -152,10 +152,11 @@ class Configuration {
       this.bindHost, this.password, this.capabilities: const [],
       this.enableInviteNotify: true, this.enableExtendedJoin: true,
       this.enableSelfMessage: true, this.enableAccountTag: true,
-      this.enableMultiPrefix: true, this.enableCapabilityNegotiation: true,
+      this.enableMultiPrefix: true, this.enableCapabilityNegotiation: false,
       this.enableMessageIntents: true, this.enableAwayNotify: true,
       this.enableServerTime: true, this.enableAccountNotify: true,
       this.enableChangeHost: true, this.enableUserHostInNames: true,
       this.enableBatch: true, this.enableMessageSplitting: true,
+      this.enableStartTls: false,
       this.websocket: false, this.websocketPath: "/"});
 }

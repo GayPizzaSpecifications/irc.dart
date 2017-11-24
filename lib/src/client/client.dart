@@ -88,6 +88,8 @@ class Client extends ClientBase {
    */
   Map<String, dynamic> _supported = {};
 
+  StreamSubscription<String> _lineSub;
+
   /**
    * Server Supports
    */
@@ -179,16 +181,37 @@ class Client extends ClientBase {
   @override
   void connect() {
     _ready = false;
+    _dropConnection();
     connection.connect(config).then((_) {
-      _timer = new Timer.periodic(sendInterval, (t) {
-        flush(all: false);
-      });
-
-      connection.lines().listen((line) {
-        post(new LineReceiveEvent(this, line));
-      });
+      _startConnection();
 
       post(new ConnectEvent(this));
+    });
+  }
+
+  void _dropConnection([bool pause = false]) {
+    if (_timer != null) {
+      _timer.cancel();
+      _timer = null;
+    }
+
+    if (_lineSub != null) {
+      if (pause) {
+        _lineSub.pause();
+      } else {
+        _lineSub.cancel();
+      }
+      _lineSub = null;
+    }
+  }
+
+  void _startConnection() {
+    _timer = new Timer.periodic(sendInterval, (t) {
+      flush(all: false);
+    });
+
+    _lineSub = connection.lines().listen((line) {
+      post(new LineReceiveEvent(this, line));
     });
   }
 
@@ -294,7 +317,7 @@ class Client extends ClientBase {
           "The length of '${line}' is greater than 510 characters");
     }
 
-    if (now) {
+    if (now && _lineSub != null) {
       /* Sending the line has priority over the event */
       connection.send(line);
       post(new LineSentEvent(this, line));
@@ -319,76 +342,12 @@ class Client extends ClientBase {
    * Registers all the default handlers.
    */
   void _registerHandlers() {
-    register((ConnectEvent event) {
+    register((ConnectEvent event) async {
       if (config.enableCapabilityNegotiation) {
-        var list = config.capabilities.toSet();
-        var caps = {
-          "invite-notify": config.enableInviteNotify,
-          "account-tag": config.enableAccountTag,
-          "extended-join": config.enableExtendedJoin,
-          "multi-prefix": config.enableMultiPrefix,
-          "self-message": config.enableSelfMessage,
-          "away-notify": config.enableAwayNotify,
-          "account-notify": config.enableAccountNotify,
-          "server-time": config.enableServerTime,
-          "userhost-in-names": config.enableUserHostInNames,
-          "chghost": config.enableChangeHost,
-          "batch": config.enableBatch
-        };
-
-        for (var cap in caps.keys) {
-          if (caps[cap] == true) {
-            list.add(cap);
-          }
-        }
-
-        if (list.isNotEmpty) {
-          listSupportedCapabilities().then((supported) {
-            var m = supported.capabilities
-                .map((it) => it.startsWith("~") ? it.substring(1) : it)
-                .toList();
-            var needsAck = supported.capabilities
-                .where((it) => it.startsWith("~"))
-                .map((it) => it.substring(1))
-                .toList();
-
-            for (var c in new Set<String>.from(list)) {
-              if (!m.contains(c)) {
-                list.remove(c);
-              }
-            }
-
-            requestCapability(list.join(" "), now: true);
-
-            events
-                .where((it) =>
-                    it is AcknowledgedCapabilitiesEvent ||
-                    it is NotAcknowledgedCapabilitiesEvent)
-                .first
-                .timeout(const Duration(seconds: 10))
-                .then((event) {
-              if (event is AcknowledgedCapabilitiesEvent) {
-                if (event.capabilities.any((it) => needsAck.contains(it))) {
-                  send("CAP ACK :${event.capabilities.join(" ")}");
-                }
-              }
-              send("CAP END");
-            }).catchError((e) {
-              send("CAP END");
-            });
-          });
-        }
+        _doCapabilityNegotiation();
+      } else {
+        _doRegistration();
       }
-
-      if (config.password != null) {
-        send("PASS ${config.password}", now: true);
-      }
-
-      send("NICK ${config.nickname}", now: true);
-      send(
-          "USER ${config.username} "
-            "${config.username} ${config.host} :${config.realname}",
-          now: true);
     });
 
     register((LineSentEvent event) {
@@ -564,17 +523,16 @@ class Client extends ClientBase {
    */
   Future<CurrentCapabilitiesEvent> listCurrentCapabilities() {
     var f = onEvent(CurrentCapabilitiesEvent).first;
-    send("CAP LS");
+    send("CAP LIST");
     return f;
   }
 
   /**
-   * Get all supported capabilities
+   * Get all supported capabilities.
    */
-  Future<ServerCapabilitiesEvent> listSupportedCapabilities() {
-    var f = onEvent(ServerCapabilitiesEvent).first;
-    send("CAP LIST");
-    return f;
+  Future<ServerCapabilitiesEvent> listSupportedCapabilities() async {
+    send("CAP LS");
+    return await pollEvent(ServerCapabilitiesEvent);
   }
 
   /**
@@ -714,6 +672,13 @@ class Client extends ClientBase {
   }
 
   /**
+   * Request a set of capabilities.
+   */
+  void requestCapabilities(List<String> caps, {bool now: false}) {
+    sendAutoSplit("CAP REQ :", caps, " ", now);
+  }
+
+  /**
    * Check if the Server has a capability.
    */
   bool hasCapability(String name) {
@@ -803,13 +768,10 @@ class Client extends ClientBase {
    * Run a WHOIS query against a user.
    */
   Future<WhoisEvent> whois(String user,
-      {Duration timeout: const Duration(seconds: 5)}) {
-    var completer = new Completer();
-    onEvent(WhoisEvent).where((it) => it.nickname == user).first.then((e) {
-      completer.complete(e);
-    });
+      {Duration timeout: const Duration(seconds: 5)}) async {
+    var future = onEvent(WhoisEvent).where((it) => it.nickname == user).first;
     send("WHOIS ${user}");
-    return completer.future.timeout(timeout,
+    return await future.timeout(timeout,
         onTimeout: () => throw new UserNotFoundException(user));
   }
 
@@ -866,7 +828,6 @@ class Client extends ClientBase {
           }
           post(new ClientJoinEvent(this, channel));
           channel.reloadBans();
-          channel.reloadTopic();
         } else {
           // User joined one of our channels
           var event = new JoinEvent(this, who, getChannel(chanName));
@@ -975,11 +936,22 @@ class Client extends ClientBase {
       case "333": // Topic User
         var channel = getChannel(input.parameters[1]);
         var user = new Hostmask.parse(input.parameters[2]).nickname;
+        if (user == null) {
+          user = input.parameters[2];
+        }
         var topic = _topicQueue.remove(channel.name);
         var old = channel._topic;
         channel._topic = topic;
         channel._topicUser = user;
-        post(new TopicEvent(this, channel, getUser(user), topic, old));
+        post(
+          new TopicEvent(
+            this,
+            channel,
+            getUser(user, create: true),
+            topic,
+            old
+          )
+        );
         break;
 
       case "AWAY": // User marked as away
@@ -1008,7 +980,11 @@ class Client extends ClientBase {
           ..removeWhere((it) => it.trim().isEmpty);
         if (_currentCap.contains("userhost-in-names")) {
           users = users.map((it) {
-            return new Hostmask.parse(it).nickname;
+            var realHost = new List<String>.generate(
+              it.length,
+                (i) => it[i])
+              .skipWhile((t) => modePrefixes.containsValue(t)).join();
+            return new Hostmask.parse(realHost).nickname;
           }).toList();
         }
 
@@ -1078,6 +1054,7 @@ class Client extends ClientBase {
         break;
 
       case "MODE": // Mode Changed
+        _fireReady();
         var split = input.parameters;
 
         if (split.isEmpty) {
@@ -1234,6 +1211,19 @@ class Client extends ClientBase {
         builder.username = split[2];
         break;
 
+      case "670":
+        _dropConnection(true);
+        connection.initiateTlsConnection(config).then((_) {
+          _startConnection();
+          _doRegistration();
+          post(new ServerTlsEvent(this));
+        });
+        break;
+
+      case "691":
+        post(new ErrorEvent(this, message: input.message, type: "tls"));
+        break;
+
       case "671":
         var builder = _whoisBuilders[input.parameters[1]];
         builder.secure = true;
@@ -1350,6 +1340,99 @@ class Client extends ClientBase {
       _batchId = null;
       _batches[input.batchId].addAll(_batchedEvents);
       _batchedEvents.clear();
+    }
+  }
+
+  /**
+   * Runs STARTTLS.
+   */
+  void startSecureConnection() {
+    send("STARTTLS");
+  }
+
+  void _doRegistration() {
+    if (config.password != null) {
+      send("PASS ${config.password}");
+    }
+
+    send("NICK ${config.nickname}");
+    send(
+      "USER ${config.username} "
+        "${config.username} ${config.host} :${config.realname}");
+
+    flush();
+  }
+
+  Future _doCapabilityNegotiation() async {
+    var capsToTryToEnable = config.capabilities.toSet();
+    var caps = {
+      "invite-notify": config.enableInviteNotify,
+      "account-tag": config.enableAccountTag,
+      "extended-join": config.enableExtendedJoin,
+      "multi-prefix": config.enableMultiPrefix,
+      "self-message": config.enableSelfMessage,
+      "away-notify": config.enableAwayNotify,
+      "account-notify": config.enableAccountNotify,
+      "server-time": config.enableServerTime,
+      "userhost-in-names": config.enableUserHostInNames,
+      "chghost": config.enableChangeHost,
+      "batch": config.enableBatch,
+      "tls": config.enableStartTls
+    };
+
+    for (var cap in caps.keys) {
+      if (caps[cap] == true) {
+        capsToTryToEnable.add(cap);
+      }
+    }
+
+    if (capsToTryToEnable.isNotEmpty) {
+      try {
+        var supported = await listSupportedCapabilities();
+        var allSupported = supported.capabilities
+          .map((it) => it.startsWith("~") ? it.substring(1) : it)
+          .toSet();
+
+        var needsAck = supported.capabilities
+          .where((it) => it.startsWith("~"))
+          .map((it) => it.substring(1))
+          .toList();
+
+        requestCapabilities(
+          allSupported.intersection(capsToTryToEnable).toList(),
+          now: true
+        );
+
+        await events
+          .where((it) =>
+        it is AcknowledgedCapabilitiesEvent ||
+          it is NotAcknowledgedCapabilitiesEvent)
+          .first
+          .timeout(const Duration(seconds: 10))
+          .then((event) {
+          if (event is AcknowledgedCapabilitiesEvent) {
+            if (event.capabilities.any((it) => needsAck.contains(it))) {
+              sendAutoSplit(
+                "CAP ACK :", event.capabilities.toList(),
+                " ",
+                true
+              );
+            }
+          }
+
+          send("CAP END");
+          _doRegistration();
+        }).catchError((e) {
+          send("CAP END");
+          _doRegistration();
+        });
+      } catch (e) {
+        send("CAP END");
+      }
+    }
+
+    if (!config.ssl && currentCapabilities.contains("tls")) {
+      startSecureConnection();
     }
   }
 }

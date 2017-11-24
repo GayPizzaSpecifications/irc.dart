@@ -75,4 +75,21 @@ class Color {
     });
     return all;
   }
+
+  static String sanitize(String message) {
+    var buffer = new StringBuffer();
+    for (var i = 0; i < message.length; i++) {
+      if (i >= message.length) break;
+      var c = message[i];
+      if (c == "\u0003") {
+        i += 2;
+      } else if (c != "\u000f" &&
+        c != "\u0016" &&
+        c != "\u0002" &&
+        c != "\u001d") {
+        buffer.write(c);
+      }
+    }
+    return buffer.toString();
+  }
 }

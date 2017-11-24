@@ -231,7 +231,7 @@ class EventDispatcher {
       }
     }
 
-    var handlers = _handlers[name];
+    List<_EventHandler> handlers = _handlers[name];
     var executed = false;
 
     for (var handler in handlers) {

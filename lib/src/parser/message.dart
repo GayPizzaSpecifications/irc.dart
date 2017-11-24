@@ -40,10 +40,18 @@ class Message {
   @override
   String toString() => line;
 
+
+  Hostmask _parsedHostmask;
   /**
    * Gets the Parsed Hostmask
    */
-  Hostmask get hostmask => new Hostmask.parse(_hostmask);
+  Hostmask get hostmask {
+    if (_parsedHostmask != null || _hostmask == null) {
+      return _parsedHostmask;
+    }
+
+    return _parsedHostmask = new Hostmask.parse(_hostmask);
+  }
 
   /**
    * The Plain Hostmask
@@ -119,9 +127,15 @@ class IrcParserSupport {
   static ModeChange parseMode(String input) {
     ModeChange mode;
     if (input.startsWith("+")) {
-      mode = new ModeChange(input.substring(1).split(""), []);
+      mode = new ModeChange(
+        input.substring(1).split("").toSet(),
+        new Set<String>()
+      );
     } else if (input.startsWith("-")) {
-      mode = new ModeChange([], input.substring(1).split(""));
+      mode = new ModeChange(
+        new Set<String>(),
+        input.substring(1).split("").toSet()
+      );
     } else {
       throw new Exception("Failed to parse mode: invalid prefix for ${input}");
     }
@@ -130,10 +144,10 @@ class IrcParserSupport {
 }
 
 class ModeChange {
-  final List<String> added;
-  final List<String> removed;
+  final Set<String> added;
+  final Set<String> removed;
 
-  List<String> get modes => isAdded ? added : removed;
+  Set<String> get modes => isAdded ? added : removed;
   bool get isAdded => added.isNotEmpty;
   bool get isRemoved => removed.isNotEmpty;
 
@@ -147,10 +161,10 @@ class ModeChange {
 }
 
 class Mode {
-  final List<String> modes;
+  final Set<String> modes;
 
   Mode(this.modes);
-  Mode.empty() : modes = [];
+  Mode.empty() : modes = new Set<String>();
 
   bool has(String x) {
     return modes.contains(x);

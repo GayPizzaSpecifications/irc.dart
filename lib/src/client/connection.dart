@@ -6,6 +6,8 @@ abstract class IrcConnection {
   
   void send(String line);
   Stream<String> lines();
+
+  Future initiateTlsConnection(Configuration config) async {}
 }
 
 class SocketIrcConnection extends IrcConnection {
@@ -72,6 +74,26 @@ class SocketIrcConnection extends IrcConnection {
     if (!_done) {
       _socket.writeln(line);
     }
+  }
+
+  @override
+  Future initiateTlsConnection(Configuration config) async {
+    _socket = await SecureSocket.secure(
+      _socket,
+      onBadCertificate: (cert) {
+        if (config.allowInvalidCertificates) {
+          return true;
+        }
+        return false;
+      }
+    );
+
+    _lines = null;
+
+    _done = false;
+    _socket.done.then((_) {
+      _done = true;
+    });
   }
 }
 

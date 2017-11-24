@@ -104,6 +104,10 @@ class ServerOperatorEvent extends Event {
     : super(client);
 }
 
+class ServerTlsEvent extends Event {
+  ServerTlsEvent(Client client) : super(client);
+}
+
 class ServerVersionEvent extends Event {
   final String version;
   final String server;

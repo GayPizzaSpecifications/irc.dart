@@ -132,7 +132,7 @@ abstract class ClientBase {
    * Sends a line prefixed by [prefix], with a section of [parts] joined by [joinBy].
    * When the line would be too long, it will generate a new line.
    */
-  void sendAutoSplit(String prefix, List<String> parts, [String joinBy = " "]) {
+  void sendAutoSplit(String prefix, List<String> parts, [String joinBy = " ", bool now = false]) {
     var line = "${prefix}";
     var empty = true;
     while (parts.isNotEmpty) {
@@ -140,12 +140,13 @@ abstract class ClientBase {
       var candidate = parts.removeAt(0);
       if (empty) {
         current += candidate;
+        empty = false;
       } else {
         current += "${joinBy}${candidate}";
       }
 
       if (current.length > 510) {
-        send(line);
+        send(line, now: now);
         line = "${prefix}${candidate}";
       } else {
         line = current;
@@ -153,7 +154,7 @@ abstract class ClientBase {
     }
 
     if (!empty) {
-      send(line);
+      send(line, now: now);
     }
   }
 
@@ -187,7 +188,7 @@ abstract class ClientBase {
    *
    * Will throw an error if [line] is greater than 510 characters
    */
-  void send(String line);
+  void send(String line, {bool now: false});
 
   /**
    * Gets a Channel object for the channel's [name].
