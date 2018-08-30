@@ -27,9 +27,9 @@ class RegexIrcParser extends IrcParser {
         parsed.group
       );
 
-      if (!line.startsWith(":") && !line.startsWith("@")) {
-        match = [match[0], null, null, match[1], null, match[3].substring(1)];
-      }
+      //if (!line.startsWith(":") && !line.startsWith("@")) {
+      //  match = [match[0], null, null, match[1], null, match[3].substring(1)];
+      //}
     }
     var tagStuff = match[1];
     var hostmask = match[2];
@@ -40,7 +40,7 @@ class RegexIrcParser extends IrcParser {
     var tags = <String, String>{};
 
     if (tagStuff != null && tagStuff.trim().isNotEmpty) {
-      tags = IrcParserSupport.parseTags(tagStuff);
+      tags = IrcParserSupport.parseTags(tagStuff).cast<String, String>();
     }
 
     return new Message(
