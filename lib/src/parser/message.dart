@@ -110,7 +110,7 @@ class IrcParserSupport {
       return {};
     }
 
-    var out = {};
+    var out = <String, String>{};
     var split = input.split(")");
     var modes = split[0].substring(1).split("");
     var prefixes = split[1].split("");

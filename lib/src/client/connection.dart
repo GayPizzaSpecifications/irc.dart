@@ -114,12 +114,12 @@ class WebSocketIrcConnection extends IrcConnection {
 
   @override
   Future disconnect() async {
-    await _socket.close(WebSocketStatus.NORMAL_CLOSURE, "IRC disconnect.");
+    await _socket.close(WebSocketStatus.normalClosure, "IRC disconnect.");
   }
 
   @override
   Stream<String> lines() {
-    return _socket.where((e) => e is String).map((String line) {
+    return _socket.where((e) => e is String).cast<String>().map((String line) {
       return line.substring(0, line.length - 2);
     });
   }

@@ -277,7 +277,7 @@ class Client extends ClientBase {
    * Returns false if [method] is already registered, otherwise true.
    */
   bool register<T extends Event>(EventHandlerFunction<T> handler,
-      {EventFilter filter, int priority}) {
+      {EventFilter<T> filter, int priority}) {
     return filter == null
         ? dispatcher.register(handler, priority: priority)
         : dispatcher.register(handler, filter: filter, priority: priority);
@@ -522,7 +522,7 @@ class Client extends ClientBase {
    * Get the current capabilities
    */
   Future<CurrentCapabilitiesEvent> listCurrentCapabilities() {
-    var f = onEvent(CurrentCapabilitiesEvent).first;
+    var f = onEvent<CurrentCapabilitiesEvent>().first;
     send("CAP LIST");
     return f;
   }
@@ -635,11 +635,11 @@ class Client extends ClientBase {
   Future<String> getChannelTopic(String channel) async {
     send("TOPIC ${channel}");
 
-    return (await onEvent(TopicEvent)
+    return (await onEvent<TopicEvent>()
       .where((TopicEvent it) => it.channel.name == channel)
-      .first.timeout(const Duration(seconds: 2), onTimeout: () {
+      .first.timeout(const Duration(seconds: 5), onTimeout: () {
         return null;
-    }).then((e) => e is TopicEvent ? (e as TopicEvent).topic : null));
+    }).then((e) => e is TopicEvent ? e.topic : null));
   }
 
   /**
@@ -699,55 +699,55 @@ class Client extends ClientBase {
   /**
    * Run callback on type event.
    */
-  Stream<Event> onEvent(Type type) {
-    return events.where((it) => it.runtimeType == type);
+  Stream<T> onEvent<T>() {
+    return events.where((Event e) => e is T).cast<T>();
   }
 
   Monitor monitor;
 
-  Stream<ConnectEvent> get onConnect => onEvent(ConnectEvent);
+  Stream<ConnectEvent> get onConnect => onEvent<ConnectEvent>();
 
-  Stream<DisconnectEvent> get onDisconnect => onEvent(DisconnectEvent);
+  Stream<DisconnectEvent> get onDisconnect => onEvent<DisconnectEvent>();
 
-  Stream<MessageEvent> get onMessage => onEvent(MessageEvent);
+  Stream<MessageEvent> get onMessage => onEvent<MessageEvent>();
 
-  Stream<ClientJoinEvent> get onClientJoin => onEvent(ClientJoinEvent);
+  Stream<ClientJoinEvent> get onClientJoin => onEvent<ClientJoinEvent>();
 
-  Stream<ClientPartEvent> get onClientPart => onEvent(ClientPartEvent);
+  Stream<ClientPartEvent> get onClientPart => onEvent<ClientPartEvent>();
 
-  Stream<JoinEvent> get onJoin => onEvent(JoinEvent);
+  Stream<JoinEvent> get onJoin => onEvent<JoinEvent>();
 
-  Stream<PartEvent> get onPart => onEvent(PartEvent);
+  Stream<PartEvent> get onPart => onEvent<PartEvent>();
 
-  Stream<QuitEvent> get onQuit => onEvent(QuitEvent);
+  Stream<QuitEvent> get onQuit => onEvent<QuitEvent>();
 
-  Stream<QuitPartEvent> get onQuitPart => onEvent(QuitPartEvent);
+  Stream<QuitPartEvent> get onQuitPart => onEvent<QuitPartEvent>();
 
-  Stream<NoticeEvent> get onNotice => onEvent(NoticeEvent);
+  Stream<NoticeEvent> get onNotice => onEvent<NoticeEvent>();
 
-  Stream<ActionEvent> get onAction => onEvent(ActionEvent);
+  Stream<ActionEvent> get onAction => onEvent<ActionEvent>();
 
-  Stream<PongEvent> get onPong => onEvent(PongEvent);
+  Stream<PongEvent> get onPong => onEvent<PongEvent>();
 
-  Stream<TopicEvent> get onTopic => onEvent(TopicEvent);
+  Stream<TopicEvent> get onTopic => onEvent<TopicEvent>();
 
-  Stream<ModeEvent> get onMode => onEvent(ModeEvent);
+  Stream<ModeEvent> get onMode => onEvent<ModeEvent>();
 
-  Stream<WhoisEvent> get onWhois => onEvent(WhoisEvent);
+  Stream<WhoisEvent> get onWhois => onEvent<WhoisEvent>();
 
-  Stream<ReadyEvent> get onReady => onEvent(ReadyEvent);
+  Stream<ReadyEvent> get onReady => onEvent<ReadyEvent>();
 
-  Stream<LineReceiveEvent> get onLineReceive => onEvent(LineReceiveEvent);
+  Stream<LineReceiveEvent> get onLineReceive => onEvent<LineReceiveEvent>();
 
-  Stream<LineSentEvent> get onLineSent => onEvent(LineSentEvent);
+  Stream<LineSentEvent> get onLineSent => onEvent<LineSentEvent>();
 
-  Stream<InviteEvent> get onInvite => onEvent(InviteEvent);
+  Stream<InviteEvent> get onInvite => onEvent<InviteEvent>();
 
-  Stream<IsOnEvent> get onIsOn => onEvent(IsOnEvent);
+  Stream<IsOnEvent> get onIsOn => onEvent<IsOnEvent>();
 
   Stream<Event> get events => _controller.stream;
 
-  StreamController _controller = new StreamController.broadcast();
+  StreamController<Event> _controller = new StreamController<Event>.broadcast();
 
   String _batchId;
 
@@ -769,7 +769,7 @@ class Client extends ClientBase {
    */
   Future<WhoisEvent> whois(String user,
       {Duration timeout: const Duration(seconds: 5)}) async {
-    var future = onEvent(WhoisEvent).where((it) => it.nickname == user).first;
+    var future = onEvent<WhoisEvent>().where((it) => it.nickname == user).first;
     send("WHOIS ${user}");
     return await future.timeout(timeout,
         onTimeout: () => throw new UserNotFoundException(user));

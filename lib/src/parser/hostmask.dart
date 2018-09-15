@@ -63,7 +63,7 @@ class GlobHostmask {
   /**
    * Checks if [hostmask] matches [pattern]
    */
-  bool matches(String hostmask) => new Glob(pattern).hasMatch(hostmask);
+  bool matches(String hostmask) => new Glob(pattern).matches(hostmask);
 
   /**
    * Gives a String Representation of this hostmask pattern

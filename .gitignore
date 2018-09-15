@@ -12,4 +12,5 @@ dartdoc-viewer/
 .packages
 personal/
 work/
+.dart_tool/
 

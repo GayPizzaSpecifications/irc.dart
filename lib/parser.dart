@@ -25,7 +25,7 @@ library irc.parser;
 
 import "dart:convert" show Converter;
 
-import "package:quiver/pattern.dart";
+import "package:glob/glob.dart";
 
 part "src/parser/base.dart";
 part "src/parser/message.dart";

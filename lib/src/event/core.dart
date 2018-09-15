@@ -3,7 +3,7 @@ part of irc.event;
 /**
  * A function that handles events.
  */
-typedef void EventHandlerFunction<T>(T event);
+typedef EventHandlerFunction<T>(T event);
 
 /**
  * An event filter that filters out events.
@@ -69,7 +69,7 @@ class EventDispatcher {
    * listener. If the specific [handler] has a priority, it should be provided as well.
    * Returns whether the [handler] was removed or not.
    */
-  bool unregister(EventHandlerFunction handler, {
+  bool unregister<T>(EventHandlerFunction<T> handler, {
     EventFilter filter: _defaultFilter,
     int priority
   }) {
@@ -120,7 +120,7 @@ class EventDispatcher {
    *
    * Returns false if [method] is already registered, otherwise true.
    */
-  bool register(EventHandlerFunction handler, {
+  bool register<T>(EventHandlerFunction<T> handler, {
     EventFilter filter: _defaultFilter,
     int priority,
     bool always: false
@@ -248,7 +248,7 @@ class EventDispatcher {
    * If [postDeadEvent] is true, if no handlers are called for the event,
    * it will post a new event of type [DeadEvent].
    */
-  bool post(dynamic event, {bool postDeadEvent: true}) {
+  bool post<T>(T event, {bool postDeadEvent: true}) {
     var name = _getName(event);
 
     if (!_handlers.containsKey(name)) {

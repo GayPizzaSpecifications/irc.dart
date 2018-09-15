@@ -32,8 +32,8 @@ class BatchStartEvent extends Event {
 
   Future<BatchEndEvent> waitForEnd() {
     return client
-      .onEvent(BatchEndEvent)
-      .where((BatchEndEvent it) => it.id == id)
+      .onEvent<BatchEndEvent>()
+      .where((it) => it.id == id)
       .first;
   }
 }
@@ -755,10 +755,11 @@ class ServerSupportsEvent extends Event {
       if (it.contains("=")) {
         var keyValue = it.split("=");
         var key = keyValue[0];
-        var value = keyValue[1];
-        try {
-          value = num.parse(value);
-        } catch (e) {
+
+        dynamic value = keyValue[1];
+        var numeric = num.tryParse(value);
+        if (numeric != null) {
+          value = numeric;
         }
         supported[key] = value;
       } else {

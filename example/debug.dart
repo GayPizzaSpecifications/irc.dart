@@ -9,7 +9,7 @@ Map<String, StreamController<CommandEvent>> commands = {};
 
 void main() {
   var config = new Configuration(
-    host: "irc.fork.run",
+    host: "irc.freenode.net",
     port: 6667,
     nickname: "DartBotDebug",
     username: "DartBotDebug",

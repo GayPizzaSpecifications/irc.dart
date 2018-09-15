@@ -8,7 +8,7 @@ void main(List<String> args) {
   
   var server = args[0];
   
-  var configs = [];
+  var configs = <Configuration>[];
   for (int i = 1; i <= 10; i++) {
     configs.add(new Configuration(
         nickname: "DartBot${i}",
