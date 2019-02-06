@@ -86,17 +86,11 @@ class IrcParserSupport {
    * [input] should begin with the @ part of the tags
    * and not include the space at the end.
    */
-  static Map<String, dynamic> parseTags(String input) {
-    var out = <String, dynamic>{};
-    var parts = input.substring(1).split(";");
-    for (var part in parts) {
-      if (part.contains("=")) {
-        var keyValue = part.split("=");
-        out[keyValue[0]] = keyValue.skip(1).join("=");
-      } else {
-        out[part] = true;
-      }
-    }
+  static Map<String, String> parseTags(String input) {
+    var out = <String, String>{};
+    var parts = input.split(";");
+    parts.forEach((part) => _testPart(part, out));
+    
     return out;
   }
   
@@ -140,6 +134,16 @@ class IrcParserSupport {
       throw new Exception("Failed to parse mode: invalid prefix for ${input}");
     }
     return mode;
+  }
+
+  static Map<String, String> _testPart(String part, Map<String, String> out) {
+    if (part.contains("=")) {
+        var keyValue = part.split("=");
+        out[keyValue[0]] = keyValue.skip(1).join("=");
+      } else {
+        out[part] = "true";
+      }
+    return out;
   }
 }
 
