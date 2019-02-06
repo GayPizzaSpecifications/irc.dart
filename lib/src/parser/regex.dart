@@ -10,7 +10,7 @@ class RegexIrcParser extends IrcParser {
    * Expression: ^([\@A-Za-z\;\=\/\\]*)?(?:\ )? ?(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$
    */
   static final kLinePattern = new RegExp(r"^(?:@([^\r\n ]*) +|())(?::([^\r\n ]+) +|())([^\r\n ]+)(?: +([^:\r\n ]+[^\r\n ]*(?: +[^:\r\n ]+[^\r\n ]*)*)|())?(?: +:([^\r\n]*)| +())?[\r\n]*$");
-  
+
   @override
   Message convert(String line) {
     line = line.trimLeft();
@@ -22,13 +22,12 @@ class RegexIrcParser extends IrcParser {
         return null;
       }
 
-   
       match = new List<String>.generate(
         parsed.groupCount + 1,
         parsed.group
       );
     }
-    
+
     var tagStuff = match[1];
     var hostmask = match[3];
     var command = match[5];
