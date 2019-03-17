@@ -1,6 +1,6 @@
-import "package:irc/parser.dart";
+import 'package:irc/parser.dart';
 
-import "dart:io";
+import 'dart:io';
 
 typedef bool CheckOutput(Message message);
 

@@ -1,19 +1,23 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:irc/client.dart';
 
 typedef CommandHandler(CommandEvent event);
 
+final Random random = Random();
+
 String prefix = '~';
 Map<String, StreamController<CommandEvent>> commands = {};
 
 void main() {
+  var nickOffset = random.nextInt(9999);
   var config = new Configuration(
       host: 'irc.freenode.net',
       port: 6667,
-      nickname: 'DartBotDebug',
-      username: 'DartBotDebug',
-      realname: 'DartBotDebug');
+      nickname: "DartBot$nickOffset",
+      username: "DartBot$nickOffset",
+      realname: 'DartBot');
 
   var client = new Client(config);
   client.connect();
