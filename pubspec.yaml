@@ -2,9 +2,7 @@ name: irc
 version: 4.0.0
 authors:
 - Kenneth Endfinger <kaendfinger@gmail.com>
-- samrg472 <samrg472@gmail.com>
-- TheMike <zeusintraining@gmail.com>
-- Logan Gorence <loganjohngorence@gmail.com>
+- Logan Gorence <logan@gorence.xyz>
 description: Simple IRC library in Dart
 homepage: https://github.com/SpinlockLabs/irc.dart/
 environment:
