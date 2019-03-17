@@ -1,13 +1,11 @@
 part of irc.client;
 
-/**
- * Builder for WHOIS Server Replies
- */
+/// Builder for WHOIS Server Replies
 class WhoisBuilder {
   final String nickname;
-  
+
   String username;
-  String realname;
+  String realName;
   String hostname;
   String awayMessage;
   List<String> channels = [];
@@ -36,7 +34,7 @@ class WhoisBuilder {
     return [
       "Nickname: ${nickname}",
       "Username: ${username}",
-      "Realname: ${realname}",
+      "Realname: ${realName}",
       "Hostname: ${hostname}",
       "Away Message: ${awayMessage}",
       "Away: ${away}",

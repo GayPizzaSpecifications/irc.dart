@@ -8,7 +8,8 @@ typedef void CommandHandler(Message message);
 class FakeServer {
   RegexIrcParser parser = new RegexIrcParser();
   FakeServerConnection connection;
-  StreamController<String> controller = new StreamController<String>.broadcast();
+  StreamController<String> controller =
+      new StreamController<String>.broadcast();
   StreamController<String> inputs = new StreamController<String>.broadcast();
   Stream<String> get messages => inputs.stream;
 

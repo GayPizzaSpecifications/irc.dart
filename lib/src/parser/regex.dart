@@ -1,15 +1,10 @@
 part of irc.parser;
 
-/**
- * Regular Expression based IRC Parser
- */
+/// Regular Expression based IRC Parser
 class RegexIrcParser extends IrcParser {
-  /**
-   * Basic Regular Expression for IRC Parsing.
-   *
-   * Expression: ^([\@A-Za-z\;\=\/\\]*)?(?:\ )? ?(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$
-   */
-  static final kLinePattern = new RegExp(r"^(?:@([^\r\n ]*) +|())(?::([^\r\n ]+) +|())([^\r\n ]+)(?: +([^:\r\n ]+[^\r\n ]*(?: +[^:\r\n ]+[^\r\n ]*)*)|())?(?: +:([^\r\n]*)| +())?[\r\n]*$");
+  /// Basic Regular Expression for IRC Parsing.
+  static final kLinePattern = new RegExp(
+      r"^(?:@([^\r\n ]*) +|())(?::([^\r\n ]+) +|())([^\r\n ]+)(?: +([^:\r\n ]+[^\r\n ]*(?: +[^:\r\n ]+[^\r\n ]*)*)|())?(?: +:([^\r\n]*)| +())?[\r\n]*$");
 
   @override
   Message convert(String line) {
@@ -17,15 +12,12 @@ class RegexIrcParser extends IrcParser {
     List<String> match;
     {
       var parsed = kLinePattern.firstMatch(line);
-   
+
       if (parsed == null) {
         return null;
       }
 
-      match = new List<String>.generate(
-        parsed.groupCount + 1,
-        parsed.group
-      );
+      match = new List<String>.generate(parsed.groupCount + 1, parsed.group);
     }
 
     var tagStuff = match[1];
@@ -41,12 +33,11 @@ class RegexIrcParser extends IrcParser {
     }
 
     return new Message(
-      line: line,
-      hostmask: hostmask,
-      command: command,
-      message: msg,
-      parameters: parameters,
-      tags: tags
-    );
+        line: line,
+        hostmask: hostmask,
+        command: command,
+        message: msg,
+        parameters: parameters,
+        tags: tags);
   }
 }

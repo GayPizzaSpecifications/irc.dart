@@ -1,50 +1,39 @@
 part of irc.parser;
 
-/**
- * IRC Message
- */
+/// IRC Message
 class Message {
-  /**
-   * Original Line
-   */
-  String line;
+  /// Original Line
+  final String line;
 
-  /**
-   * IRC Command
-   */
-  String command;
+  /// IRC Command
+  final String command;
 
-  /**
-   * Message
-   */
-  String message;
+  /// Message
+  final String message;
+  final String _hostmask;
 
-  String _hostmask;
+  /// IRC v3 Tags
+  final Map<String, String> tags;
 
-  /**
-   * IRC v3 Tags
-   */
-  Map<String, String> tags;
+  /// Parameters
+  final List<String> parameters;
 
-  /**
-   * Parameters
-   */
-  List<String> parameters;
-
-  /**
-   * Creates a new Message
-   */
-  Message({this.line, hostmask, this.command, this.message, this.parameters, this.tags})
+  /// Creates a new Message
+  Message(
+      {this.line,
+      hostmask,
+      this.command,
+      this.message,
+      this.parameters,
+      this.tags})
       : _hostmask = hostmask;
 
   @override
   String toString() => line;
 
-
   Hostmask _parsedHostmask;
-  /**
-   * Gets the Parsed Hostmask
-   */
+
+  /// Gets the Parsed Hostmask
   Hostmask get hostmask {
     if (_parsedHostmask != null || _hostmask == null) {
       return _parsedHostmask;
@@ -53,9 +42,7 @@ class Message {
     return _parsedHostmask = new Hostmask.parse(_hostmask);
   }
 
-  /**
-   * The Plain Hostmask
-   */
+  /// The Plain Hostmask
   String get plainHostmask => _hostmask;
 
   bool get hasAccountTag => tags.containsKey("account");
@@ -76,29 +63,23 @@ class Message {
   DateTime _serverTime;
 }
 
-/**
- * IRC Parser Helpers
- */
+/// IRC Parser Helpers
 class IrcParserSupport {
-  /**
-   * Parses IRCv3 Tags from [input].
-   * 
-   * [input] should begin with the @ part of the tags
-   * and not include the space at the end.
-   */
+  /// Parses IRCv3 Tags from [input].
+  ///
+  /// [input] should begin with the @ part of the tags
+  /// and not include the space at the end.
   static Map<String, String> parseTags(String input) {
     var out = <String, String>{};
     var parts = input.split(";");
     parts.forEach((part) => _testPart(part, out));
-    
+
     return out;
   }
-  
-  /**
-   * Parses the ISUPPORT PREFIX Property
-   * 
-   * [input] should begin with '(' and contain ')'
-   */
+
+  /// Parses the ISUPPORT PREFIX Property
+  ///
+  /// [input] should begin with '(' and contain ')'
   static Map<String, String> parseSupportedPrefixes(String input) {
     if (input == null) {
       return {};
@@ -108,13 +89,13 @@ class IrcParserSupport {
     var split = input.split(")");
     var modes = split[0].substring(1).split("");
     var prefixes = split[1].split("");
-    
+
     var i = 0;
     for (var mode in modes) {
       out[mode] = prefixes[i];
       i++;
     }
-    
+
     return out;
   }
 
@@ -122,14 +103,10 @@ class IrcParserSupport {
     ModeChange mode;
     if (input.startsWith("+")) {
       mode = new ModeChange(
-        input.substring(1).split("").toSet(),
-        new Set<String>()
-      );
+          input.substring(1).split("").toSet(), new Set<String>());
     } else if (input.startsWith("-")) {
       mode = new ModeChange(
-        new Set<String>(),
-        input.substring(1).split("").toSet()
-      );
+          new Set<String>(), input.substring(1).split("").toSet());
     } else {
       throw new Exception("Failed to parse mode: invalid prefix for ${input}");
     }
@@ -138,11 +115,11 @@ class IrcParserSupport {
 
   static Map<String, String> _testPart(String part, Map<String, String> out) {
     if (part.contains("=")) {
-        var keyValue = part.split("=");
-        out[keyValue[0]] = keyValue.skip(1).join("=");
-      } else {
-        out[part] = "true";
-      }
+      var keyValue = part.split("=");
+      out[keyValue[0]] = keyValue.skip(1).join("=");
+    } else {
+      out[part] = "true";
+    }
     return out;
   }
 }
@@ -159,9 +136,7 @@ class ModeChange {
 
   @override
   String toString() =>
-    added.isEmpty ?
-    "-${removed.join()}" :
-    "+${added.join()}";
+      added.isEmpty ? "-${removed.join()}" : "+${added.join()}";
 }
 
 class Mode {

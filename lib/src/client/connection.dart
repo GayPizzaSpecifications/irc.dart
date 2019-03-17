@@ -3,7 +3,7 @@ part of irc.client;
 abstract class IrcConnection {
   Future connect(Configuration config);
   Future disconnect();
-  
+
   void send(String line);
   Stream<String> lines();
 
@@ -16,44 +16,38 @@ class SocketIrcConnection extends IrcConnection {
   bool _done = false;
 
   List<String> _queue = <String>[];
-  
+
   @override
   Future connect(Configuration config) async {
-    var socket = await Socket.connect(
-      config.host,
-      config.port,
-      sourceAddress: config.bindHost
-    );
-    
+    var socket = await Socket.connect(config.host, config.port,
+        sourceAddress: config.bindHost);
+
     if (config.ssl) {
-      socket = await SecureSocket.secure(
-        socket,
-        onBadCertificate: (cert) {
-          if (config.allowInvalidCertificates) {
-            return true;
-          }
-          return false;
+      socket = await SecureSocket.secure(socket, onBadCertificate: (cert) {
+        if (config.allowInvalidCertificates) {
+          return true;
         }
-      );
+        return false;
+      });
     }
-    
+
     _socket = socket;
 
     _done = false;
-    _socket.done.then((_) {
+    unawaited(_socket.done.then((_) {
       _done = true;
-    });
+    }));
     return socket;
   }
-  
+
   @override
   Stream<String> lines() {
     if (_lines == null) {
       _lines = _socket
-        .transform(const Utf8Decoder(allowMalformed: true))
-        .transform(const LineSplitter());
+          .transform(const Utf8Decoder(allowMalformed: true))
+          .transform(const LineSplitter());
     }
-    
+
     return _lines;
   }
 
@@ -78,22 +72,19 @@ class SocketIrcConnection extends IrcConnection {
 
   @override
   Future initiateTlsConnection(Configuration config) async {
-    _socket = await SecureSocket.secure(
-      _socket,
-      onBadCertificate: (cert) {
-        if (config.allowInvalidCertificates) {
-          return true;
-        }
-        return false;
+    _socket = await SecureSocket.secure(_socket, onBadCertificate: (cert) {
+      if (config.allowInvalidCertificates) {
+        return true;
       }
-    );
+      return false;
+    });
 
     _lines = null;
 
     _done = false;
-    _socket.done.then((_) {
+    unawaited(_socket.done.then((_) {
       _done = true;
-    });
+    }));
   }
 }
 
@@ -103,11 +94,10 @@ class WebSocketIrcConnection extends IrcConnection {
   @override
   Future connect(Configuration config) async {
     var uri = new Uri(
-      scheme: config.ssl ? "wss" : "ws",
-      port: config.port,
-      host: config.host,
-      path: config.websocketPath
-    );
+        scheme: config.ssl ? "wss" : "ws",
+        port: config.port,
+        host: config.host,
+        path: config.websocketPath);
 
     _socket = await WebSocket.connect(uri.toString());
   }

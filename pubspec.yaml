@@ -5,11 +5,12 @@ authors:
 - samrg472 <samrg472@gmail.com>
 - TheMike <zeusintraining@gmail.com>
 - Logan Gorence <loganjohngorence@gmail.com>
-description: A beautiful all-purpose IRC library.
+description: Simple IRC library in Dart
 homepage: https://github.com/SpinlockLabs/irc.dart/
 environment:
   sdk: ">=2.0.0 <3.0.0"
 dependencies:
   glob: "^1.1.7"
+  pedantic: '1.5.0'
 dev_dependencies:
   test: "^1.3.2"
