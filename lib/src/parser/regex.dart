@@ -9,7 +9,7 @@ class RegexIrcParser extends IrcParser {
    *
    * Expression: ^([\@A-Za-z\;\=\/\\]*)?(?:\ )? ?(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$
    */
-  static final kLinePattern = new RegExp(r"^(@[^ ]*)?(?:\ )? ?(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$");
+  static final kLinePattern = new RegExp(r"^(?:@([^\r\n ]*) +|())(?::([^\r\n ]+) +|())([^\r\n ]+)(?: +([^:\r\n ]+[^\r\n ]*(?: +[^:\r\n ]+[^\r\n ]*)*)|())?(?: +:([^\r\n]*)| +())?[\r\n]*$");
 
   @override
   Message convert(String line) {
@@ -17,7 +17,7 @@ class RegexIrcParser extends IrcParser {
     List<String> match;
     {
       var parsed = kLinePattern.firstMatch(line);
-
+   
       if (parsed == null) {
         return null;
       }
@@ -26,20 +26,17 @@ class RegexIrcParser extends IrcParser {
         parsed.groupCount + 1,
         parsed.group
       );
-
-      if (!line.startsWith(":") && !line.startsWith("@")) {
-        match = [match[0], null, null, match[1], null, match[3].substring(1)];
-      }
     }
+
     var tagStuff = match[1];
-    var hostmask = match[2];
-    var command = match[3];
-    var param = match[4];
-    var msg = match[5];
-    var parameters = param != null ? param.trim().split(" ") : <String>[];
+    var hostmask = match[3];
+    var command = match[5];
+    var param = match[6];
+    var msg = match[8];
+    var parameters = param != null ? param.split(" ") : <String>[];
     var tags = <String, String>{};
 
-    if (tagStuff != null && tagStuff.trim().isNotEmpty) {
+    if (tagStuff != null && tagStuff.isNotEmpty) {
       tags = IrcParserSupport.parseTags(tagStuff);
     }
 
