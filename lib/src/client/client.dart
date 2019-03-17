@@ -1,108 +1,74 @@
 part of irc.client;
 
-/**
- * IRC Client is the primary class in irc.dart.
- *
- *      var config = new Configuration(
- *        nickname: "DartBot",
- *        host: "irc.esper.net",
- *        port: 6667
- *      );
- *      var client = new Client(config);
- *      // Use Client
- */
+/// IRC Client is the primary class in irc.dart.
+///
+///      var config = new Configuration(
+///        nickname: "DartBot",
+///        host: "irc.esper.net",
+///        port: 6667
+///      );
+///      var client = new Client(config);
+///      // Use Client
 class Client extends ClientBase {
-  /**
-   * Event Dispatcher.
-   */
+  /// Event Dispatcher.
   final EventDispatcher dispatcher = new EventDispatcher();
 
-  /**
-   * Configuration for the Client.
-   */
+  /// Configuration for the Client.
   @override
   Configuration config;
 
-  /**
-   * List of Channels.
-   */
+  /// List of Channels.
   @override
   Map<String, Channel> channels = {};
 
-  /**
-   * List of Users.
-   */
+  /// List of Users.
   @override
   Map<String, User> users = {};
 
-  /**
-   * WHOIS Implementation Builder Storage.
-   */
+  /// WHOIS Implementation Builder Storage.
   Map<String, WhoisBuilder> _whoisBuilders;
 
-  /**
-   * Connection System.
-   */
+  /// IRC connection
   IrcConnection connection;
 
-  /**
-   * Flag for if the Client has sent a ReadyEvent.
-   */
+  /// Flag for if the Client has sent a ReadyEvent.
   bool _ready = false;
 
-  /**
-   * Privately Stored Nickname.
-   */
+  /// Privately Stored Nickname.
   String _nickname;
 
-  /**
-   * Instance of the class that parses incoming messages.
-   */
+  /// Instance of the class that parses incoming messages.
   @override
   final IrcParser parser;
 
-  /**
-   * Send interval for buffer.
-   */
+  /// Send interval for buffer.
   final Duration sendInterval;
 
-  /**
-   * Boolean whether the Client is connected to the server or not.
-   */
+  /// Boolean whether the Client is connected to the server or not.
   @override
   bool connected = false;
 
-  /**
-   * Storage for any data.
-   * This will persist when you connect and disconnect.
-   */
+  /// Storage for any data.
+  /// This will persist when you connect and disconnect.
   final Map<String, dynamic> metadata;
 
-  /**
-   * Stores the MOTD
-   */
+  /// Stores the MOTD
   String _motd = "";
 
-  /**
-   * Server Supports
-   */
+  /// Server Supports
   Map<String, dynamic> _supported = {};
 
   StreamSubscription<String> _lineSub;
 
-  /**
-   * Server Supports
-   */
+  /// Server Supports
   Map<String, dynamic> get supported => _supported;
 
-  /**
-   * Creates a new IRC Client using the specified configuration
-   * If parser is specified, then the parser is used for the current client
-   */
+  /// Creates a new IRC Client using the specified configuration
+  /// If parser is specified, then the parser is used for the current client
   Client(Configuration config,
       {IrcParser parser,
       IrcConnection connection,
-      this.sendInterval: const Duration(milliseconds: 2)})
+      this.sendInterval = const Duration(milliseconds: 2)})
       : this.parser = parser == null ? new RegexIrcParser() : parser,
         this.connection = connection == null
             ? (config.websocket
@@ -117,21 +83,15 @@ class Client extends ClientBase {
     monitor = new Monitor(this);
   }
 
-  /**
-   * Get the Server's MOTD.
-   */
+  /// Get the Server's MOTD.
   @override
   String get motd => _motd;
 
-  /**
-   * Get the Client's nickname.
-   */
+  /// Get the Client's nickname.
   @override
   String get nickname => _nickname;
 
-  /**
-   * Get a User.
-   */
+  /// Get a User.
   @override
   Channel getChannel(String name) => channels[name];
 
@@ -146,11 +106,9 @@ class Client extends ClientBase {
     });
   }
 
-  /**
-   * Get a User.
-   */
+  /// Get a User.
   @override
-  User getUser(String nickname, {bool create: false}) {
+  User getUser(String nickname, {bool create = false}) {
     var user = users[nickname];
 
     if (create && user == null) {
@@ -161,11 +119,9 @@ class Client extends ClientBase {
     return user;
   }
 
-  /**
-   * Get an Entity for the Server.
-   */
+  /// Get an Entity for the Server.
   Entity getEntity(String entityName,
-      {bool weAreServer: false, bool createUser: false}) {
+      {bool weAreServer = false, bool createUser = false}) {
     if (getChannel(entityName) != null) {
       return getChannel(entityName);
     } else if (getUser(entityName, create: createUser) != null) {
@@ -175,9 +131,7 @@ class Client extends ClientBase {
     }
   }
 
-  /**
-   * Connect the User to the Server.
-   */
+  /// Connect the User to the Server.
   @override
   void connect() {
     _ready = false;
@@ -217,23 +171,19 @@ class Client extends ClientBase {
 
   List<String> _queue = [];
 
-  /**
-   * Disconnect the Client from the Server.
-   */
+  /// Disconnect the Client from the Server.
   @override
-  Future disconnect({String reason: "Client Disconnecting"}) {
+  Future disconnect({String reason = "Client Disconnecting"}) {
     send("QUIT :${reason}");
     post(new DisconnectEvent(this));
     flush();
     return connection.disconnect();
   }
 
-  /**
-   * Flushes the line queue.
-   * If [all] is true, then all lines are sent,
-   * otherwise only one line is sent.
-   */
-  void flush({bool all: true}) {
+  /// Flushes the line queue.
+  /// If [all] is true, then all lines are sent,
+  /// otherwise only one line is sent.
+  void flush({bool all = true}) {
     if (_queue.isEmpty) {
       return;
     }
@@ -247,10 +197,8 @@ class Client extends ClientBase {
     } while (all && _queue.isNotEmpty);
   }
 
-  /**
-   * Fires an event to registered listeners. Any listeners that take the
-   * specific type [event] will be called.
-   */
+  /// Fires an event to registered listeners. Any listeners that take the
+  /// specific type [event] will be called.
   void post(Event event) {
     dispatcher.post(event);
     _controller.add(event);
@@ -262,20 +210,18 @@ class Client extends ClientBase {
     }
   }
 
-  /**
-   * Registers a method so that it can start receiving events.
-   *
-   * A filter can be provided to determine when the [handler] will
-   * be called. If the [filter] returns true then the [handler] will
-   * not be called, otherwise it will be called. If no [filter] is
-   * provided then the [handler] will always be called upon posting an
-   * event.
-   *
-   * A [priority] can be provided which will specify in what order the handler will be called in.
-   * The higher a priority is, the quicker it will be called in the handler list when an event is posted.
-   *
-   * Returns false if [method] is already registered, otherwise true.
-   */
+  /// Registers a method so that it can start receiving events.
+  ///
+  /// A filter can be provided to determine when the [handler] will
+  /// be called. If the [filter] returns true then the [handler] will
+  /// not be called, otherwise it will be called. If no [filter] is
+  /// provided then the [handler] will always be called upon posting an
+  /// event.
+  ///
+  /// A [priority] can be provided which will specify in what order the handler will be called in.
+  /// The higher a priority is, the quicker it will be called in the handler list when an event is posted.
+  ///
+  /// Returns false if [method] is already registered, otherwise true.
   bool register<T extends Event>(EventHandlerFunction<T> handler,
       {EventFilter<T> filter, int priority}) {
     return filter == null
@@ -283,19 +229,15 @@ class Client extends ClientBase {
         : dispatcher.register(handler, filter: filter, priority: priority);
   }
 
-  /**
-   * Gets the next event of the specified [type].
-   */
+  /// Gets the next event of the specified [type].
   Future<T> pollEvent<T extends Event>(Type type) {
     return events.where((it) => it.runtimeType == type).first;
   }
 
-  /**
-   * Unregisters a [handler] from receiving events. If the specific [handler]
-   * has a filter, it should be provided in order to properly unregister the
-   * listener. If the specific [handler] has a priority, it should be provided as well.
-   * Returns whether the [handler] was removed or not.
-   */
+  /// Unregisters a [handler] from receiving events. If the specific [handler]
+  /// has a filter, it should be provided in order to properly unregister the
+  /// listener. If the specific [handler] has a priority, it should be provided as well.
+  /// Returns whether the [handler] was removed or not.
   bool unregister<T extends Event>(EventHandlerFunction<T> handler,
       {EventFilter filter, int priority}) {
     return filter == null
@@ -305,11 +247,9 @@ class Client extends ClientBase {
 
   List<Event> _batchedEvents = [];
 
-  /**
-   * Send a raw line on the socket.
-   */
+  /// Send a raw line on the socket.
   @override
-  void send(String line, {bool now: false}) {
+  void send(String line, {bool now = false}) {
     /* Max Line Length for IRC is 512.
       With the newlines (\r\n or \n) we can only send 510 character lines */
     if (line.length > 510) {
@@ -326,9 +266,7 @@ class Client extends ClientBase {
     }
   }
 
-  /**
-   * Fires the Ready Event if it hasn't been fired yet.
-   */
+  /// Fires the Ready Event if it hasn't been fired yet.
   void _fireReady() {
     if (!_ready) {
       _ready = true;
@@ -338,13 +276,11 @@ class Client extends ClientBase {
 
   Map<String, String> _topicQueue = {};
 
-  /**
-   * Registers all the default handlers.
-   */
+  /// Registers all the default handlers.
   void _registerHandlers() {
     register((ConnectEvent event) async {
       if (config.enableCapabilityNegotiation) {
-        _doCapabilityNegotiation();
+        unawaited(_doCapabilityNegotiation());
       } else {
         _doRegistration();
       }
@@ -439,7 +375,7 @@ class Client extends ClientBase {
     register((KickEvent event) {
       var channel = event.channel;
       channel._dropFromUserList(event.user.name);
-      if (event.user == nickname) {
+      if (event.user.nickname == nickname) {
         channels.remove(channel.name);
       }
     });
@@ -508,7 +444,7 @@ class Client extends ClientBase {
 
     register((WhoisEvent event) {
       User user = getUser(event.nickname, create: true);
-      user._realname = event.realname;
+      user._realName = event.realname;
       user._hostname = event.hostname;
       user._serverName = event.serverName;
       user._serverInfo = event.serverInfo;
@@ -518,26 +454,20 @@ class Client extends ClientBase {
     });
   }
 
-  /**
-   * Get the current capabilities
-   */
+  /// Get the current capabilities
   Future<CurrentCapabilitiesEvent> listCurrentCapabilities() {
     var f = onEvent<CurrentCapabilitiesEvent>().first;
     send("CAP LIST");
     return f;
   }
 
-  /**
-   * Get all supported capabilities.
-   */
+  /// Get all supported capabilities.
   Future<ServerCapabilitiesEvent> listSupportedCapabilities() async {
     send("CAP LS");
     return await pollEvent(ServerCapabilitiesEvent);
   }
 
-  /**
-   * Handle capability commands
-   */
+  /// Handle capability commands
   void _handleCAP(Message input) {
     var cmd = input.parameters[1];
 
@@ -581,12 +511,10 @@ class Client extends ClientBase {
 
   Map<String, String> get modePrefixes => _modePrefixes;
 
-  /**
-   * Get the state of a user
-   */
+  /// Get the state of a user
   @override
   Future<bool> isUserOn(String name,
-      {Duration timeout: const Duration(seconds: 5)}) {
+      {Duration timeout = const Duration(seconds: 5)}) {
     var completer = new Completer.sync();
 
     var handler = (WhoisEvent event) {
@@ -610,9 +538,7 @@ class Client extends ClientBase {
     });
   }
 
-  /**
-   * Get the Server version
-   */
+  /// Get the Server version
   @override
   Future<ServerVersionEvent> getServerVersion([String target]) {
     var completer = new Completer();
@@ -628,23 +554,20 @@ class Client extends ClientBase {
             "Server Version Information may not be supported on this server."));
   }
 
-  /**
-   * Get a Channel's topic.
-   */
+  /// Get a Channel's topic.
   @override
   Future<String> getChannelTopic(String channel) async {
     send("TOPIC ${channel}");
 
     return (await onEvent<TopicEvent>()
-      .where((TopicEvent it) => it.channel.name == channel)
-      .first.timeout(const Duration(seconds: 5), onTimeout: () {
-        return null;
+        .where((TopicEvent it) => it.channel.name == channel)
+        .first
+        .timeout(const Duration(seconds: 5), onTimeout: () {
+      return null;
     }).then((e) => e is TopicEvent ? e.topic : null));
   }
 
-  /**
-   * Set a Channel's topic.
-   */
+  /// Set a Channel's topic.
   void setChannelTopic(String channel, String topic) {
     if (supported.containsKey("TOPICLEN")) {
       var length = supported["TOPICLEN"];
@@ -657,37 +580,27 @@ class Client extends ClientBase {
     send("TOPIC ${channel} :${topic}");
   }
 
-  /**
-   * Refresh the User list for a Channel.
-   */
+  /// Refresh the User list for a Channel.
   void refreshUserList(String channel) {
     send("NAMES ${channel}");
   }
 
-  /**
-   * Request a capability.
-   */
-  void requestCapability(String name, {bool now: false}) {
+  /// Request a capability.
+  void requestCapability(String name, {bool now = false}) {
     send("CAP REQ :${name}", now: now);
   }
 
-  /**
-   * Request a set of capabilities.
-   */
-  void requestCapabilities(List<String> caps, {bool now: false}) {
+  /// Request a set of capabilities.
+  void requestCapabilities(List<String> caps, {bool now = false}) {
     sendAutoSplit("CAP REQ :", caps, " ", now);
   }
 
-  /**
-   * Check if the Server has a capability.
-   */
+  /// Check if the Server has a capability.
   bool hasCapability(String name) {
     return currentCapabilities.contains(name);
   }
 
-  /**
-   * Check if the Server has support for a capability.
-   */
+  /// Check if the Server has support for a capability.
   bool hasSupportForCapability(String name) {
     return serverCapabilities.contains(name);
   }
@@ -696,9 +609,7 @@ class Client extends ClientBase {
 
   Set<String> get currentCapabilities => _currentCap;
 
-  /**
-   * Run callback on type event.
-   */
+  /// Run callback on type event.
   Stream<T> onEvent<T>() {
     return events.where((Event e) => e is T).cast<T>();
   }
@@ -751,9 +662,7 @@ class Client extends ClientBase {
 
   String _batchId;
 
-  /**
-   * Send a message to all users. Requires operator status.
-   */
+  /// Send a message to all users. Requires operator status.
   void wallops(String message) {
     send("WALLOPS :${message}");
   }
@@ -764,11 +673,9 @@ class Client extends ClientBase {
 
   List<String> _monitorList = [];
 
-  /**
-   * Run a WHOIS query against a user.
-   */
+  /// Run a WHOIS query against a user.
   Future<WhoisEvent> whois(String user,
-      {Duration timeout: const Duration(seconds: 5)}) async {
+      {Duration timeout = const Duration(seconds: 5)}) async {
     var future = onEvent<WhoisEvent>().where((it) => it.nickname == user).first;
     send("WHOIS ${user}");
     return await future.timeout(timeout,
@@ -810,16 +717,15 @@ class Client extends ClientBase {
       case "324":
         var channel = getChannel(input.parameters[1]);
         if (channel != null) {
-          channel.mode.modes.addAll(
-            input.parameters[2].replaceFirst("+", "").split("")
-          );
+          channel.mode.modes
+              .addAll(input.parameters[2].replaceFirst("+", "").split(""));
         }
         break;
 
       case "JOIN": // User Joined Channel
         var who = input.hostmask.nickname;
         var chanName =
-            input.parameters.length != 0 ? input.parameters[0] : input.message;
+            input.parameters.isNotEmpty ? input.parameters[0] : input.message;
         if (who == _nickname) {
           // We joined a new channel
           var channel = getChannel(chanName);
@@ -837,7 +743,7 @@ class Client extends ClientBase {
             event.username = input.parameters[1];
             event.realname = input.message;
             userObject._username = input.parameters[1];
-            userObject._realname = input.message;
+            userObject._realName = input.message;
           }
           post(event);
         }
@@ -898,7 +804,7 @@ class Client extends ClientBase {
         var who = input.hostmask.nickname;
 
         var nameOfChannel =
-            input.parameters.length != 0 ? input.parameters[0] : input.message;
+            input.parameters.isNotEmpty ? input.parameters[0] : input.message;
 
         if (who == _nickname) {
           post(new ClientPartEvent(this, getChannel(nameOfChannel)));
@@ -943,15 +849,8 @@ class Client extends ClientBase {
         var old = channel._topic;
         channel._topic = topic;
         channel._topicUser = user;
-        post(
-          new TopicEvent(
-            this,
-            channel,
-            getUser(user, create: true),
-            topic,
-            old
-          )
-        );
+        post(new TopicEvent(
+            this, channel, getUser(user, create: true), topic, old));
         break;
 
       case "AWAY": // User marked as away
@@ -980,10 +879,9 @@ class Client extends ClientBase {
           ..removeWhere((it) => it.trim().isEmpty);
         if (_currentCap.contains("userhost-in-names")) {
           users = users.map((it) {
-            var realHost = new List<String>.generate(
-              it.length,
-                (i) => it[i])
-              .skipWhile((t) => modePrefixes.containsValue(t)).join();
+            var realHost = new List<String>.generate(it.length, (i) => it[i])
+                .skipWhile((t) => modePrefixes.containsValue(t))
+                .join();
             return new Hostmask.parse(realHost).nickname;
           }).toList();
         }
@@ -992,12 +890,13 @@ class Client extends ClientBase {
 
         for (var user in users) {
           var chars = new List<String>.generate(user.length, (i) => user[i]);
-          var prefixes = chars.takeWhile((it) => modePrefixes.containsValue(it));
+          var prefixes =
+              chars.takeWhile((it) => modePrefixes.containsValue(it));
 
           var name = chars.skip(prefixes.length).join();
 
           var userInstance = getUser(name, create: true);
-          if (prefixes.length == 0) {
+          if (prefixes.isEmpty) {
             channel.members.add(userInstance);
           }
 
@@ -1043,14 +942,7 @@ class Client extends ClientBase {
 
         // Posts the nickname change event.
         // No need for checking if we are the original nickname.
-        post(
-          new NickChangeEvent(
-            this,
-            user,
-            original,
-            now
-          )
-        );
+        post(new NickChangeEvent(this, user, original, now));
         break;
 
       case "MODE": // Mode Changed
@@ -1093,7 +985,7 @@ class Client extends ClientBase {
         var realname = input.message;
         var builder = new WhoisBuilder(nickname);
         builder.hostname = hostname;
-        builder.realname = realname;
+        builder.realName = realname;
         builder._createTimestamp = new DateTime.now();
         _whoisBuilders[nickname] = builder;
         break;
@@ -1343,9 +1235,7 @@ class Client extends ClientBase {
     }
   }
 
-  /**
-   * Runs STARTTLS.
-   */
+  /// Runs STARTTLS.
   void startSecureConnection() {
     send("STARTTLS");
   }
@@ -1356,8 +1246,7 @@ class Client extends ClientBase {
     }
 
     send("NICK ${config.nickname}");
-    send(
-      "USER ${config.username} "
+    send("USER ${config.username} "
         "${config.username} ${config.host} :${config.realname}");
 
     flush();
@@ -1390,33 +1279,29 @@ class Client extends ClientBase {
       try {
         var supported = await listSupportedCapabilities();
         var allSupported = supported.capabilities
-          .map((it) => it.startsWith("~") ? it.substring(1) : it)
-          .toSet();
+            .map((it) => it.startsWith("~") ? it.substring(1) : it)
+            .toSet();
 
         var needsAck = supported.capabilities
-          .where((it) => it.startsWith("~"))
-          .map((it) => it.substring(1))
-          .toList();
+            .where((it) => it.startsWith("~"))
+            .map((it) => it.substring(1))
+            .toList();
 
         requestCapabilities(
-          allSupported.intersection(capsToTryToEnable).toList(),
-          now: true
-        );
+            allSupported.intersection(capsToTryToEnable).toList(),
+            now: true);
 
         await events
-          .where((it) =>
-        it is AcknowledgedCapabilitiesEvent ||
-          it is NotAcknowledgedCapabilitiesEvent)
-          .first
-          .timeout(const Duration(seconds: 10))
-          .then((event) {
+            .where((it) =>
+                it is AcknowledgedCapabilitiesEvent ||
+                it is NotAcknowledgedCapabilitiesEvent)
+            .first
+            .timeout(const Duration(seconds: 10))
+            .then((event) {
           if (event is AcknowledgedCapabilitiesEvent) {
             if (event.capabilities.any((it) => needsAck.contains(it))) {
               sendAutoSplit(
-                "CAP ACK :", event.capabilities.toList(),
-                " ",
-                true
-              );
+                  "CAP ACK :", event.capabilities.toList(), " ", true);
             }
           }
 
@@ -1437,9 +1322,7 @@ class Client extends ClientBase {
   }
 }
 
-/**
- * Monitor a user's status.
- */
+/// Monitor a user's status.
 class Monitor {
   final Client client;
 
@@ -1453,18 +1336,14 @@ class Monitor {
     });
   }
 
-  /**
-   * Current user statuses.
-   */
+  /// Current user statuses.
   Map<String, bool> _statuses = {};
 
   Map<String, bool> get statuses => _statuses;
 
   bool get isSupported => client._supported.containsKey("MONITOR");
 
-  /**
-   * Add a monitor for a user.
-   */
+  /// Add a monitor for a user.
   void add(String user) {
     _checkMonitorSupported();
 
@@ -1472,18 +1351,14 @@ class Monitor {
     _monitorList.add(user);
   }
 
-  /**
-   * Add a monitor for multiple users.
-   */
+  /// Add a monitor for multiple users.
   void addAll(Iterable<String> users) {
     _checkMonitorSupported();
     client.sendAutoSplit("MONITOR + ", users.toList());
     _monitorList.addAll(users);
   }
 
-  /**
-   * Remove a monitor for a user.
-   */
+  /// Remove a monitor for a user.
   void remove(String user) {
     _checkMonitorSupported();
     client.send("MONITOR - ${user}");
@@ -1491,9 +1366,7 @@ class Monitor {
     _statuses.remove(user);
   }
 
-  /**
-   * Remove a monitor for multiple users.
-   */
+  /// Remove a monitor for multiple users.
   void removeAll(Iterable<String> users) {
     _checkMonitorSupported();
     client.sendAutoSplit("MONITOR - ", users.toList());
@@ -1501,9 +1374,7 @@ class Monitor {
     users.forEach(_statuses.remove);
   }
 
-  /**
-   * Clear all monitors.
-   */
+  /// Clear all monitors.
   void clear() {
     _checkMonitorSupported();
     client.send("MONITOR C");
@@ -1511,30 +1382,22 @@ class Monitor {
     _statuses.clear();
   }
 
-  /**
-   * Check if a user is monitored.
-   */
+  /// Check if a user is monitored.
   bool isUserMonitored(String user) {
     return users.contains(user);
   }
 
-  /**
-   * Check if a user is online.
-   */
+  /// Check if a user is online.
   bool isUserOnline(String user) {
     return statuses[user];
   }
 
-  /**
-   * Check if a user is offline.
-   */
+  /// Check if a user is offline.
   bool isUserOffline(String user) {
     return statuses[user] == false;
   }
 
-  /**
-   * Limit for user monitors.
-   */
+  /// Limit for user monitors.
   int get limit {
     if (client._supported["MONITOR"] == true) {
       return 9999999999;
@@ -1547,9 +1410,7 @@ class Monitor {
 
   Set<String> get users => _monitorList;
 
-  /**
-   * Checks whether the monitor extension is supported.
-   */
+  /// Checks whether the monitor extension is supported.
   void _checkMonitorSupported() {
     if (!client._supported.containsKey("MONITOR")) {
       throw new UnsupportedError("Monitor is not supported on this server.");
@@ -1557,9 +1418,7 @@ class Monitor {
   }
 }
 
-/**
- * An exception for when an IRC User is not found.
- */
+/// An exception for when an IRC user is not found.
 class UserNotFoundException {
   final String user;
 

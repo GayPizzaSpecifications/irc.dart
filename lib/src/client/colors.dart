@@ -1,8 +1,6 @@
 part of irc.client;
 
-/**
- * IRC Message Colors
- */
+/// IRC Message Colors
 class Color {
   static final BLUE = "\u000312";
   static final RESET = "\u000f";
@@ -27,20 +25,14 @@ class Color {
   static final LIGHT_GRAY = "\u000315";
   static final ITALICS = "\u001d";
 
-  /**
-   * Color can't be instantiated.
-   */
-  factory Color() => throw new UnsupportedError("Sorry, Color can't be instantiated");
+  factory Color() =>
+      throw new UnsupportedError("Sorry, Color can't be instantiated");
 
-  /**
-   * Puts the Color String of [color] in front of [input] and ends with [endColor].
-   */
+  /// Puts the Color String of [color] in front of [input] and ends with [endColor].
   static String wrap(String input, String color, [String endColor = "reset"]) =>
-    "${forName(color)}${input}${forName(endColor)}";
+      "${forName(color)}${input}${forName(endColor)}";
 
-  /**
-   * Gets a Color by the name of [input]. If no such color exists it returns null.
-   */
+  /// Gets a Color by the name of [input]. If no such color exists it returns null.
   static String forName(String input) {
     var name = input.replaceAll(" ", "_").toUpperCase();
     var field;
@@ -55,9 +47,7 @@ class Color {
     return field.reflectee;
   }
 
-  /**
-   * Gets a Mapping of Color Names to Color Beginnings
-   */
+  /// Gets a Mapping of Color Names to Color Beginnings
   static Map<String, String> allColors() {
     var all = <String, String>{};
     var clazz = reflectClass(Color);
@@ -84,9 +74,9 @@ class Color {
       if (c == "\u0003") {
         i += 2;
       } else if (c != "\u000f" &&
-        c != "\u0016" &&
-        c != "\u0002" &&
-        c != "\u001d") {
+          c != "\u0016" &&
+          c != "\u0002" &&
+          c != "\u001d") {
         buffer.write(c);
       }
     }

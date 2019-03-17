@@ -1,78 +1,53 @@
 part of irc.event;
 
-/**
- * A function that handles events.
- */
+/// A function that handles events.
 typedef EventHandlerFunction<T>(T event);
 
-/**
- * An event filter that filters out events.
- *
- * If this function returns false, the function will be called, otherwise it will not be called.
- */
+/// An event filter that filters out events.
+///
+/// If this function returns false, the function will be called, otherwise it will not be called.
 typedef bool EventFilter<T>(T event);
 
-/**
- * A Cancelable Event
- */
+/// A Cancelable Event
 abstract class Cancelable {
   bool _isCanceled;
 
-  /**
-   * Checks if this event has been canceled.
-   */
+  /// Checks if this event has been canceled.
   bool get isCanceled => _isCanceled;
 
-  /**
-   * Cancels this event.
-   *
-   * This will stop the event dispatcher from calling any other event handlers.
-   */
+  /// Cancels this event.
+  /// This will stop the event dispatcher from calling any other event handlers.
   void cancel() {
     _isCanceled = true;
   }
 }
 
-/**
- * A Dead Event
- *
- * Dead Events are events that had no handlers called.
- */
+/// Dead Events are events that had no handlers called.
 class DeadEvent {
   final dynamic event;
 
   DeadEvent(this.event);
 }
 
-/**
- * The controller through which all events communicate with each other.
- */
+/// The controller through which all events communicate with each other.
 class EventDispatcher {
-  /**
-   * Default Event Handler Priority
-   */
+  /// Default Event Handler Priority
   final int defaultPriority;
   final int dispatcherId;
   final _handlers = new Map<Type, List<_EventHandler>>();
 
-  /**
-   * Creates a new Event Dispatcher.
-   *
-   * If [defaultPriority] is specified, it will be the priority
-   * that is assigned to handlers when they do not specify one.
-   */
-  EventDispatcher({this.defaultPriority: 10, this.dispatcherId});
+  /// Creates a new Event Dispatcher.
+  ///
+  /// If [defaultPriority] is specified, it will be the priority
+  /// that is assigned to handlers when they do not specify one.
+  EventDispatcher({this.defaultPriority = 10, this.dispatcherId});
 
-  /**
-   * Unregisters a [handler] from receiving events. If the specific [handler]
-   * has a filter, it should be provided in order to properly unregister the
-   * listener. If the specific [handler] has a priority, it should be provided as well.
-   * Returns whether the [handler] was removed or not.
-   */
-  bool unregister<T>(EventHandlerFunction<T> handler, {
-    EventFilter filter: _defaultFilter,
-    int priority
-  }) {
+  /// Unregisters a [handler] from receiving events. If the specific [handler]
+  /// has a filter, it should be provided in order to properly unregister the
+  /// listener. If the specific [handler] has a priority, it should be provided as well.
+  /// Returns whether the [handler] was removed or not.
+  bool unregister<T>(EventHandlerFunction<T> handler,
+      {EventFilter filter = _defaultFilter, int priority}) {
     if (priority == null) {
       priority = defaultPriority;
     }
@@ -104,27 +79,24 @@ class EventDispatcher {
     }
   }
 
-  /**
-   * Registers a method so that it can start receiving events.
-   *
-   * A filter can be provided to determine when the [handler] will
-   * be called. If the [filter] returns true then the [handler] will
-   * not be called, otherwise it will be called. If no [filter] is
-   * provided then the [handler] will always be called upon posting an
-   * event.
-   *
-   * A [priority] can be provided which will specify in what order the handler will be called in.
-   * The higher a priority is, the quicker it will be called in the handler list when an event is posted.
-   *
-   * If [always] is true, the event handler will be called even if the event was canceled.
-   *
-   * Returns false if [method] is already registered, otherwise true.
-   */
-  bool register<T>(EventHandlerFunction<T> handler, {
-    EventFilter filter: _defaultFilter,
-    int priority,
-    bool always: false
-  }) {
+  /// Registers a method so that it can start receiving events.
+  ///
+  /// A filter can be provided to determine when the [handler] will
+  /// be called. If the [filter] returns true then the [handler] will
+  /// not be called, otherwise it will be called. If no [filter] is
+  /// provided then the [handler] will always be called upon posting an
+  /// event.
+  ///
+  /// A [priority] can be provided which will specify in what order the handler will be called in.
+  /// The higher a priority is, the quicker it will be called in the handler list when an event is posted.
+  ///
+  /// If [always] is true, the event handler will be called even if the event was canceled.
+  ///
+  /// Returns false if [method] is already registered, otherwise true.
+  bool register<T>(EventHandlerFunction<T> handler,
+      {EventFilter filter = _defaultFilter,
+      int priority,
+      bool always = false}) {
     if (priority == null) {
       priority = defaultPriority;
     }
@@ -142,30 +114,26 @@ class EventDispatcher {
 
     handlers.add(h);
     handlers.sort(
-        (_EventHandler a, _EventHandler b) => b.priority.compareTo(a.priority)
-    );
+        (_EventHandler a, _EventHandler b) => b.priority.compareTo(a.priority));
     return true;
   }
 
-  /**
-   * Scans the object for [Subscribe] annotations and registers handlers appropriately.
-   */
+  /// Scans the object for [Subscribe] annotations and registers handlers appropriately.
   bool registerHandlers(Object object) {
     var mirror = reflect(object);
     var registered = false;
 
     for (var method in mirror.type.instanceMembers.values) {
       var subscribes = method.metadata
-        .where((it) => it.type.reflectedType == Subscribe)
-        .toList();
+          .where((it) => it.type.reflectedType == Subscribe)
+          .toList();
       if (subscribes.isEmpty) {
         continue;
       }
 
       if (subscribes.length > 1) {
-        throw new Exception(
-          "${MirrorSystem.getName(mirror.type.qualifiedName)}"
-          " has multiple subscribe annotations.");
+        throw new Exception("${MirrorSystem.getName(mirror.type.qualifiedName)}"
+            " has multiple subscribe annotations.");
       }
 
       var m = subscribes.first;
@@ -174,9 +142,8 @@ class EventDispatcher {
 
       if (params.length != 1) {
         throw new Exception(
-          "${MirrorSystem.getName(mirror.type.qualifiedName)} does not"
-            " specify a valid event parameter type."
-        );
+            "${MirrorSystem.getName(mirror.type.qualifiedName)} does not"
+            " specify a valid event parameter type.");
       }
 
       var p = params.first;
@@ -203,27 +170,18 @@ class EventDispatcher {
       }
 
       var handlers = _handlers[name];
-      var h = new _EventHandler(
-        handler,
-        filter,
-        priority,
-        object,
-        sub.always
-      );
+      var h = new _EventHandler(handler, filter, priority, object, sub.always);
 
       handlers.add(h);
-      handlers.sort(
-          (_EventHandler a, _EventHandler b) => b.priority.compareTo(a.priority)
-      );
+      handlers.sort((_EventHandler a, _EventHandler b) =>
+          b.priority.compareTo(a.priority));
       registered = true;
     }
 
     return registered;
   }
 
-  /**
-   * Unregisters all handlers that were registered on [object].
-   */
+  /// Unregisters all handlers that were registered on [object].
   bool unregisterHandlers(Object object) {
     var m = _handlers.values.where((h) {
       return h.any((it) => it.object == object);
@@ -235,20 +193,19 @@ class EventDispatcher {
 
     for (var n in m) {
       n.removeWhere((it) => it.object == object);
-      n.sort((_EventHandler a, _EventHandler b) => b.priority.compareTo(a.priority));
+      n.sort((_EventHandler a, _EventHandler b) =>
+          b.priority.compareTo(a.priority));
     }
 
     return true;
   }
 
-  /**
-   * Fires an event to registered listeners. Any listeners that take the
-   * specific type [event] will be called.
-   *
-   * If [postDeadEvent] is true, if no handlers are called for the event,
-   * it will post a new event of type [DeadEvent].
-   */
-  bool post<T>(T event, {bool postDeadEvent: true}) {
+  /// Fires an event to registered listeners. Any listeners that take the
+  /// specific type [event] will be called.
+  ///
+  /// If [postDeadEvent] is true, if no handlers are called for the event,
+  /// it will post a new event of type [DeadEvent].
+  bool post<T>(T event, {bool postDeadEvent = true}) {
     var name = _getName(event);
 
     if (!_handlers.containsKey(name)) {
@@ -275,14 +232,15 @@ class EventDispatcher {
     return executed;
   }
 
-  /**
-   * Gets the type of the first parameter, used for posting.
-   */
+  /// Gets the type of the first parameter, used for posting.
   Type _getName(dynamic input) {
     if (input is Function) {
-      return (
-        reflect(input) as ClosureMirror
-      ).function.parameters.first.type.reflectedType;
+      return (reflect(input) as ClosureMirror)
+          .function
+          .parameters
+          .first
+          .type
+          .reflectedType;
     } else if (input is Type) {
       return input;
     } else {
@@ -302,14 +260,8 @@ class _EventHandler {
   final Object object;
   final bool always;
 
-  _EventHandler(
-    this.function,
-    this.filter,
-    this.priority, [
-      this.object,
-      this.always = false
-    ]
-  );
+  _EventHandler(this.function, this.filter, this.priority,
+      [this.object, this.always = false]);
 
   bool apply(dynamic event) {
     if (event is Cancelable && event.isCanceled && !always) {
@@ -324,8 +276,11 @@ class _EventHandler {
     }
   }
 
-  bool operator ==(other) => other is _EventHandler &&
-    other.function == function && other.filter == filter &&
-    other.priority == priority && other.object == object &&
-    other.always == always;
+  bool operator ==(other) =>
+      other is _EventHandler &&
+      other.function == function &&
+      other.filter == filter &&
+      other.priority == priority &&
+      other.object == object &&
+      other.always == always;
 }

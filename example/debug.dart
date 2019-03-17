@@ -1,20 +1,19 @@
-import "dart:async";
+import 'dart:async';
 
-import "package:irc/client.dart";
+import 'package:irc/client.dart';
 
 typedef CommandHandler(CommandEvent event);
 
-String prefix = "~";
+String prefix = '~';
 Map<String, StreamController<CommandEvent>> commands = {};
 
 void main() {
   var config = new Configuration(
-    host: "irc.freenode.net",
-    port: 6667,
-    nickname: "DartBotDebug",
-    username: "DartBotDebug",
-    realname: "DartBotDebug"
-  );
+      host: 'irc.freenode.net',
+      port: 6667,
+      nickname: 'DartBotDebug',
+      username: 'DartBotDebug',
+      realname: 'DartBotDebug');
 
   var client = new Client(config);
   client.connect();
@@ -34,7 +33,8 @@ void main() {
 
   client.onMode.listen((event) {
     if (event.channel != null && event.user != null) {
-      print("Mode (${event.mode}) given to ${event.user} in ${event.channel.name}");
+      print(
+          "Mode (${event.mode}) given to ${event.user} in ${event.channel.name}");
     } else if (event.channel != null) {
       print("Mode (${event.mode}) given to ${event.channel.name}");
     } else if (event.user != null) {
@@ -43,7 +43,7 @@ void main() {
   });
 
   client.onReady.listen((event) {
-    event.join("#spinlock");
+    event.join("#spinlocklabs");
 
     if (client.monitor.isSupported) {
       client.monitor.add("kaendfinger");
@@ -76,7 +76,7 @@ void main() {
   command("part", (CommandEvent event) {
     if (event.args.length == 1) {
       client.part(event.args[0]);
-    } else if (event.args.length == 0) {
+    } else if (event.args.isEmpty) {
       client.part(event.channel.name);
     } else {
       event.reply("Usage: part [channel]");
@@ -106,9 +106,12 @@ void main() {
       if (users.length > 10) {
         return "${users.length} users";
       }
-      return users.map((it) {
-        return it.nickname;
-      }).toList().join(", ");
+      return users
+          .map((it) {
+            return it.nickname;
+          })
+          .toList()
+          .join(", ");
     }
 
     if (!event.target.isChannel) {
@@ -116,7 +119,7 @@ void main() {
     }
 
     Channel channel = event.target;
-    if (event.args.length > 0) {
+    if (event.args.isNotEmpty) {
       channel = client.getChannel(event.args[0]);
     }
 
@@ -178,12 +181,12 @@ void handleAsCommand(MessageEvent event) {
   String message = event.message;
 
   if (message.startsWith(prefix)) {
-    var end = message.contains(" ") ? message
-      .indexOf(" ", prefix.length) : message.length;
+    var end = message.contains(" ")
+        ? message.indexOf(" ", prefix.length)
+        : message.length;
     var command = message.substring(prefix.length, end);
-    var args = message
-      .substring(end != message.length ? end + 1 : end)
-      .split(" ");
+    var args =
+        message.substring(end != message.length ? end + 1 : end).split(" ");
 
     args.removeWhere((i) => i.isEmpty || i == " ");
 
@@ -196,19 +199,22 @@ void handleAsCommand(MessageEvent event) {
 }
 
 void command(String name, CommandHandler handler) {
-  commands.putIfAbsent(name, () {
-    return new StreamController.broadcast();
-  }).stream.listen((e) async {
-    try {
-      await handler(e);
-    } catch (e, stack) {
-      print(e);
-      print(stack);
-    }
-  }, onError: (e, stack) {
-    print(e);
-    print(stack);
-  });
+  commands
+      .putIfAbsent(name, () {
+        return new StreamController.broadcast();
+      })
+      .stream
+      .listen((e) async {
+        try {
+          await handler(e);
+        } catch (e, stack) {
+          print(e);
+          print(stack);
+        }
+      }, onError: (e, stack) {
+        print(e);
+        print(stack);
+      });
 }
 
 void commandNotFound(CommandEvent event) {
@@ -220,10 +226,10 @@ class CommandEvent extends MessageEvent {
   List<String> args;
 
   CommandEvent(MessageEvent event, this.command, this.args)
-    : super(event.client, event.from, event.target, event.message);
+      : super(event.client, event.from, event.target, event.message);
 
-  void notice(String message, {bool user: true}) =>
-    client.sendNotice(from.name, message);
+  void notice(String message, {bool user = true}) =>
+      client.sendNotice(from.name, message);
 
   void act(String message) => client.sendAction(target.name, message);
 

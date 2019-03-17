@@ -1,7 +1,8 @@
 part of irc.client;
 
 class ParsedCommand {
-  static ParsedCommand parsePotentialCommand(String prefix, MessageEvent event) {
+  static ParsedCommand parsePotentialCommand(
+      String prefix, MessageEvent event) {
     if (!event.message.startsWith(prefix)) {
       return null;
     }
