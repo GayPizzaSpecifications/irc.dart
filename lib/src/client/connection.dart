@@ -44,6 +44,7 @@ class SocketIrcConnection extends IrcConnection {
   Stream<String> lines() {
     if (_lines == null) {
       _lines = _socket
+          .cast<List<int>>()
           .transform(const Utf8Decoder(allowMalformed: true))
           .transform(const LineSplitter());
     }
