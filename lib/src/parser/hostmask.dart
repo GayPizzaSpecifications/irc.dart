@@ -2,7 +2,7 @@ part of irc.parser;
 
 /// Represents a Hostmask that has been parsed
 class Hostmask {
-  static final HOSTMASK_REGEX = new RegExp("[!@]");
+  static final HOSTMASK_REGEX = RegExp('[!@]');
 
   /// User's Nickname
   String nickname;
@@ -23,9 +23,9 @@ class Hostmask {
     if (parts.length == 1) {
       hostname = input;
     } else {
-      this.nickname = parts[0];
-      this.identity = parts[1];
-      this.hostname = parts[2];
+      nickname = parts[0];
+      identity = parts[1];
+      hostname = parts[2];
     }
   }
 }
@@ -43,7 +43,7 @@ class GlobHostmask {
   GlobHostmask(this.pattern);
 
   /// Checks if [hostmask] matches [pattern]
-  bool matches(String hostmask) => new Glob(pattern).matches(hostmask);
+  bool matches(String hostmask) => Glob(pattern).matches(hostmask);
 
   /// Gives a String Representation of this hostmask pattern
   @override

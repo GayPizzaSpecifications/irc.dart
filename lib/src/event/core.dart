@@ -1,12 +1,12 @@
 part of irc.event;
 
 /// A function that handles events.
-typedef EventHandlerFunction<T>(T event);
+typedef EventHandlerFunction<T> = Function(T event);
 
 /// An event filter that filters out events.
 ///
 /// If this function returns false, the function will be called, otherwise it will not be called.
-typedef bool EventFilter<T>(T event);
+typedef EventFilter<T> = bool Function(T event);
 
 /// A Cancelable Event
 abstract class Cancelable {
@@ -34,9 +34,7 @@ class EventDispatcher {
   /// Default Event Handler Priority
   final int defaultPriority;
   final int dispatcherId;
-  final _handlers = new Map<Type, List<_EventHandler>>();
-
-  /// Creates a new Event Dispatcher.
+  final _handlers = <Type, List<_EventHandler>>{} /// Creates a new Event Dispatcher.
   ///
   /// If [defaultPriority] is specified, it will be the priority
   /// that is assigned to handlers when they do not specify one.
@@ -48,9 +46,7 @@ class EventDispatcher {
   /// Returns whether the [handler] was removed or not.
   bool unregister<T>(EventHandlerFunction<T> handler,
       {EventFilter filter = _defaultFilter, int priority}) {
-    if (priority == null) {
-      priority = defaultPriority;
-    }
+    priority ??= defaultPriority;
 
     var name = _getName(handler);
 
@@ -58,7 +54,7 @@ class EventDispatcher {
       return false;
     }
 
-    var h = new _EventHandler(handler, filter, priority);
+    var h = _EventHandler(handler, filter, priority);
     _EventHandler fh;
 
     for (var mh in _handlers[name]) {
@@ -97,9 +93,7 @@ class EventDispatcher {
       {EventFilter filter = _defaultFilter,
       int priority,
       bool always = false}) {
-    if (priority == null) {
-      priority = defaultPriority;
-    }
+    priority ??= defaultPriority;
 
     var name = _getName(handler);
     if (!_handlers.containsKey(name)) {
@@ -107,7 +101,7 @@ class EventDispatcher {
     }
     var handlers = _handlers[name];
 
-    var h = new _EventHandler(handler, filter, priority, null, always);
+    var h = _EventHandler(handler, filter, priority, null, always);
     if (handlers.any((it) => it == h)) {
       return false;
     }
@@ -132,8 +126,8 @@ class EventDispatcher {
       }
 
       if (subscribes.length > 1) {
-        throw new Exception("${MirrorSystem.getName(mirror.type.qualifiedName)}"
-            " has multiple subscribe annotations.");
+        throw Exception('${MirrorSystem.getName(mirror.type.qualifiedName)}'
+            ' has multiple subscribe annotations.');
       }
 
       var m = subscribes.first;
@@ -141,9 +135,9 @@ class EventDispatcher {
       var params = method.parameters;
 
       if (params.length != 1) {
-        throw new Exception(
-            "${MirrorSystem.getName(mirror.type.qualifiedName)} does not"
-            " specify a valid event parameter type.");
+        throw Exception(
+            '${MirrorSystem.getName(mirror.type.qualifiedName)} does not'
+            ' specify a valid event parameter type.');
       }
 
       var p = params.first;
@@ -153,24 +147,22 @@ class EventDispatcher {
       };
       var filter = sub.filter;
 
-      if (filter == null) {
-        filter = (e) {
+      filter ??= (e) {
           if (sub.when != null) {
             return !sub.when(e);
           } else {
             return false;
           }
         };
-      }
 
-      var priority = sub.priority != null ? sub.priority : defaultPriority;
+      var priority = sub.priority ?? defaultPriority;
 
       if (!_handlers.containsKey(name)) {
         _handlers[name] = <_EventHandler>[];
       }
 
       var handlers = _handlers[name];
-      var h = new _EventHandler(handler, filter, priority, object, sub.always);
+      var h = _EventHandler(handler, filter, priority, object, sub.always);
 
       handlers.add(h);
       handlers.sort((_EventHandler a, _EventHandler b) =>
@@ -210,13 +202,13 @@ class EventDispatcher {
 
     if (!_handlers.containsKey(name)) {
       if (postDeadEvent) {
-        return post(new DeadEvent(event), postDeadEvent: false);
+        return post(DeadEvent(event), postDeadEvent: false);
       } else {
         return false;
       }
     }
 
-    List<_EventHandler> handlers = _handlers[name];
+    var handlers = _handlers[name];
     var executed = false;
 
     for (var handler in handlers) {
@@ -226,7 +218,7 @@ class EventDispatcher {
     }
 
     if (!executed && postDeadEvent) {
-      executed = post(new DeadEvent(event), postDeadEvent: false);
+      executed = post(DeadEvent(event), postDeadEvent: false);
     }
 
     return executed;
@@ -276,6 +268,7 @@ class _EventHandler {
     }
   }
 
+  @override
   bool operator ==(other) =>
       other is _EventHandler &&
       other.function == function &&

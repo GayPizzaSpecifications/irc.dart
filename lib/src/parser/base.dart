@@ -7,7 +7,7 @@ part of irc.parser;
 ///      // Use Message Instance
 abstract class IrcParser extends Converter<String, Message> {
   /// Creates the default IrcParser, which is [RegexIrcParser].
-  static IrcParser create() => new RegexIrcParser();
+  static IrcParser create() => RegexIrcParser();
 
   /// Parses [line] as an IRC line and outputs a [Message].
   @override

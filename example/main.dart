@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:irc/client.dart';
 
-typedef CommandHandler(CommandEvent event);
+typedef CommandHandler = Function(CommandEvent event);
 
 final Random random = Random();
 
@@ -12,110 +12,110 @@ Map<String, StreamController<CommandEvent>> commands = {};
 
 void main() {
   var nickOffset = random.nextInt(9999);
-  var config = new Configuration(
+  var config = Configuration(
       host: 'irc.freenode.net',
       port: 6667,
-      nickname: "DartBot$nickOffset",
-      username: "DartBot$nickOffset",
+      nickname: 'DartBot$nickOffset',
+      username: 'DartBot$nickOffset',
       realname: 'DartBot');
 
-  var client = new Client(config);
+  var client = Client(config);
   client.connect();
 
   client.onLineSent.listen((event) {
-    print("<< ${event.line}");
+    print('<< ${event.line}');
   });
 
   client.onLineReceive.listen((event) {
-    print(">> ${event.line}");
+    print('>> ${event.line}');
   });
 
   client.onDisconnect.listen((e) async {
-    await new Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
     client.connect();
   });
 
   client.onMode.listen((event) {
     if (event.channel != null && event.user != null) {
       print(
-          "Mode (${event.mode}) given to ${event.user} in ${event.channel.name}");
+          'Mode (${event.mode}) given to ${event.user} in ${event.channel.name}');
     } else if (event.channel != null) {
-      print("Mode (${event.mode}) given to ${event.channel.name}");
+      print('Mode (${event.mode}) given to ${event.channel.name}');
     } else if (event.user != null) {
-      print("Mode (${event.mode}) was set on us.");
+      print('Mode (${event.mode}) was set on us.');
     }
   });
 
   client.onReady.listen((event) {
-    event.join("#spinlocklabs");
+    event.join('#spinlocklabs');
 
     if (client.monitor.isSupported) {
-      client.monitor.add("kaendfinger");
+      client.monitor.add('kaendfinger');
     }
   });
 
   client.register(handleAsCommand);
 
-  command("notice-me", (CommandEvent event) {
-    event.notice("This is a test notice to you");
+  command('notice-me', (CommandEvent event) {
+    event.notice('This is a test notice to you');
   });
 
-  command("server-caps", (CommandEvent e) {
-    e.reply("Supported: ${client.supported}");
+  command('server-caps', (CommandEvent e) {
+    e.reply('Supported: ${client.supported}');
     e.reply("Capabilities: ${client.serverCapabilities.join(', ')}");
   });
 
-  command("notice-chan", (CommandEvent event) {
-    event.notice("This is a test notice to the channel", user: false);
+  command('notice-chan', (CommandEvent event) {
+    event.notice('This is a test notice to the channel', user: false);
   });
 
-  command("join", (CommandEvent event) {
+  command('join', (CommandEvent event) {
     if (event.args.length == 1) {
       client.join(event.args[0]);
     } else {
-      event.reply("Usage: join <channel>");
+      event.reply('Usage: join <channel>');
     }
   });
 
-  command("part", (CommandEvent event) {
+  command('part', (CommandEvent event) {
     if (event.args.length == 1) {
       client.part(event.args[0]);
     } else if (event.args.isEmpty) {
       client.part(event.channel.name);
     } else {
-      event.reply("Usage: part [channel]");
+      event.reply('Usage: part [channel]');
     }
   });
 
-  command("quit", (CommandEvent event) {
-    client.disconnect(reason: "${event.from.name} asked me to quit.");
+  command('quit', (CommandEvent event) {
+    client.disconnect(reason: '${event.from.name} asked me to quit.');
   });
 
-  command("topic", (CommandEvent event) {
+  command('topic', (CommandEvent event) {
     event.reply(event.channel.topic);
   });
 
-  command("bans", (CommandEvent event) {
-    event.reply("${event.channel.bans}");
+  command('bans', (CommandEvent event) {
+    event.reply('${event.channel.bans}');
   });
 
-  command("spam", (CommandEvent event) {
+  command('spam', (CommandEvent event) {
     for (var i = 1; i <= 50; i++) {
       event.reply(i.toString());
     }
   });
 
-  command("users", (CommandEvent event) {
+  command('users', (CommandEvent event) {
     String joinNicks(Set<User> users) {
       if (users.length > 10) {
-        return "${users.length} users";
+        return '${users.length} users';
       }
       return users
           .map((it) {
             return it.nickname;
           })
           .toList()
-          .join(", ");
+          .join(', ');
     }
 
     if (!event.target.isChannel) {
@@ -128,25 +128,25 @@ void main() {
     }
 
     if (channel == null) {
-      event.notice("${event.args[0]} not found.");
+      event.notice('${event.args[0]} not found.');
       return;
     }
 
-    event.notice("> Members: ${joinNicks(channel.members)}");
-    event.notice("> Ops: ${joinNicks(channel.ops)}");
-    event.notice("> Voices: ${joinNicks(channel.voices)}");
-    event.notice("> Owners: ${joinNicks(channel.owners)}");
-    event.notice("> Half-Ops: ${joinNicks(channel.halfops)}");
-    event.notice("> All Users: ${joinNicks(channel.allUsers)}");
+    event.notice('> Members: ${joinNicks(channel.members)}');
+    event.notice('> Ops: ${joinNicks(channel.ops)}');
+    event.notice('> Voices: ${joinNicks(channel.voices)}');
+    event.notice('> Owners: ${joinNicks(channel.owners)}');
+    event.notice('> Half-Ops: ${joinNicks(channel.halfops)}');
+    event.notice('> All Users: ${joinNicks(channel.allUsers)}');
   });
 
-  command("act", (CommandEvent event) {
-    event.act("is silleh.");
+  command('act', (CommandEvent event) {
+    event.act('is silleh.');
   });
 
-  command("whois", (CommandEvent event) async {
+  command('whois', (CommandEvent event) async {
     if (event.args.length != 1) {
-      event.reply("Usage: whois <user>");
+      event.reply('Usage: whois <user>');
       return;
     }
 
@@ -155,49 +155,49 @@ void main() {
     event.notice(info);
   });
 
-  command("away", (CommandEvent event) async {
+  command('away', (CommandEvent event) async {
     if (event.args.length == 1) {
-      User user = client.getUser(event.args[0]);
+      var user = client.getUser(event.args[0]);
       var isAway = await user.isAway();
       if (isAway) {
-        event.reply("${user.name} is away.");
+        event.reply('${user.name} is away.');
       } else {
-        event.reply("${user.name} is not away.");
+        event.reply('${user.name} is not away.');
       }
     }
   });
 
-  command("server-version", (CommandEvent e) async {
+  command('server-version', (CommandEvent e) async {
     var version = await client.getServerVersion();
-    e.reply("Server: ${version.server}, Version: ${version.version}");
+    e.reply('Server: ${version.server}, Version: ${version.version}');
   });
 
-  command("online", (CommandEvent e) {
+  command('online', (CommandEvent e) {
     if (e.args.length != 1) {
       return;
     }
 
-    e.reply("Online: ${client.monitor.isUserOnline(e.args[0])}");
+    e.reply('Online: ${client.monitor.isUserOnline(e.args[0])}');
   });
 }
 
 void handleAsCommand(MessageEvent event) {
-  String message = event.message;
+  var message = event.message;
 
   if (message.startsWith(prefix)) {
-    var end = message.contains(" ")
-        ? message.indexOf(" ", prefix.length)
+    var end = message.contains(' ')
+        ? message.indexOf(' ', prefix.length)
         : message.length;
     var command = message.substring(prefix.length, end);
     var args =
-        message.substring(end != message.length ? end + 1 : end).split(" ");
+        message.substring(end != message.length ? end + 1 : end).split(' ');
 
-    args.removeWhere((i) => i.isEmpty || i == " ");
+    args.removeWhere((i) => i.isEmpty || i == ' ');
 
     if (commands.containsKey(command)) {
-      commands[command].add(new CommandEvent(event, command, args));
+      commands[command].add(CommandEvent(event, command, args));
     } else {
-      commandNotFound(new CommandEvent(event, command, args));
+      commandNotFound(CommandEvent(event, command, args));
     }
   }
 }
@@ -205,7 +205,7 @@ void handleAsCommand(MessageEvent event) {
 void command(String name, CommandHandler handler) {
   commands
       .putIfAbsent(name, () {
-        return new StreamController.broadcast();
+        return StreamController.broadcast();
       })
       .stream
       .listen((e) async {
@@ -222,7 +222,7 @@ void command(String name, CommandHandler handler) {
 }
 
 void commandNotFound(CommandEvent event) {
-  event.reply("Command not found.");
+  event.reply('Command not found.');
 }
 
 class CommandEvent extends MessageEvent {

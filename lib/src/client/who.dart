@@ -32,22 +32,22 @@ class WhoisBuilder {
   @override
   String toString() {
     return [
-      "Nickname: ${nickname}",
-      "Username: ${username}",
-      "Realname: ${realName}",
-      "Hostname: ${hostname}",
-      "Away Message: ${awayMessage}",
-      "Away: ${away}",
+      'Nickname: ${nickname}',
+      'Username: ${username}',
+      'Realname: ${realName}',
+      'Hostname: ${hostname}',
+      'Away Message: ${awayMessage}',
+      'Away: ${away}',
       "Channels: ${channels.join(',')}",
       "Voice In: ${voiceIn.join(',')}",
       "Op In: ${opIn.join(',')}",
       "Owner In: ${ownerIn.join(',')}",
       "Half Op In: ${halfOpIn.join(',')}",
-      "Server Name: ${serverName}",
-      "Server Info: ${serverInfo}",
-      "Idle: ${idle}",
-      "Idle Time: ${idleTime}",
-      "Is Server Operator: ${isServerOperator}"
-    ].where((line) => !line.endsWith("null")).join("\n");
+      'Server Name: ${serverName}',
+      'Server Info: ${serverInfo}',
+      'Idle: ${idle}',
+      'Idle Time: ${idleTime}',
+      'Is Server Operator: ${isServerOperator}'
+    ].where((line) => !line.endsWith('null')).join('\n');
   }
 }

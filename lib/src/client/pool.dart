@@ -7,7 +7,7 @@ class ClientPool {
 
   /// Adds a Client using the [config].
   int addClient(Configuration config, {bool connect = false}) {
-    var client = new Client(config);
+    var client = Client(config);
     clients.add(client);
     if (connect) {
       client.connect();
@@ -22,11 +22,11 @@ class ClientPool {
   Client operator [](int id) => clientAt(id);
 
   void connectAll() => forEach((client) => client.connect());
-  void disconnectAll([String reason = ""]) =>
+  void disconnectAll([String reason = '']) =>
       forEach((client) => client.disconnect(reason: reason));
   void sendMessage(String target, String message) =>
       forEach((client) => client.sendMessage(target, message));
-  void register<T>(handler(T event)) =>
+  void register<T>(Function(T event) handler) =>
       forEach((client) => client.register(handler));
-  void forEach(void action(Client client)) => clients.forEach(action);
+  void forEach(void Function(Client client) action) => clients.forEach(action);
 }

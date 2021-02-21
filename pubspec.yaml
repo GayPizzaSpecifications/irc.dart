@@ -1,5 +1,5 @@
 name: irc
-version: 4.0.2
+version: 4.0.3
 authors:
 - Kenneth Endfinger <kaendfinger@gmail.com>
 - Logan Gorence <logan@gorence.xyz>
@@ -8,7 +8,7 @@ homepage: https://github.com/SpinlockLabs/irc.dart/
 environment:
   sdk: ">=2.0.0 <3.0.0"
 dependencies:
-  glob: "^1.1.7"
-  pedantic: "^1.5.0"
+  glob: "^1.2.0"
+  pedantic: "^1.9.2"
 dev_dependencies:
-  test: "^1.3.2"
+  test: "^1.15.7"

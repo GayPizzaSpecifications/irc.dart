@@ -39,26 +39,26 @@ class Message {
       return _parsedHostmask;
     }
 
-    return _parsedHostmask = new Hostmask.parse(_hostmask);
+    return _parsedHostmask = Hostmask.parse(_hostmask);
   }
 
   /// The Plain Hostmask
   String get plainHostmask => _hostmask;
 
-  bool get hasAccountTag => tags.containsKey("account");
-  String get accountTag => tags["account"];
+  bool get hasAccountTag => tags.containsKey('account');
+  String get accountTag => tags['account'];
 
-  bool get hasServerTime => tags.containsKey("time");
+  bool get hasServerTime => tags.containsKey('time');
   DateTime get serverTime {
     if (_serverTime != null) {
       return _serverTime;
     } else {
-      return _serverTime = DateTime.parse(tags["time"]);
+      return _serverTime = DateTime.parse(tags['time']);
     }
   }
 
-  bool get isBatched => tags.containsKey("batch");
-  String get batchId => tags["batch"];
+  bool get isBatched => tags.containsKey('batch');
+  String get batchId => tags['batch'];
 
   DateTime _serverTime;
 }
@@ -71,7 +71,7 @@ class IrcParserSupport {
   /// and not include the space at the end.
   static Map<String, String> parseTags(String input) {
     var out = <String, String>{};
-    var parts = input.split(";");
+    var parts = input.split(';');
     parts.forEach((part) => _testPart(part, out));
 
     return out;
@@ -86,9 +86,9 @@ class IrcParserSupport {
     }
 
     var out = <String, String>{};
-    var split = input.split(")");
-    var modes = split[0].substring(1).split("");
-    var prefixes = split[1].split("");
+    var split = input.split(')');
+    var modes = split[0].substring(1).split('');
+    var prefixes = split[1].split('');
 
     var i = 0;
     for (var mode in modes) {
@@ -101,24 +101,24 @@ class IrcParserSupport {
 
   static ModeChange parseMode(String input) {
     ModeChange mode;
-    if (input.startsWith("+")) {
-      mode = new ModeChange(
-          input.substring(1).split("").toSet(), new Set<String>());
-    } else if (input.startsWith("-")) {
-      mode = new ModeChange(
-          new Set<String>(), input.substring(1).split("").toSet());
+    if (input.startsWith('+')) {
+      mode = ModeChange(
+          input.substring(1).split('').toSet(), ing>{});
+    } else if (input.startsWith('-')) {
+      mode = ModeChange(
+          <String>{}put.substring(1).split('').toSet());
     } else {
-      throw new Exception("Failed to parse mode: invalid prefix for ${input}");
+      throw Exception('Failed to parse mode: invalid prefix for ${input}');
     }
     return mode;
   }
 
   static Map<String, String> _testPart(String part, Map<String, String> out) {
-    if (part.contains("=")) {
-      var keyValue = part.split("=");
-      out[keyValue[0]] = keyValue.skip(1).join("=");
+    if (part.contains('=')) {
+      var keyValue = part.split('=');
+      out[keyValue[0]] = keyValue.skip(1).join('=');
     } else {
-      out[part] = "true";
+      out[part] = 'true';
     }
     return out;
   }
@@ -136,16 +136,14 @@ class ModeChange {
 
   @override
   String toString() =>
-      added.isEmpty ? "-${removed.join()}" : "+${added.join()}";
+      added.isEmpty ? '-${removed.join()}' : '+${added.join()}';
 }
 
 class Mode {
   final Set<String> modes;
 
   Mode(this.modes);
-  Mode.empty() : modes = new Set<String>();
-
-  bool has(String x) {
+  Mode.empty() : modes = <String>{} bool has(String x) {
     return modes.contains(x);
   }
 }

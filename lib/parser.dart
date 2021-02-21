@@ -23,11 +23,11 @@
 ///
 library irc.parser;
 
-import "dart:convert" show Converter;
+import 'dart:convert' show Converter;
 
-import "package:glob/glob.dart";
+import 'package:glob/glob.dart';
 
-part "src/parser/base.dart";
-part "src/parser/message.dart";
-part "src/parser/regex.dart";
-part "src/parser/hostmask.dart";
+part 'src/parser/base.dart';
+part 'src/parser/message.dart';
+part 'src/parser/regex.dart';
+part 'src/parser/hostmask.dart';

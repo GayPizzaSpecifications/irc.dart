@@ -15,7 +15,7 @@ class SocketIrcConnection extends IrcConnection {
   Socket _socket;
   bool _done = false;
 
-  List<String> _queue = <String>[];
+  final List<String> _queue = <String>[];
 
   @override
   Future connect(Configuration config) async {
@@ -42,12 +42,10 @@ class SocketIrcConnection extends IrcConnection {
 
   @override
   Stream<String> lines() {
-    if (_lines == null) {
-      _lines = _socket
+    _lines ??= _socket
           .cast<List<int>>()
           .transform(const Utf8Decoder(allowMalformed: true))
           .transform(const LineSplitter());
-    }
 
     return _lines;
   }
@@ -55,7 +53,7 @@ class SocketIrcConnection extends IrcConnection {
   @override
   Future disconnect() async {
     if (_done) {
-      return new Future.value();
+      return Future.value();
     }
     _lines = null;
     var future = _socket.close();
@@ -94,8 +92,8 @@ class WebSocketIrcConnection extends IrcConnection {
 
   @override
   Future connect(Configuration config) async {
-    var uri = new Uri(
-        scheme: config.ssl ? "wss" : "ws",
+    var uri = Uri(
+        scheme: config.ssl ? 'wss' : 'ws',
         port: config.port,
         host: config.host,
         path: config.websocketPath);
@@ -105,7 +103,7 @@ class WebSocketIrcConnection extends IrcConnection {
 
   @override
   Future disconnect() async {
-    await _socket.close(WebSocketStatus.normalClosure, "IRC disconnect.");
+    await _socket.close(WebSocketStatus.normalClosure, 'IRC disconnect.');
   }
 
   @override
@@ -117,6 +115,6 @@ class WebSocketIrcConnection extends IrcConnection {
 
   @override
   void send(String line) {
-    _socket.add("${line}\r\n");
+    _socket.add('${line}\r\n');
   }
 }

@@ -213,7 +213,7 @@ class JoinEvent extends Event {
   String realname;
 
   bool get isExtended => realname != null;
-  bool get isRegistered => username != "*";
+  bool get isRegistered => username != '*';
 
   JoinEvent(Client client, this.user, this.channel,
       {this.username, this.realname})
@@ -285,7 +285,7 @@ class ErrorEvent extends Event {
   /// Type of Error
   String type;
 
-  ErrorEvent(Client client, {this.message, this.err, this.type = "unspecified"})
+  ErrorEvent(Client client, {this.message, this.err, this.type = 'unspecified'})
       : super(client);
 }
 
@@ -561,10 +561,10 @@ class ServerSupportsEvent extends Event {
 
   ServerSupportsEvent(Client client, String message) : super(client) {
     supported = {};
-    var split = message.split(" ");
+    var split = message.split(' ');
     split.forEach((it) {
-      if (it.contains("=")) {
-        var keyValue = it.split("=");
+      if (it.contains('=')) {
+        var keyValue = it.split('=');
         var key = keyValue[0];
 
         dynamic value = keyValue[1];

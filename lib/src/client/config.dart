@@ -27,7 +27,7 @@ class Configuration {
   bool websocket;
 
   /// The path of the websocket.
-  String websocketPath = "/";
+  String websocketPath = '/';
 
   /// Allow Invalid SSL Certificates
   bool allowInvalidCertificates;
@@ -88,11 +88,11 @@ class Configuration {
 
   /// Creates a new Client Configuration with default values.
   Configuration(
-      {this.host = "irc.esper.net",
+      {this.host = 'irc.esper.net',
       this.port = 6667,
-      this.nickname = "DartBot",
-      this.username = "DartBot",
-      this.realname = "Dart IRC Bot",
+      this.nickname = 'DartBot',
+      this.username = 'DartBot',
+      this.realname = 'Dart IRC Bot',
       this.ssl = false,
       this.allowInvalidCertificates = false,
       this.bindHost,
@@ -114,5 +114,5 @@ class Configuration {
       this.enableMessageSplitting = true,
       this.enableStartTls = false,
       this.websocket = false,
-      this.websocketPath = "/"});
+      this.websocketPath = '/'});
 }

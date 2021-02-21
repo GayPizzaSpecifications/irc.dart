@@ -5,9 +5,9 @@ class User extends Entity {
   /// Client associated with the user
   final Client client;
   String _username;
-  String _nickname;
+  final String _nickname;
   String _realName;
-  bool _isServerOperator = false;
+  final bool _isServerOperator = false;
   String _serverName;
   String _hostname;
   String _serverInfo;
@@ -42,7 +42,7 @@ class User extends Entity {
 
   /// Check if the user is away.
   Future<bool> isAway() {
-    var completer = new Completer.sync();
+    var completer = Completer.sync();
 
     var handler = (WhoisEvent event) {
       if (event.nickname == nickname) {
@@ -58,7 +58,7 @@ class User extends Entity {
     return completer.future
         .timeout(const Duration(seconds: 5), onTimeout: () => false)
         .then((value) {
-      new Future(() {
+      Future(() {
         client.unregister(handler);
       });
       return value;
