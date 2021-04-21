@@ -1,8 +1,5 @@
 name: irc
 version: 4.0.3
-authors:
-- Kenneth Endfinger <kaendfinger@gmail.com>
-- Logan Gorence <logan@gorence.xyz>
 description: IRC library in Dart providing a simplistic and easy to use API.
 homepage: https://github.com/SpinlockLabs/irc.dart/
 environment:
