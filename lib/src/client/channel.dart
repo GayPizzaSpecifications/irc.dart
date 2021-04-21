@@ -14,19 +14,21 @@ class Channel extends Entity {
   final Map<String, dynamic> metadata;
 
   /// Channel Operators
-  final Set<User> ops = r>{};
+  final Set<User> ops = <User>{};
 
   /// Channel Half-Ops
-  final Set<User> halfops = r>{};
+  final Set<User> halfops = <User>{};
 
   /// Channel Voices
-  final Set<User> voices = r>{};
+  final Set<User> voices = <User>{};
 
   /// Channel Members
-  final Set<User> members = r>{};
+  final Set<User> members = <User>{};
 
   /// Channel Owners (Not Supported on all Servers)
-  final Set<User> owners = <User>{} /// Channel topic
+  final Set<User> owners = <User>{};
+  
+  /// Channel topic
   String _topic;
 
   /// Banned Hostmasks

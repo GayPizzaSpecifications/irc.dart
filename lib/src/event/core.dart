@@ -34,7 +34,9 @@ class EventDispatcher {
   /// Default Event Handler Priority
   final int defaultPriority;
   final int dispatcherId;
-  final _handlers = <Type, List<_EventHandler>>{} /// Creates a new Event Dispatcher.
+  final _handlers = <Type, List<_EventHandler>>{};
+  
+  /// Creates a new Event Dispatcher.
   ///
   /// If [defaultPriority] is specified, it will be the priority
   /// that is assigned to handlers when they do not specify one.

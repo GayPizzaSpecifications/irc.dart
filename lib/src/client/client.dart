@@ -70,9 +70,11 @@ class Client extends ClientBase {
       {IrcParser parser,
       IrcConnection connection,
       this.sendInterval = const Duration(milliseconds: 2)})
-      : parser = parser ?? new RegexIrcParser()      connection = connection ?? (config.websocket
-                ? new WebSocketIrcConnection()
-                : new SocketIrcConnection())  metadata = {} {
+      : parser = parser ?? RegexIrcParser(),
+        connection = connection ?? (config.websocket
+                ? WebSocketIrcConnection()
+                : SocketIrcConnection()),
+        metadata = {} {
     this.config = config;
     _registerHandlers();
     _nickname = config.nickname;
@@ -471,19 +473,21 @@ class Client extends ClientBase {
       case 'LS': // All capabilities
         _supportedCap = input.message != null
             ? input.message.trim().split(' ').toSet()
-            : <String>{}      _supportedCap.removeWhere((it) => it == ' ' || it.trim().isEmpty);
+            : <String>{};
+        _supportedCap.removeWhere((it) => it == ' ' || it.trim().isEmpty);
         post(ServerCapabilitiesEvent(this, _supportedCap));
         break;
       case 'LIST': // Current capabilities
         _currentCap = input.message != null
             ? input.message.trim().split(' ').toSet()
-            : <String>{}      _currentCap.removeWhere((it) => it == ' ' || it.trim().isEmpty);
+            : <String>{};
+        _currentCap.removeWhere((it) => it == ' ' || it.trim().isEmpty);
         post(CurrentCapabilitiesEvent(this, _currentCap));
         break;
       case 'ACK': // Acknowledged capabilities
         var caps = input.message != null
             ? input.message.trim().split(' ').toSet()
-            : ing>{};
+            : <String>{};
         caps.removeWhere((it) => it == ' ' || it.trim().isEmpty);
         _currentCap.addAll(caps);
         post(AcknowledgedCapabilitiesEvent(this, caps));
@@ -491,7 +495,8 @@ class Client extends ClientBase {
       case 'NAK': // Not acknowledged capabilities
         var caps = input.message != null
             ? input.message.trim().split(' ').toSet()
-            : <String>{}      caps.removeWhere((it) => it == ' ' || it.trim().isEmpty);
+            : <String>{};    
+        caps.removeWhere((it) => it == ' ' || it.trim().isEmpty);
         _currentCap.removeWhere((it) => caps.contains(it));
         post(NotAcknowledgedCapabilitiesEvent(this, caps));
         break;
@@ -499,7 +504,9 @@ class Client extends ClientBase {
   }
 
   Map<String, String> _modePrefixes = {};
-  Set<String> _supportedCap = <String>{}Set<String> _currentCap = <String>{} Map<String, String> get modePrefixes => _modePrefixes;
+  Set<String> _supportedCap = <String>{};
+  Set<String> _currentCap = <String>{};
+  Map<String, String> get modePrefixes => _modePrefixes;
 
   /// Get the state of a user
   @override
@@ -1391,7 +1398,8 @@ class Monitor {
     }
   }
 
-  final Set<String> _monitorList = <String>{} Set<String> get users => _monitorList;
+  final Set<String> _monitorList = <String>{};
+  Set<String> get users => _monitorList;
 
   /// Checks whether the monitor extension is supported.
   void _checkMonitorSupported() {

@@ -5,9 +5,9 @@ class User extends Entity {
   /// Client associated with the user
   final Client client;
   String _username;
-  final String _nickname;
+  String _nickname;
   String _realName;
-  final bool _isServerOperator = false;
+  bool _isServerOperator = false;
   String _serverName;
   String _hostname;
   String _serverInfo;

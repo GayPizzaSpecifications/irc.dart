@@ -67,7 +67,8 @@ abstract class ClientBase {
   /// [input] is the message
   List<String> _handleMessageSending(String begin, String input) {
     if (config.enableMessageSplitting && input.contains('\n')) {
-      var combined = <String>[]    for (var part in input.split('\n')) {
+      var combined = <String>[];
+      for (var part in input.split('\n')) {
         combined.addAll(_handleMessageSending(begin, part));
       }
       return combined;

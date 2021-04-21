@@ -103,10 +103,10 @@ class IrcParserSupport {
     ModeChange mode;
     if (input.startsWith('+')) {
       mode = ModeChange(
-          input.substring(1).split('').toSet(), ing>{});
+          input.substring(1).split('').toSet(), <String>{});
     } else if (input.startsWith('-')) {
       mode = ModeChange(
-          <String>{}put.substring(1).split('').toSet());
+          <String>{}, input.substring(1).split('').toSet());
     } else {
       throw Exception('Failed to parse mode: invalid prefix for ${input}');
     }
@@ -143,7 +143,9 @@ class Mode {
   final Set<String> modes;
 
   Mode(this.modes);
-  Mode.empty() : modes = <String>{} bool has(String x) {
+  Mode.empty() : modes = <String>{};
+  
+  bool has(String x) {
     return modes.contains(x);
   }
 }
