@@ -1,25 +1,25 @@
 part of irc.client;
 
 abstract class IrcConnection {
-  Future connect(Configuration config);
+  Future connect(Configuration? config);
   Future disconnect();
 
   void send(String line);
-  Stream<String> lines();
+  Stream<String>? lines();
 
-  Future initiateTlsConnection(Configuration config) async {}
+  Future initiateTlsConnection(Configuration? config) async {}
 }
 
 class SocketIrcConnection extends IrcConnection {
-  Stream<String> _lines;
-  Socket _socket;
+  Stream<String>? _lines;
+  late Socket _socket;
   bool _done = false;
 
   final List<String> _queue = <String>[];
 
   @override
-  Future connect(Configuration config) async {
-    var socket = await Socket.connect(config.host, config.port,
+  Future connect(Configuration? config) async {
+    var socket = await Socket.connect(config!.host, config.port,
         sourceAddress: config.bindHost);
 
     if (config.ssl) {
@@ -41,7 +41,7 @@ class SocketIrcConnection extends IrcConnection {
   }
 
   @override
-  Stream<String> lines() {
+  Stream<String>? lines() {
     _lines ??= _socket
           .cast<List<int>>()
           .transform(const Utf8Decoder(allowMalformed: true))
@@ -70,9 +70,9 @@ class SocketIrcConnection extends IrcConnection {
   }
 
   @override
-  Future initiateTlsConnection(Configuration config) async {
+  Future initiateTlsConnection(Configuration? config) async {
     _socket = await SecureSocket.secure(_socket, onBadCertificate: (cert) {
-      if (config.allowInvalidCertificates) {
+      if (config!.allowInvalidCertificates) {
         return true;
       }
       return false;
@@ -88,12 +88,12 @@ class SocketIrcConnection extends IrcConnection {
 }
 
 class WebSocketIrcConnection extends IrcConnection {
-  WebSocket _socket;
+  late WebSocket _socket;
 
   @override
-  Future connect(Configuration config) async {
+  Future connect(Configuration? config) async {
     var uri = Uri(
-        scheme: config.ssl ? 'wss' : 'ws',
+        scheme: config!.ssl ? 'wss' : 'ws',
         port: config.port,
         host: config.host,
         path: config.websocketPath);

@@ -18,7 +18,7 @@ class Configuration {
   String username;
 
   /// Server Password
-  String password;
+  String? password;
 
   /// Enable SSL
   bool ssl;
@@ -78,7 +78,7 @@ class Configuration {
   bool enableBatch;
 
   /// The address to bind the local socket to.
-  String bindHost;
+  String? bindHost;
 
   /// Extra IRCv3 Capabilities to Request
   List<String> capabilities;

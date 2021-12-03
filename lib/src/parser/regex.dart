@@ -7,9 +7,9 @@ class RegexIrcParser extends IrcParser {
       r'^(?:@([^\r\n ]*) +|())(?::([^\r\n ]+) +|())([^\r\n ]+)(?: +([^:\r\n ]+[^\r\n ]*(?: +[^:\r\n ]+[^\r\n ]*)*)|())?(?: +:([^\r\n]*)| +())?[\r\n]*$');
 
   @override
-  Message convert(String line) {
+  Message? convert(String line) {
     line = line.trimLeft();
-    List<String> match;
+    List<String?> match;
     {
       var parsed = kLinePattern.firstMatch(line);
 
@@ -17,7 +17,7 @@ class RegexIrcParser extends IrcParser {
         return null;
       }
 
-      match = List<String>.generate(parsed.groupCount + 1, parsed.group);
+      match = List<String?>.generate(parsed.groupCount + 1, parsed.group);
     }
 
     var tagStuff = match[1];

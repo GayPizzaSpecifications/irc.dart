@@ -6,7 +6,7 @@ abstract class Event {
   Client client;
 
   bool isBatched = false;
-  String batchId;
+  String? batchId;
 
   Event(this.client);
 }
@@ -18,8 +18,8 @@ class ConnectEvent extends Event {
 
 class BatchStartEvent extends Event {
   String id;
-  String get type => body.parameters[1];
-  Message body;
+  String get type => body!.parameters![1];
+  Message? body;
 
   BatchStartEvent(Client client, this.id, this.body) : super(client);
 
@@ -38,7 +38,7 @@ class BatchEndEvent extends Event {
 }
 
 class MessageSentEvent extends Event {
-  String message;
+  String? message;
   String target;
 
   MessageSentEvent(Client client, this.message, this.target) : super(client);
@@ -62,7 +62,7 @@ class NetJoinEvent extends Event {
 
 class QuitPartEvent extends Event {
   final Channel channel;
-  final String user;
+  final String? user;
 
   QuitPartEvent(Client client, this.channel, this.user) : super(client);
 }
@@ -94,7 +94,7 @@ class ServerTlsEvent extends Event {
 class ServerVersionEvent extends Event {
   final String version;
   final String server;
-  final String comments;
+  final String? comments;
 
   ServerVersionEvent(Client client, this.server, this.version, this.comments)
       : super(client);
@@ -105,9 +105,9 @@ class LineReceiveEvent extends Event {
   /// Line from the Server
   String line;
 
-  Message _message;
+  Message? _message;
 
-  Message get message {
+  Message? get message {
     if (_message != null) {
       return _message;
     } else {
@@ -138,7 +138,7 @@ class MonitorListEvent extends Event {
 
 class ChangeHostEvent extends Event {
   String host;
-  String user;
+  String? user;
   String username;
 
   ChangeHostEvent(Client client, this.user, this.username, this.host)
@@ -148,55 +148,55 @@ class ChangeHostEvent extends Event {
 /// Message Event is dispatched when a message is received from the server (includes private messages)
 class MessageEvent extends Event {
   /// Who sent the message
-  Entity from;
+  Entity? from;
 
   /// Where the message was sent to
-  Entity target;
+  Entity? target;
 
   /// The message that was received
-  String message;
+  String? message;
 
   /// Message Intent
-  String intent;
+  String? intent;
 
   MessageEvent(Client client, this.from, this.target, this.message,
       {this.intent})
       : super(client);
 
   /// Replies to the Event
-  void reply(String message) {
-    if (target.isUser) {
-      client.sendMessage(from.name, message);
-    } else if (target.isChannel) {
-      client.sendMessage(target.name, message);
+  void reply(String? message) {
+    if (target!.isUser) {
+      client.sendMessage(from!.name, message);
+    } else if (target!.isChannel) {
+      client.sendMessage(target!.name, message);
     } else {
       // Ignore server replies.
     }
   }
 
   /// If this event is a private message
-  bool get isPrivate => target.isUser;
+  bool get isPrivate => target!.isUser;
 
-  Channel get channel => target.isChannel ? target as Channel : null;
+  Channel? get channel => target!.isChannel ? target as Channel? : null;
 }
 
 /// Notice Event is dispatched when a notice is received
 class NoticeEvent extends MessageEvent {
   /// Returns whether the notice is from the system or not.
-  bool get isSystem => from != null && from.isServer;
+  bool get isSystem => from != null && from!.isServer;
 
   bool get isServer => isSystem;
 
-  NoticeEvent(Client client, Entity from, Entity target, String message)
+  NoticeEvent(Client client, Entity? from, Entity? target, String? message)
       : super(client, from, target, message);
 
-  bool get isChannel => target.isChannel;
+  bool get isChannel => target!.isChannel;
 
   /// Sends [message] to [target] as a notice.
   @override
-  void reply(String message) {
-    if (!from.isServer) {
-      client.sendNotice(from.name, message);
+  void reply(String? message) {
+    if (!from!.isServer) {
+      client.sendNotice(from!.name, message);
     }
   }
 }
@@ -204,13 +204,13 @@ class NoticeEvent extends MessageEvent {
 /// Join Event is dispatched when another user joins a channel we are in
 class JoinEvent extends Event {
   /// Channel they joined
-  Channel channel;
+  Channel? channel;
 
   /// User who joined
-  String user;
+  String? user;
 
-  String username;
-  String realname;
+  String? username;
+  String? realname;
 
   bool get isExtended => realname != null;
   bool get isRegistered => username != '*';
@@ -220,7 +220,7 @@ class JoinEvent extends Event {
       : super(client);
 
   /// Replies to this Event by sending [message] to the channel
-  void reply(String message) => channel.sendMessage(message);
+  void reply(String message) => channel!.sendMessage(message);
 }
 
 /// Nick In Use Event is dispatched when a nickname is in use when trying to switch usernames
@@ -242,21 +242,21 @@ class ClientJoinEvent extends Event {
 /// Part Event is dispatched when a user parts a channel that the Client is in
 class PartEvent extends Event {
   /// Channel that the user left
-  Channel channel;
+  Channel? channel;
 
   /// The user that left
-  String user;
+  String? user;
 
   PartEvent(Client client, this.user, this.channel) : super(client);
 
   /// Replies to the Event by sending [message] to the channel the user left
-  void reply(String message) => channel.sendMessage(message);
+  void reply(String message) => channel!.sendMessage(message);
 }
 
 /// Fired when the Client parts a channel
 class ClientPartEvent extends Event {
   /// Channel we left
-  Channel channel;
+  Channel? channel;
 
   ClientPartEvent(Client client, this.channel) : super(client);
 }
@@ -264,7 +264,7 @@ class ClientPartEvent extends Event {
 /// Quit Event is dispatched when a user quits the server
 class QuitEvent extends Event {
   /// User who quit
-  String user;
+  String? user;
 
   QuitEvent(Client client, this.user) : super(client);
 }
@@ -277,10 +277,10 @@ class DisconnectEvent extends Event {
 /// Error Event is dispatched when there is any error in the Client or Server
 class ErrorEvent extends Event {
   /// Error Message
-  String message;
+  String? message;
 
   /// Error Object (possibly null)
-  Error err;
+  Error? err;
 
   /// Type of Error
   String type;
@@ -292,13 +292,13 @@ class ErrorEvent extends Event {
 /// Mode Event is dispatched when we are notified of a mode change
 class ModeEvent extends Event {
   /// Channel we received the change from (possibly null)
-  Channel channel;
+  Channel? channel;
 
   /// Mode that was changed
   ModeChange mode;
 
   /// User the mode was changed on
-  String user;
+  String? user;
 
   bool get isClient => user == client.nickname;
   bool get hasChannel => channel != null;
@@ -313,9 +313,9 @@ class LineSentEvent extends Event {
   /// Line that was sent
   String line;
 
-  Message _message;
+  Message? _message;
 
-  Message get message {
+  Message? get message {
     if (_message != null) {
       return _message;
     } else {
@@ -329,16 +329,16 @@ class LineSentEvent extends Event {
 /// Topic Event is dispatched when the topic changes or is received in a channel
 class TopicEvent extends Event {
   /// Channel we received the event from
-  Channel channel;
+  Channel? channel;
 
   /// The Topic
-  String topic;
+  String? topic;
 
   /// The old Topic.
-  String oldTopic;
+  String? oldTopic;
 
   /// The User
-  User user;
+  User? user;
 
   bool isChange;
 
@@ -347,7 +347,7 @@ class TopicEvent extends Event {
       : super(client);
 
   void revert() {
-    channel.topic = oldTopic;
+    channel!.topic = oldTopic;
   }
 }
 
@@ -372,8 +372,8 @@ class NotAcknowledgedCapabilitiesEvent extends Event {
 }
 
 class AwayEvent extends Event {
-  User user;
-  String message;
+  User? user;
+  String? message;
   bool get isAway => message != null;
   bool get isBack => message == null;
 
@@ -402,10 +402,10 @@ class NickChangeEvent extends Event {
   User user;
 
   /// Original Nickname
-  String original;
+  String? original;
 
   /// New Nickname
-  String now;
+  String? now;
 
   NickChangeEvent(Client client, this.user, this.original, this.now)
       : super(client);
@@ -413,7 +413,7 @@ class NickChangeEvent extends Event {
 
 class UserLoggedInEvent extends Event {
   /// User that logged in.
-  User user;
+  User? user;
 
   /// Account name for the user.
   String account;
@@ -422,21 +422,21 @@ class UserLoggedInEvent extends Event {
 }
 
 class UserLoggedOutEvent extends Event {
-  User user;
+  User? user;
 
   UserLoggedOutEvent(Client client, this.user) : super(client);
 }
 
 /// Whois Event is dispatched when a WHOIS query is completed
 class WhoisEvent extends Event {
-  WhoisBuilder builder;
+  WhoisBuilder? builder;
 
   WhoisEvent(Client client, this.builder) : super(client);
 
   /// The Channels the user is a member in
   List<String> get memberChannels {
     var list = <String>[];
-    list.addAll(builder.channels.where((i) =>
+    list.addAll(builder!.channels.where((i) =>
         !operatorChannels.contains(i) &&
         !voicedChannels.contains(i) &&
         !ownerChannels.contains(i) &&
@@ -445,51 +445,51 @@ class WhoisEvent extends Event {
   }
 
   /// The Channels the user is an operator in
-  List<String> get operatorChannels => builder.opIn;
+  List<String> get operatorChannels => builder!.opIn;
 
   /// The Channels the user is a voice in
-  List<String> get voicedChannels => builder.voiceIn;
+  List<String> get voicedChannels => builder!.voiceIn;
 
-  List<String> get ownerChannels => builder.ownerIn;
-  List<String> get halfOpChannels => builder.halfOpIn;
+  List<String> get ownerChannels => builder!.ownerIn;
+  List<String> get halfOpChannels => builder!.halfOpIn;
 
   /// If the user is away
-  bool get away => builder.away;
+  bool get away => builder!.away;
 
   /// If the user is away
   bool get isAway => away;
 
   /// If the user is away, then this is the message that was set
-  String get awayMessage => builder.awayMessage;
+  String? get awayMessage => builder!.awayMessage;
 
   /// If this user is a server operator
-  bool get isServerOperator => builder.isServerOperator;
+  bool get isServerOperator => builder!.isServerOperator;
 
   /// The name of the server this user is on
-  String get serverName => builder.serverName;
+  String? get serverName => builder!.serverName;
 
-  bool get secure => builder.secure;
+  bool get secure => builder!.secure;
 
   /// The Server Information (message) for the server this user is on
-  String get serverInfo => builder.serverInfo;
+  String? get serverInfo => builder!.serverInfo;
 
   /// The User's Username
-  String get username => builder.username;
+  String? get username => builder!.username;
 
   /// The User's Hostname
-  String get hostname => builder.hostname;
+  String? get hostname => builder!.hostname;
 
   /// If the user is idle
-  bool get idle => builder.idle;
+  bool get idle => builder!.idle;
 
   /// If the user is idle, then this is the amount of time that the user has been idle
-  int get idleTime => builder.idleTime;
+  int? get idleTime => builder!.idleTime;
 
   /// The User's Real Name
-  String get realname => builder.realName;
+  String? get realname => builder!.realName;
 
   /// The User's Nickname
-  String get nickname => builder.nickname;
+  String get nickname => builder!.nickname;
 
   @override
   String toString() => builder.toString();
@@ -497,34 +497,34 @@ class WhoisEvent extends Event {
 
 class PongEvent extends Event {
   /// Message in the PONG
-  String message;
+  String? message;
 
   PongEvent(Client client, this.message) : super(client);
 }
 
 /// An Action Event
 class ActionEvent extends MessageEvent {
-  ActionEvent(Client client, User from, Entity target, String message)
+  ActionEvent(Client client, User from, Entity? target, String? message)
       : super(client, from, target, message);
 
   /// Sends [message] to [target] as a action.
   @override
-  void reply(String message) => client.sendAction(from.name, message);
+  void reply(String? message) => client.sendAction(from!.name, message);
 }
 
 /// A Kick Event
 class KickEvent extends Event {
   /// The Channel where the event is from
-  Channel channel;
+  Channel? channel;
 
   /// The User who was kicked
-  User user;
+  User? user;
 
   /// The User who kicked the other user
-  User by;
+  User? by;
 
   /// The Reason Given for [by] kicking [user]
-  String reason;
+  String? reason;
 
   KickEvent(Client client, this.channel, this.user, this.by, [this.reason])
       : super(client);
@@ -537,7 +537,7 @@ class CTCPEvent extends Event {
   User user;
 
   /// The Target of the message
-  Entity target;
+  Entity? target;
 
   /// The Message sent
   String message;
@@ -557,7 +557,7 @@ class MOTDEvent extends Event {
 /// Server ISUPPORT Event
 class ServerSupportsEvent extends Event {
   /// Supported Stuff
-  Map<String, dynamic> supported;
+  late Map<String, dynamic> supported;
 
   ServerSupportsEvent(Client client, String message) : super(client) {
     supported = {};
@@ -586,7 +586,7 @@ class InviteEvent extends Event {
   String channel;
 
   /// The user who invited the client
-  String user;
+  String? user;
 
   InviteEvent(Client client, this.channel, this.user) : super(client);
 
@@ -599,13 +599,13 @@ class InviteEvent extends Event {
 
 class UserInvitedEvent extends Event {
   /// The Channel that this invite was issued for.
-  Channel channel;
+  Channel? channel;
 
   /// The user who was invited.
   String user;
 
   /// The user who invited.
-  User inviter;
+  User? inviter;
 
   UserInvitedEvent(Client client, this.channel, this.user, this.inviter)
       : super(client);

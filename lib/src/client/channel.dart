@@ -7,29 +7,29 @@ class Channel extends Entity {
 
   /// Channel Name (Including the #)
   @override
-  final String name;
+  final String? name;
 
   /// Storage for data about a channel.
   /// Note that this doesn't persist when the client leaves the channel.
   final Map<String, dynamic> metadata;
 
   /// Channel Operators
-  final Set<User> ops = <User>{};
+  final Set<User?> ops = <User?>{};
 
   /// Channel Half-Ops
-  final Set<User> halfops = <User>{};
+  final Set<User?> halfops = <User?>{};
 
   /// Channel Voices
-  final Set<User> voices = <User>{};
+  final Set<User?> voices = <User?>{};
 
   /// Channel Members
-  final Set<User> members = <User>{};
+  final Set<User?> members = <User?>{};
 
   /// Channel Owners (Not Supported on all Servers)
-  final Set<User> owners = <User>{};
+  final Set<User?> owners = <User?>{};
   
   /// Channel topic
-  String _topic;
+  String? _topic;
 
   /// Banned Hostmasks
   final List<GlobHostmask> bans = [];
@@ -38,16 +38,16 @@ class Channel extends Entity {
   final Mode mode = Mode.empty();
 
   /// Channel topic
-  String get topic => _topic;
+  String? get topic => _topic;
 
   /// User who changed the topic last.
-  String get topicUser => _topicUser;
+  String? get topicUser => _topicUser;
 
   /// Change the topic for the Channel.
-  set topic(String topic) {
+  set topic(String? topic) {
     if (client.supported.containsKey('TOPICLEN')) {
       var max = client.supported['TOPICLEN'];
-      if (topic.length > max) {
+      if (topic!.length > max) {
         throw ArgumentError.value(topic,
             'length is >${max}, which is the maximum topic length set by the server.');
       }
@@ -57,7 +57,7 @@ class Channel extends Entity {
   }
 
   /// User who changed the topic last.
-  String _topicUser;
+  String? _topicUser;
 
   /// Invite a user to the Channel.
   void invite(User user) {
@@ -65,8 +65,8 @@ class Channel extends Entity {
   }
 
   /// Get all users for the Channel.
-  Set<User> get allUsers {
-    var all = <User>{}   ..addAll(ops)
+  Set<User?> get allUsers {
+    var all = <User?>{}   ..addAll(ops)
       ..addAll(voices)
       ..addAll(members)
       ..addAll(owners)
@@ -102,10 +102,10 @@ class Channel extends Entity {
   void unban(User user) => setMode('-b', user);
 
   /// Kicks [user] from channel with optional [reason].
-  void kick(User user, [String reason]) => client.kick(this, user, reason);
+  void kick(User user, [String? reason]) => client.kick(this, user, reason);
 
   /// Sets +b on [user] then kicks [user] with the specified [reason]
-  void kickban(User user, [String reason]) {
+  void kickban(User user, [String? reason]) {
     ban(user);
     kick(user, reason);
   }
@@ -126,7 +126,7 @@ class Channel extends Entity {
   }
 
   /// Sets the Mode on the Channel or if the user if [user] is specified.
-  void setMode(String mode, [User user]) {
+  void setMode(String mode, [User? user]) {
     if (user == null) {
       client.send('MODE ${name} ${mode}');
     } else {
@@ -143,11 +143,11 @@ class Channel extends Entity {
         owners.contains(user);
   }
 
-  bool _userListHas(String name, Set<User> users) {
-    return users.any((user) => user.name == name);
+  bool _userListHas(String? name, Set<User?> users) {
+    return users.any((user) => user!.name == name);
   }
 
-  bool hasUserWithName(String name) {
+  bool hasUserWithName(String? name) {
     return _userListHas(name, ops) ||
         _userListHas(name, halfops) ||
         _userListHas(name, voices) ||
@@ -155,12 +155,12 @@ class Channel extends Entity {
         _userListHas(name, owners);
   }
 
-  void _dropFromUserList(String nickname) {
-    ops.removeWhere((user) => user.name == nickname);
-    halfops.removeWhere((user) => user.name == nickname);
-    voices.removeWhere((user) => user.name == nickname);
-    members.removeWhere((user) => user.name == nickname);
-    owners.removeWhere((user) => user.name == nickname);
+  void _dropFromUserList(String? nickname) {
+    ops.removeWhere((user) => user!.name == nickname);
+    halfops.removeWhere((user) => user!.name == nickname);
+    voices.removeWhere((user) => user!.name == nickname);
+    members.removeWhere((user) => user!.name == nickname);
+    owners.removeWhere((user) => user!.name == nickname);
   }
 
   /// Compares [object] to this. Only true if channels names are equal.

@@ -6,18 +6,18 @@ abstract class ClientBase {
   IrcParser get parser;
 
   /// Client configuration
-  Configuration get config;
+  Configuration? get config;
 
   /// Client nickname
-  String get nickname;
+  String? get nickname;
 
   /// Map of channel name and channel instance for which
   /// the client is currently in.
-  Map<String, Channel> get channels;
+  Map<String?, Channel> get channels;
 
   /// Map of user nickname and user instance for every channel
   /// that this client is in.
-  Map<String, User> get users;
+  Map<String?, User?> get users;
 
   /// MOTD of the server, which is available only after the
   /// ReadyEvent is posted.
@@ -35,13 +35,13 @@ abstract class ClientBase {
   ///
   /// Note that this handles long messages. If the length of the message is 454
   /// characters or bigger, it will split it up into multiple messages
-  void sendMessage(String target, String message) {
+  void sendMessage(String? target, String? message) {
     var begin = 'PRIVMSG ${target} :';
 
     var all = _handleMessageSending(begin, message);
 
     for (var msg in all) {
-      send(begin + msg);
+      send(begin + msg!);
     }
   }
 
@@ -65,18 +65,18 @@ abstract class ClientBase {
   /// Splits messages if required.
   /// [begin] is the very beginning of the line (like 'PRIVMSG user :')
   /// [input] is the message
-  List<String> _handleMessageSending(String begin, String input) {
-    if (config.enableMessageSplitting && input.contains('\n')) {
-      var combined = <String>[];
+  List<String?> _handleMessageSending(String begin, String? input) {
+    if (config!.enableMessageSplitting && input!.contains('\n')) {
+      var combined = <String?>[];
       for (var part in input.split('\n')) {
         combined.addAll(_handleMessageSending(begin, part));
       }
       return combined;
     }
 
-    var all = <String>[];
+    List<String?> all = <String>[];
 
-    if ((input.length + begin.length) > 454) {
+    if ((input!.length + begin.length) > 454) {
       var max = 454 - (begin.length + 1);
       var chars = input.split('');
       var list = chars;
@@ -96,11 +96,11 @@ abstract class ClientBase {
   ///
   /// Note that this handles long messages. If the length of the message is 454
   /// characters or bigger, it will split it up into multiple messages
-  void sendNotice(String target, String message) {
+  void sendNotice(String? target, String? message) {
     var begin = 'NOTICE ${target} :';
     var all = _handleMessageSending(begin, message);
     for (var msg in all) {
-      send(begin + msg);
+      send(begin + msg!);
     }
   }
 
@@ -142,9 +142,10 @@ abstract class ClientBase {
       {String username = '____DART_PLEASE_INJECT_DEFAULT____',
       String password = 'password',
       String nickserv = 'NickServ',
-      String Function(String user, String password) generateMessage = _nickserv}) {
+      String Function(String user, String password) generateMessage =
+          _nickserv}) {
     if (username == '____DART_PLEASE_INJECT_DEFAULT____') {
-      username = config.username;
+      username = config!.username;
     }
 
     sendMessage(nickserv, generateMessage(username, password));
@@ -162,11 +163,11 @@ abstract class ClientBase {
 
   /// Gets a channel object for the channel's [name].
   /// Returns null if no such channel exists.
-  Channel getChannel(String name);
+  Channel? getChannel(String name);
 
   /// Get a user object for the server.
   /// Returns null if no such user exists.
-  User getUser(String nickname);
+  User? getUser(String nickname);
 
   /// Joins the specified [channel].
   void join(String channel) {
@@ -181,10 +182,10 @@ abstract class ClientBase {
   }
 
   /// Parts the specified [channel].
-  void part(String channel) {
+  void part(String? channel) {
     if (supported.containsKey('CHANNELLEN')) {
       var max = supported['CHANNELLEN'];
-      if (channel.length > max) {
+      if (channel!.length > max) {
         throw ArgumentError.value(channel,
             'length is >${max}, which is the maximum channel name length set by the server.');
       }
@@ -209,7 +210,7 @@ abstract class ClientBase {
 
   /// Applies a Mode to a User (The Client by Default)
   void setMode(String mode,
-      {String user = '____DART_PLEASE_INJECT_DEFAULT____'}) {
+      {String? user = '____DART_PLEASE_INJECT_DEFAULT____'}) {
     if (user == '____DART_PLEASE_INJECT_DEFAULT____') {
       user = nickname;
     }
@@ -217,7 +218,7 @@ abstract class ClientBase {
     send('MODE ${user} ${mode}');
   }
 
-  void knock(String channel, [String message]) {
+  void knock(String channel, [String? message]) {
     if (supported.containsKey('KNOCK') && supported['KNOCK']) {
       send(message != null
           ? 'KNOCK ${channel}'
@@ -228,15 +229,15 @@ abstract class ClientBase {
   }
 
   /// Sends [msg] to [target] as a CTCP message
-  void sendCTCP(String target, String msg) =>
+  void sendCTCP(String? target, String msg) =>
       sendMessage(target, '\u0001${msg}\u0001');
 
   /// Sends [msg] to [target] as an action.
-  void sendAction(String target, String msg) =>
+  void sendAction(String? target, String? msg) =>
       sendCTCP(target, 'ACTION ${msg}');
 
   /// Kicks [user] from [channel] with an optional [reason].
-  void kick(Channel channel, User user, [String reason]) {
+  void kick(Channel channel, User user, [String? reason]) {
     if (reason != null && supported.containsKey('KICKLEN')) {
       var max = supported['KICKLEN'];
       if (reason.length > max) {
@@ -252,15 +253,15 @@ abstract class ClientBase {
     send('OPER ${name} ${password}');
   }
 
-  void invite(User user, String channel) {
+  void invite(User user, String? channel) {
     send('INVITE ${user.nickname} ${channel}');
   }
 
-  Future<ServerVersionEvent> getServerVersion([String target]);
-  Future<String> getChannelTopic(String channel);
+  Future<ServerVersionEvent> getServerVersion([String? target]);
+  Future<String?> getChannelTopic(String channel);
 
   Future<bool> isUserOn(String name);
 
   bool get hasNetworkName => supported.containsKey('NETWORK');
-  String get networkName => supported['NETWORK'];
+  String? get networkName => supported['NETWORK'];
 }

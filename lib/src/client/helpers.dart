@@ -1,13 +1,13 @@
 part of irc.client;
 
 class ParsedCommand {
-  static ParsedCommand parsePotentialCommand(
+  static ParsedCommand? parsePotentialCommand(
       String prefix, MessageEvent event) {
-    if (!event.message.startsWith(prefix)) {
+    if (!event.message!.startsWith(prefix)) {
       return null;
     }
 
-    var command = event.message.substring(prefix.length);
+    var command = event.message!.substring(prefix.length);
     var args = <String>[];
 
     if (command.contains(' ')) {

@@ -4,41 +4,41 @@ part of irc.client;
 class User extends Entity {
   /// Client associated with the user
   final Client client;
-  String _username;
-  String _nickname;
-  String _realName;
+  String? _username;
+  String? _nickname;
+  String? _realName;
   bool _isServerOperator = false;
-  String _serverName;
-  String _hostname;
-  String _serverInfo;
+  String? _serverName;
+  String? _hostname;
+  String? _serverInfo;
 
   /// A flag for WHOIS which determines if it is secure.
   bool secure = false;
 
   /// Get the user's nickname.
-  String get nickname => _nickname;
+  String? get nickname => _nickname;
 
   /// Get the user's name.
   @override
-  String get name => _nickname;
+  String? get name => _nickname;
 
   /// Get the user's username.
-  String get username => _username;
+  String? get username => _username;
 
   /// Get the user's real name.
-  String get realName => _realName;
+  String? get realName => _realName;
 
   /// The user is a Server Operator.
   bool get isServerOperator => _isServerOperator;
 
   /// User's hostname.
-  String get hostname => _hostname;
+  String? get hostname => _hostname;
 
   /// User's Server name.
-  String get serverName => _serverName;
+  String? get serverName => _serverName;
 
   /// User's Server info.
-  String get serverInfo => _serverInfo;
+  String? get serverInfo => _serverInfo;
 
   /// Check if the user is away.
   Future<bool> isAway() {

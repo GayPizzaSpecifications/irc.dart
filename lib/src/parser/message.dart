@@ -3,20 +3,20 @@ part of irc.parser;
 /// IRC Message
 class Message {
   /// Original Line
-  final String line;
+  final String? line;
 
   /// IRC Command
-  final String command;
+  final String? command;
 
   /// Message
-  final String message;
-  final String _hostmask;
+  final String? message;
+  final String? _hostmask;
 
   /// IRC v3 Tags
-  final Map<String, String> tags;
+  final Map<String, String>? tags;
 
   /// Parameters
-  final List<String> parameters;
+  final List<String>? parameters;
 
   /// Creates a new Message
   Message(
@@ -29,38 +29,38 @@ class Message {
       : _hostmask = hostmask;
 
   @override
-  String toString() => line;
+  String toString() => line!;
 
-  Hostmask _parsedHostmask;
+  Hostmask? _parsedHostmask;
 
   /// Gets the Parsed Hostmask
-  Hostmask get hostmask {
+  Hostmask? get hostmask {
     if (_parsedHostmask != null || _hostmask == null) {
       return _parsedHostmask;
     }
 
-    return _parsedHostmask = Hostmask.parse(_hostmask);
+    return _parsedHostmask = Hostmask.parse(_hostmask!);
   }
 
   /// The Plain Hostmask
-  String get plainHostmask => _hostmask;
+  String? get plainHostmask => _hostmask;
 
-  bool get hasAccountTag => tags.containsKey('account');
-  String get accountTag => tags['account'];
+  bool get hasAccountTag => tags!.containsKey('account');
+  String? get accountTag => tags!['account'];
 
-  bool get hasServerTime => tags.containsKey('time');
-  DateTime get serverTime {
+  bool get hasServerTime => tags!.containsKey('time');
+  DateTime? get serverTime {
     if (_serverTime != null) {
       return _serverTime;
     } else {
-      return _serverTime = DateTime.parse(tags['time']);
+      return _serverTime = DateTime.parse(tags!['time']!);
     }
   }
 
-  bool get isBatched => tags.containsKey('batch');
-  String get batchId => tags['batch'];
+  bool get isBatched => tags!.containsKey('batch');
+  String? get batchId => tags!['batch'];
 
-  DateTime _serverTime;
+  DateTime? _serverTime;
 }
 
 /// IRC Parser Helpers
@@ -80,7 +80,7 @@ class IrcParserSupport {
   /// Parses the ISUPPORT PREFIX Property
   ///
   /// [input] should begin with '(' and contain ')'
-  static Map<String, String> parseSupportedPrefixes(String input) {
+  static Map<String, String> parseSupportedPrefixes(String? input) {
     if (input == null) {
       return {};
     }

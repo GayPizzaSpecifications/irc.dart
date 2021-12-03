@@ -4,28 +4,28 @@ part of irc.client;
 class WhoisBuilder {
   final String nickname;
 
-  String username;
-  String realName;
-  String hostname;
-  String awayMessage;
+  String? username;
+  String? realName;
+  String? hostname;
+  String? awayMessage;
   List<String> channels = [];
   List<String> voiceIn = [];
   List<String> opIn = [];
   List<String> ownerIn = [];
   List<String> halfOpIn = [];
-  String serverName;
-  String serverInfo;
+  String? serverName;
+  String? serverInfo;
   bool idle = false;
-  int idleTime;
+  int? idleTime;
   bool isServerOperator = false;
   bool away = false;
 
-  DateTime _createTimestamp;
+  DateTime? _createTimestamp;
 
   bool secure = false;
-  String secureConnectionInfo;
+  String? secureConnectionInfo;
 
-  DateTime get created => _createTimestamp;
+  DateTime? get created => _createTimestamp;
 
   WhoisBuilder(this.nickname);
 

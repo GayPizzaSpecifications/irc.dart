@@ -33,7 +33,7 @@ class Color {
       '${forName(color)}${input}${forName(endColor)}';
 
   /// Gets a Color by the name of [input]. If no such color exists it returns null.
-  static String forName(String input) {
+  static String? forName(String input) {
     var name = input.replaceAll(' ', '_').toUpperCase();
     var field;
     try {
@@ -48,8 +48,8 @@ class Color {
   }
 
   /// Gets a Mapping of Color Names to Color Beginnings
-  static Map<String, String> allColors() {
-    var all = <String, String>{};
+  static Map<String, String?> allColors() {
+    var all = <String, String?>{};
     var clazz = reflectClass(Color);
     clazz.declarations.forEach((key, value) {
       var name = MirrorSystem.getName(key).replaceAll('_', ' ').toLowerCase();

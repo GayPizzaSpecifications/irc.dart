@@ -4,7 +4,7 @@ part of irc.client;
 class Server extends Entity {
   /// The server's name.
   @override
-  String name;
+  String? name;
 
   Server(this.name);
 }

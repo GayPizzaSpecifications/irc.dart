@@ -7,7 +7,7 @@ typedef CommandHandler = void Function(Message message);
 
 class FakeServer {
   RegexIrcParser parser = RegexIrcParser();
-  FakeServerConnection connection;
+  FakeServerConnection? connection;
   StreamController<String> controller =
       StreamController<String>.broadcast();
   StreamController<String> inputs = StreamController<String>.broadcast();
@@ -83,7 +83,7 @@ class FakeServerConnection extends IrcConnection {
   FakeServerConnection(this.server);
 
   @override
-  Future connect(Configuration config) async {
+  Future connect(Configuration? config) async {
     server.kickOff();
 
     return true;
@@ -106,8 +106,8 @@ class FakeServerConnection extends IrcConnection {
 }
 
 class Environment {
-  Client client;
-  FakeServer server;
+  late Client client;
+  late FakeServer server;
 }
 
 Environment createEnvironment() {

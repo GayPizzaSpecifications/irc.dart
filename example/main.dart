@@ -38,9 +38,9 @@ void main() {
   client.onMode.listen((event) {
     if (event.channel != null && event.user != null) {
       print(
-          'Mode (${event.mode}) given to ${event.user} in ${event.channel.name}');
+          'Mode (${event.mode}) given to ${event.user} in ${event.channel!.name}');
     } else if (event.channel != null) {
-      print('Mode (${event.mode}) given to ${event.channel.name}');
+      print('Mode (${event.mode}) given to ${event.channel!.name}');
     } else if (event.user != null) {
       print('Mode (${event.mode}) was set on us.');
     }
@@ -81,22 +81,22 @@ void main() {
     if (event.args.length == 1) {
       client.part(event.args[0]);
     } else if (event.args.isEmpty) {
-      client.part(event.channel.name);
+      client.part(event.channel!.name);
     } else {
       event.reply('Usage: part [channel]');
     }
   });
 
   command('quit', (CommandEvent event) {
-    client.disconnect(reason: '${event.from.name} asked me to quit.');
+    client.disconnect(reason: '${event.from!.name} asked me to quit.');
   });
 
   command('topic', (CommandEvent event) {
-    event.reply(event.channel.topic);
+    event.reply(event.channel!.topic);
   });
 
   command('bans', (CommandEvent event) {
-    event.reply('${event.channel.bans}');
+    event.reply('${event.channel!.bans}');
   });
 
   command('spam', (CommandEvent event) {
@@ -106,23 +106,23 @@ void main() {
   });
 
   command('users', (CommandEvent event) {
-    String joinNicks(Set<User> users) {
+    String joinNicks(Set<User?> users) {
       if (users.length > 10) {
         return '${users.length} users';
       }
       return users
           .map((it) {
-            return it.nickname;
+            return it!.nickname;
           })
           .toList()
           .join(', ');
     }
 
-    if (!event.target.isChannel) {
+    if (!event.target!.isChannel) {
       return;
     }
 
-    Channel channel = event.target;
+    Channel? channel = event.target as Channel?;
     if (event.args.isNotEmpty) {
       channel = client.getChannel(event.args[0]);
     }
@@ -157,7 +157,7 @@ void main() {
 
   command('away', (CommandEvent event) async {
     if (event.args.length == 1) {
-      var user = client.getUser(event.args[0]);
+      var user = client.getUser(event.args[0])!;
       var isAway = await user.isAway();
       if (isAway) {
         event.reply('${user.name} is away.');
@@ -182,7 +182,7 @@ void main() {
 }
 
 void handleAsCommand(MessageEvent event) {
-  var message = event.message;
+  var message = event.message!;
 
   if (message.startsWith(prefix)) {
     var end = message.contains(' ')
@@ -195,7 +195,7 @@ void handleAsCommand(MessageEvent event) {
     args.removeWhere((i) => i.isEmpty || i == ' ');
 
     if (commands.containsKey(command)) {
-      commands[command].add(CommandEvent(event, command, args));
+      commands[command]!.add(CommandEvent(event, command, args));
     } else {
       commandNotFound(CommandEvent(event, command, args));
     }
@@ -233,9 +233,9 @@ class CommandEvent extends MessageEvent {
       : super(event.client, event.from, event.target, event.message);
 
   void notice(String message, {bool user = true}) =>
-      client.sendNotice(from.name, message);
+      client.sendNotice(from!.name, message);
 
-  void act(String message) => client.sendAction(target.name, message);
+  void act(String message) => client.sendAction(target!.name, message);
 
   String argument(int index) => args[index];
 }

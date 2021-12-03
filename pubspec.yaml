@@ -3,7 +3,7 @@ version: 4.0.3
 description: IRC library in Dart providing a simplistic and easy to use API.
 homepage: https://github.com/SpinlockLabs/irc.dart/
 environment:
-  sdk: ">=2.2.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 dependencies:
   glob: "^2.0.1"
   pedantic: "^1.11.0"

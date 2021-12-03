@@ -5,13 +5,13 @@ class Hostmask {
   static final HOSTMASK_REGEX = RegExp('[!@]');
 
   /// User's Nickname
-  String nickname;
+  String? nickname;
 
   /// User's Identity
-  String identity;
+  String? identity;
 
   /// User's Hostname
-  String hostname;
+  String? hostname;
 
   /// Creates a Hostmask instance
   Hostmask({this.nickname, this.identity, this.hostname});
