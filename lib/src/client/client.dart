@@ -131,14 +131,14 @@ class Client extends ClientBase {
 
   /// Connect the User to the Server.
   @override
-  void connect() {
+  Future<void> connect() async {
     _ready = false;
     _dropConnection();
-    connection.connect(config).then((_) {
-      _startConnection();
 
-      post(ConnectEvent(this));
-    });
+    await connection.connect(config);
+
+    _startConnection();
+    post(ConnectEvent(this));
   }
 
   void _dropConnection([bool pause = false]) {
