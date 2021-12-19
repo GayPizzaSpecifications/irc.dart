@@ -519,11 +519,9 @@ class Client extends ClientBase {
       {Duration timeout = const Duration(seconds: 5)}) {
     var completer = Completer.sync();
 
-    var handler = (WhoisEvent event) {
-      if (event.nickname == nickname) {
-        if (!completer.isCompleted) {
-          completer.complete(event.away);
-        }
+    var handler = (IsOnEvent event) {
+      if (!completer.isCompleted) {
+        completer.complete(event.users.contains(name));
       }
     };
 
