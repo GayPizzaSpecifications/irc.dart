@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.1.0
+
+- Minor upgrades and Mystic assignment.
+
 ## 4.0.3
 
 - Code quality updates.

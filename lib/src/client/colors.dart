@@ -35,7 +35,7 @@ class Color {
   /// Gets a Color by the name of [input]. If no such color exists it returns null.
   static String forName(String input) {
     var name = input.replaceAll(' ', '_').toUpperCase();
-    var field;
+    dynamic field;
     try {
       field = reflectClass(Color).getField(MirrorSystem.getSymbol(name));
       if (field.reflectee is! String) {
@@ -53,7 +53,7 @@ class Color {
     var clazz = reflectClass(Color);
     clazz.declarations.forEach((key, value) {
       var name = MirrorSystem.getName(key).replaceAll('_', ' ').toLowerCase();
-      var field;
+      dynamic field;
       try {
         field = clazz.getField(key);
       } catch (e) {

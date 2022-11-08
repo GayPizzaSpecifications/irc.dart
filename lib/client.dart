@@ -6,9 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:mirrors';
 
-// Import pedantic for unawaited
-import 'package:pedantic/pedantic.dart';
-
 /* IRC Parsing Support */
 import 'parser.dart';
 export 'parser.dart';

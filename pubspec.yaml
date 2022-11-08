@@ -1,11 +1,11 @@
 name: irc
-version: 4.0.3
+version: 4.1.0
 description: IRC library in Dart providing a simplistic and easy to use API.
-homepage: https://github.com/SpinlockLabs/irc.dart/
+homepage: https://github.com/mysticlgbt/irc.dart/
 environment:
   sdk: ">=2.2.0 <3.0.0"
 dependencies:
-  glob: "^2.0.1"
-  pedantic: "^1.11.0"
+  glob: "^2.1.0"
 dev_dependencies:
-  test: "^1.16.8"
+  lints: ^2.0.1
+  test: "^1.22.0"

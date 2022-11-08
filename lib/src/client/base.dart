@@ -108,7 +108,7 @@ abstract class ClientBase {
   /// When the line would be too long, it will generate a new line.
   void sendAutoSplit(String prefix, List<String> parts,
       [String joinBy = ' ', bool now = false]) {
-    var line = '${prefix}';
+    var line = prefix;
     var empty = true;
     while (parts.isNotEmpty) {
       var current = line;
@@ -245,7 +245,7 @@ abstract class ClientBase {
       }
     }
     send(
-        "KICK ${channel.name} ${user.nickname}${reason != null ? ' :' + reason : ''}");
+        "KICK ${channel.name} ${user.nickname}${reason != null ? ' :$reason' : ''}");
   }
 
   void loginOperator(String name, String password) {
