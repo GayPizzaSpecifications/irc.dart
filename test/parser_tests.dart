@@ -38,7 +38,7 @@ main() {
   group('Regex IrcParser', () {
     var parser = RegexIrcParser();
     var inputs = <String, InputChecker<Message>>{
-      ':OverbotDL1!~OverbotDL@74.195.31.2 PRIVMSG kaendfinger :Overbot 0.1.14':
+      ':OverbotDL1!~OverbotDL@74.195.31.2 PRIVMSG azenla :Overbot 0.1.14':
           (Message it) {
         expect(it.hostmask.nickname, equals('OverbotDL1'),
             reason: "hostmask nickname should be 'OverbotDL1'");
@@ -48,8 +48,8 @@ main() {
             reason: "identity should be '~OverbotDL'");
         expect(it.parameters.length, equals(1),
             reason: 'there should be one parameter');
-        expect(it.parameters[0], equals('kaendfinger'),
-            reason: "first parameter should be 'kaendfinger'");
+        expect(it.parameters[0], equals('azenla'),
+            reason: "first parameter should be 'azenla'");
         expect(it.message, equals('Overbot 0.1.14'),
             reason: "message should be 'Overbot 0.1.14'");
       },
@@ -84,7 +84,7 @@ main() {
       '*!*@I.got.g-lined.cu.cc': [
         'samrg472!~deathcraz@I.got.g-lined.cu.cc',
         'samrg472!~deathcraz@I.got.g-lined.cu.cc',
-        'kaendfinger!~kaendfing@I.got.g-lined.cu.cc',
+        'azenla!~azenla@I.got.g-lined.cu.cc',
         '!some!~user@not.right.com'
       ]
     };

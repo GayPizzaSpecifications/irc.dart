@@ -28,7 +28,7 @@ void main(List<String> args) {
   });
 
   pool.register((ReadyEvent event) {
-    event.join('#spinlocklabs');
+    event.join('#mysticlgbt');
   });
 
   pool.connectAll();

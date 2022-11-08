@@ -15,8 +15,6 @@ class SocketIrcConnection extends IrcConnection {
   Socket _socket;
   bool _done = false;
 
-  final List<String> _queue = <String>[];
-
   @override
   Future connect(Configuration config) async {
     var socket = await Socket.connect(config.host, config.port,

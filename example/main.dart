@@ -13,7 +13,7 @@ Map<String, StreamController<CommandEvent>> commands = {};
 void main() {
   var nickOffset = random.nextInt(9999);
   var config = Configuration(
-      host: 'irc.freenode.net',
+      host: 'irc.esper.net',
       port: 6667,
       nickname: 'DartBot$nickOffset',
       username: 'DartBot$nickOffset',
@@ -47,10 +47,10 @@ void main() {
   });
 
   client.onReady.listen((event) {
-    event.join('#spinlocklabs');
+    event.join('#mysticlgbt');
 
     if (client.monitor.isSupported) {
-      client.monitor.add('kaendfinger');
+      client.monitor.add('azenla');
     }
   });
 
